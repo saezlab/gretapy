@@ -6,11 +6,122 @@ from decoupler._log import _log
 
 from pygreta.config import DATA, METRIC_CATS
 from pygreta.ds._db import _read_db
-from pygreta.pp._check import _check_dataset, _check_dts_grn, _check_grn, _check_metrics, _check_terms
+from pygreta.pp._check import (
+    _check_dataset,
+    _check_datasets,
+    _check_dts_grn,
+    _check_grn,
+    _check_metrics,
+    _check_organism,
+    _check_terms,
+)
 from pygreta.tl._genomic import _cre, _cre_column
 from pygreta.tl._mechanistic import _frc, _sim, _tfa
 from pygreta.tl._predictive import _gset, _omics
 from pygreta.tl._prior import _grn, _tfm, _tfp
+
+
+def benchmark(
+    organism: str,
+    grns: dict | pd.DataFrame,
+    datasets: str | list | None = None,
+    terms: dict | None = None,
+    metrics: str | list | None = None,
+    min_edges: int = 5,
+) -> pd.DataFrame:
+    """
+    Run the benchmark for one or multiple GRNs across one or multiple datasets.
+
+    Parameters
+    ----------
+    organism
+        Which organism to use (e.g., "hg38", "mm10").
+    grns
+        Either a single GRN DataFrame, or a dictionary mapping GRN names to DataFrames.
+    datasets
+        Dataset(s) to evaluate against. Can be:
+        - None: Use all datasets available in config for the organism.
+        - str: A single dataset name from config.
+        - list: A list of dataset names from config.
+    terms
+        Optional dictionary specifying filtering terms per dataset and metric.
+        Structure: {dataset_name: {db_name: [terms]}}.
+        If None, terms are auto-loaded from config for each dataset.
+    metrics
+        Metric(s) to evaluate. Can be category name, metric type, or database name.
+        If None, all available metrics are evaluated.
+    min_edges
+        Minimum number of edges required in a GRN to run evaluation.
+
+    Returns
+    -------
+    DataFrame with columns: grn, dataset, category, metric, db, precision, recall, f01.
+
+    Example
+    -------
+    .. code-block:: python
+
+        import pygreta as pg
+        import pandas as pd
+
+        # Single GRN
+        grn = pd.read_csv("grn.csv")
+        results = pg.tl.benchmark(
+            organism="hg38",
+            grns=grn,
+            datasets=["pbmc10k", "brain"],
+        )
+
+        # Multiple GRNs
+        grns = {
+            "method_a": pd.read_csv("grn_a.csv"),
+            "method_b": pd.read_csv("grn_b.csv"),
+        }
+        results = pg.tl.benchmark(
+            organism="hg38",
+            grns=grns,
+            datasets=None,  # all datasets
+        )
+    """
+    # Validate organism
+    _check_organism(organism=organism)
+    # Normalize grns to dictionary
+    if isinstance(grns, pd.DataFrame):
+        grns_dict = {"grn": grns}
+    elif isinstance(grns, dict):
+        grns_dict = grns
+    else:
+        raise ValueError(f"grns must be pd.DataFrame or dict, got {type(grns)}")
+    # Validate and normalize datasets
+    datasets_list = _check_datasets(organism=organism, datasets=datasets)
+    # Validate metrics
+    _check_metrics(organism=organism, metrics=metrics)
+    # Run benchmark
+    all_results = []
+    for grn_name, grn_df in grns_dict.items():
+        for dataset_name in datasets_list:
+            _log(f"Evaluating GRN '{grn_name}' on dataset '{dataset_name}'...", level="info", verbose=True)
+            # Get terms for this dataset
+            dataset_terms = None
+            if terms is not None and dataset_name in terms:
+                dataset_terms = terms[dataset_name]
+            # Run evaluation
+            result = eval_grn_dataset(
+                organism=organism,
+                grn=grn_df,
+                dataset=dataset_name,
+                terms=dataset_terms,
+                metrics=metrics,
+                min_edges=min_edges,
+            )
+            # Add identifiers
+            if not result.empty:
+                result.insert(0, "grn", grn_name)
+                result.insert(1, "dataset", dataset_name)
+                all_results.append(result)
+    if not all_results:
+        return pd.DataFrame(columns=["grn", "dataset", "category", "metric", "db", "precision", "recall", "f01"])
+    return pd.concat(all_results, ignore_index=True)
 
 
 def eval_grn_dataset(

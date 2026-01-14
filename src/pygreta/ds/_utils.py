@@ -57,6 +57,42 @@ def _download_data(
     return path_fname
 
 
+def show_datasets(organism: str) -> pd.DataFrame:
+    """
+    Show all available datasets for an organism.
+
+    Parameters
+    ----------
+    organism
+        Which organism to use (e.g., "hg38", "mm10").
+
+    Returns
+    -------
+    DataFrame with columns: name, pubmed, geo.
+
+    Example
+    -------
+    .. code-block:: python
+
+        import pygreta as pg
+
+        pg.ds.show_datasets(organism="hg38")
+    """
+    organisms = show_organisms()
+    assert organism in organisms, f"organism={organism} not available ({organisms})"
+    datasets = DATA[organism]["dts"]
+    rows = []
+    for name, info in datasets.items():
+        rows.append(
+            {
+                "name": name,
+                "pubmed": info.get("pubmed", ""),
+                "geo": info.get("geo", ""),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def show_terms(organism: str) -> pd.DataFrame:
     """
     Show all available terms for filtering databases.

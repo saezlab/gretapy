@@ -3,8 +3,68 @@ import mudata as mu
 import pandas as pd
 
 from pygreta.config import DATA
-from pygreta.ds._utils import show_terms
+from pygreta.ds._utils import show_datasets, show_terms
 from pygreta.tl._utils import show_metrics
+
+
+def _check_organism(organism: str) -> None:
+    """
+    Validate organism is available in config.
+
+    Parameters
+    ----------
+    organism
+        Which organism to use.
+
+    Raises
+    ------
+    ValueError
+        If organism is not available in config.
+    """
+    if organism not in DATA:
+        raise ValueError(f"Invalid organism: '{organism}'. Available: {list(DATA.keys())}")
+
+
+def _check_datasets(
+    organism: str,
+    datasets: str | list | None,
+) -> list:
+    """
+    Validate and normalize datasets input.
+
+    Parameters
+    ----------
+    organism
+        Which organism to use.
+    datasets
+        Dataset(s) to validate. Can be:
+        - None: Returns all available datasets for the organism.
+        - str: A single dataset name.
+        - list: A list of dataset names.
+
+    Returns
+    -------
+    List of validated dataset names.
+
+    Raises
+    ------
+    ValueError
+        If any dataset is not available in config.
+    """
+    available_datasets = show_datasets(organism=organism)["name"].tolist()
+    if datasets is None:
+        return available_datasets
+    elif isinstance(datasets, str):
+        if datasets not in available_datasets:
+            raise ValueError(f"Dataset '{datasets}' not found. Available: {available_datasets}")
+        return [datasets]
+    elif isinstance(datasets, list):
+        for ds in datasets:
+            if ds not in available_datasets:
+                raise ValueError(f"Dataset '{ds}' not found. Available: {available_datasets}")
+        return datasets
+    else:
+        raise ValueError(f"datasets must be None, str, or list, got {type(datasets)}")
 
 
 def _check_metrics(
