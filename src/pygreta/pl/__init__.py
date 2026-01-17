@@ -1,1 +1,1 @@
-from .basic import BasicClass, basic_plot
+from ._heatmap import heatmap
