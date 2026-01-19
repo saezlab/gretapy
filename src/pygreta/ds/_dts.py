@@ -46,7 +46,7 @@ def read_dts(organism: str, dts_name: str, verbose: bool = False) -> mu.MuData:
         The organism identifier (e.g., 'hg38' for human).
     dts_name : str
         The name of the dataset to read (e.g., 'pbmc10k', 'brain').
-    verbose : bool, optional
+    verbose : bool
         Whether to print progress messages. Default is False.
 
     Returns

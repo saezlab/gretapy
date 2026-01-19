@@ -51,7 +51,7 @@ def read_db(organism: str, db_name: str, verbose: bool = False) -> pd.DataFrame:
         The organism identifier (e.g., 'hg38' for human).
     db_name : str
         The name of the database to read (e.g., 'Promoters', 'CollecTRI').
-    verbose : bool, optional
+    verbose : bool
         Whether to print progress messages. Default is False.
 
     Returns
