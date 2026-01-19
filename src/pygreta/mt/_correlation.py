@@ -5,7 +5,7 @@ import pyranges as pr
 import scipy.stats as sts
 from decoupler._download import _log
 
-from pygreta.ds._db import _read_db
+from pygreta.ds._db import read_db
 from pygreta.pp._check import _check_organism
 
 
@@ -85,7 +85,7 @@ def correlation(
 
     # Load promoters and filter by genes
     _log("Downloading promoter annotations...", level="info", verbose=verbose)
-    proms = _read_db(organism=organism, db_name="Promoters", verbose=verbose)
+    proms = read_db(organism=organism, db_name="Promoters", verbose=verbose)
     proms = proms[proms.Name.astype("U").isin(genes)]
 
     # Find promoters that overlap with peaks

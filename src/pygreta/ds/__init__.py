@@ -1,2 +1,2 @@
-from ._db import _read_db
-from ._dts import _read_dts
+from ._db import read_db
+from ._dts import read_dts

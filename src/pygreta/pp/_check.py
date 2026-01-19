@@ -4,7 +4,7 @@ import pandas as pd
 
 from pygreta._utils import show_datasets, show_metrics, show_terms
 from pygreta.config import DATA
-from pygreta.ds._dts import _read_dts
+from pygreta.ds._dts import read_dts
 
 
 def _check_organism(organism: str) -> None:
@@ -173,7 +173,7 @@ def _check_dataset(
         assert dataset in DATA[organism]["dts"], (
             f'Dataset "{dataset}" not found in config. Run pygreta.ds.show_datasets() to see available datasets'
         )
-        dataset = _read_dts(organism=organism, dts_name=dataset)
+        dataset = read_dts(organism=organism, dts_name=dataset)
     elif isinstance(dataset, mu.MuData):
         assert {"rna", "atac"}.issubset(dataset.mod), 'Modalities "rna" and "atac" missing in dataset.mod'
         assert "celltype" in dataset.obs.columns, 'Column "celltype" not found in dataset.obs'

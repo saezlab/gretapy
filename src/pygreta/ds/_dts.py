@@ -2,7 +2,6 @@ import os
 import shutil
 
 import mudata as mu
-import pandas as pd
 from decoupler._download import _download, _log
 
 from pygreta.config import DATA, PATH_DATA, URL_END, URL_STR
@@ -34,7 +33,27 @@ def _download_dts(
     return path_fname
 
 
-def _read_dts(organism: str, dts_name: str, verbose: bool = False) -> pd.DataFrame:
+def read_dts(organism: str, dts_name: str, verbose: bool = False) -> mu.MuData:
+    """
+    Read a dataset for a given organism.
+
+    Downloads the dataset if not already cached locally, then reads it
+    as a MuData object.
+
+    Parameters
+    ----------
+    organism : str
+        The organism identifier (e.g., 'hg38' for human).
+    dts_name : str
+        The name of the dataset to read (e.g., 'pbmc10k', 'brain').
+    verbose : bool, optional
+        Whether to print progress messages. Default is False.
+
+    Returns
+    -------
+    mu.MuData
+        The loaded dataset as a MuData object containing 'rna' and 'atac' modalities.
+    """
     path_fname = _download_dts(organism=organism, dts_name=dts_name, verbose=verbose)
     dts = mu.read(path_fname)
     return dts

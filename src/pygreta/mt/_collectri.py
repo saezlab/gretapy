@@ -3,7 +3,7 @@ import pandas as pd
 import pyranges as pr
 from decoupler._download import _log
 
-from pygreta.ds._db import _read_db
+from pygreta.ds._db import read_db
 from pygreta.pp._check import _check_organism
 
 
@@ -60,10 +60,10 @@ def collectri(
     peaks = mdata.mod["atac"].var_names.astype("U")
 
     _log("Downloading CollecTRI GRN...", level="info", verbose=verbose)
-    grn = _read_db(organism=organism, db_name="CollecTRI", verbose=verbose)
+    grn = read_db(organism=organism, db_name="CollecTRI", verbose=verbose)
 
     _log("Downloading promoter annotations...", level="info", verbose=verbose)
-    proms = _read_db(organism=organism, db_name="Promoters", verbose=verbose)
+    proms = read_db(organism=organism, db_name="Promoters", verbose=verbose)
 
     # Transform peaks to PyRanges
     peaks_df = pd.DataFrame(peaks, columns=["cre"])

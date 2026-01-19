@@ -4,7 +4,7 @@ import pandas as pd
 import pyranges as pr
 from decoupler._download import _log
 
-from pygreta.ds._db import _read_db
+from pygreta.ds._db import read_db
 from pygreta.pp._check import _check_organism
 
 
@@ -91,13 +91,13 @@ def random(
     # Get TFs
     if tfs is None:
         _log("Loading TFs from LambertTFs...", level="info", verbose=verbose)
-        tfs_db = _read_db(organism=organism, db_name="LambertTFs", verbose=verbose)
+        tfs_db = read_db(organism=organism, db_name="LambertTFs", verbose=verbose)
         tfs = tfs_db.iloc[:, 0].values.astype("U")
     tfs = np.array(list(set(genes) & set(tfs)))
     _log(f"Found {len(tfs)} TFs in dataset", level="info", verbose=verbose)
 
     _log("Downloading promoter annotations...", level="info", verbose=verbose)
-    gannot = _read_db(organism=organism, db_name="Promoters", verbose=verbose)
+    gannot = read_db(organism=organism, db_name="Promoters", verbose=verbose)
 
     # Filter genes to those in annotation
     g_in_ann = set(gannot.df["Name"].values)

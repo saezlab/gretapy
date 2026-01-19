@@ -38,7 +38,30 @@ def _download_db(
     return path_fname
 
 
-def _read_db(organism: str, db_name: str, verbose: bool = False) -> pd.DataFrame:
+def read_db(organism: str, db_name: str, verbose: bool = False) -> pd.DataFrame:
+    """
+    Read a database file for a given organism.
+
+    Downloads the database if not already cached locally, then reads it
+    based on its file format (bed, tsv, csv, or h5ad).
+
+    Parameters
+    ----------
+    organism : str
+        The organism identifier (e.g., 'hg38' for human).
+    db_name : str
+        The name of the database to read (e.g., 'Promoters', 'CollecTRI').
+    verbose : bool, optional
+        Whether to print progress messages. Default is False.
+
+    Returns
+    -------
+    pd.DataFrame | pr.PyRanges | ad.AnnData
+        The loaded database. The return type depends on the file format:
+        - bed files return PyRanges objects
+        - tsv/csv files return pandas DataFrames
+        - h5ad files return AnnData objects
+    """
     path_fname = _download_db(organism=organism, db_name=db_name, verbose=verbose)
     f_format = os.path.basename(path_fname).replace(".gz", "").split(".")[-1]
     if f_format == "bed":

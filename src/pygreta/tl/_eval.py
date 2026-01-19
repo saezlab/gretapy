@@ -5,7 +5,7 @@ import pyranges as pr
 from decoupler._log import _log
 
 from pygreta.config import DATA, METRIC_CATS
-from pygreta.ds._db import _read_db
+from pygreta.ds._db import read_db
 from pygreta.pp._check import (
     _check_dataset,
     _check_datasets,
@@ -224,7 +224,7 @@ def eval_grn_dataset(
         if metric_type in {"TF binding", "CREs", "CRE to gene links"} and not can_run_genomic:
             continue
         # Load database and run metric
-        db = _read_db(organism=organism, db_name=db_name)
+        db = read_db(organism=organism, db_name=db_name)
         cats = terms.get(db_name, None)
         result = _run_metric(metric_type, db_name, grn, db, genes, peaks, cats, adata)
         if result is not None:
