@@ -1,3 +1,4 @@
+import gzip
 import os
 import shutil
 
@@ -23,8 +24,9 @@ def _download_dts(
         url = URL_STR + fname + URL_END
         data = _download(url, verbose=verbose)
         data.seek(0)  # Move pointer to beginning
-        with open(path_fname, "wb") as f:
-            shutil.copyfileobj(data, f)
+        with gzip.open(data, "rb") as gz_file:
+            with open(path_fname, "wb") as f:
+                shutil.copyfileobj(gz_file, f)
         m = f"Dataset {dts_name} saved in {path_fname}"
         _log(m, level="info", verbose=verbose)
     else:
