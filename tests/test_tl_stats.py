@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from gretapy.tl._stats import _get_grn_stats, _ocoeff, ocoeff, stats
+from gretapy.tl._stats import _get_grn_stats, _map_regions, _ocoeff, ocoeff, stats
 
 # ============================================================================
 # Fixtures specific to stats module tests
@@ -79,6 +79,124 @@ def grn_with_duplicates():
 def empty_grn():
     """Empty GRN DataFrame."""
     return pd.DataFrame(columns=["source", "target", "cre", "score"])
+
+
+@pytest.fixture
+def grn_overlapping_cres():
+    """GRN with CREs that overlap with grn_a but are not identical."""
+    return pd.DataFrame(
+        {
+            "source": ["TF1", "TF1", "TF2", "TF4"],
+            "target": ["Gene1", "Gene2", "Gene3", "Gene6"],
+            # chr1-150-250 overlaps with chr1-100-200
+            # chr1-350-450 overlaps with chr1-300-400
+            # chr2-150-250 overlaps with chr2-100-200
+            # chr4-100-200 has no overlap with grn_a
+            "cre": ["chr1-150-250", "chr1-350-450", "chr2-150-250", "chr4-100-200"],
+            "score": [0.8, 0.7, 0.9, 0.6],
+        }
+    )
+
+
+@pytest.fixture
+def grn_non_overlapping_cres():
+    """GRN with CREs that do not overlap with grn_a."""
+    return pd.DataFrame(
+        {
+            "source": ["TF1", "TF2"],
+            "target": ["Gene1", "Gene2"],
+            # These CREs are on different chromosomes or non-overlapping positions
+            "cre": ["chr10-100-200", "chr11-100-200"],
+            "score": [0.8, 0.7],
+        }
+    )
+
+
+# ============================================================================
+# _map_regions helper function tests
+# ============================================================================
+
+
+class TestMapRegions:
+    """Tests for _map_regions helper function."""
+
+    def test_returns_dataframe(self):
+        """Test that function returns a DataFrame."""
+        regions_a = np.array(["chr1-100-200", "chr1-300-400"])
+        regions_b = np.array(["chr1-150-250", "chr1-350-450"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert isinstance(result, pd.DataFrame)
+
+    def test_output_columns(self):
+        """Test that output has correct columns."""
+        regions_a = np.array(["chr1-100-200"])
+        regions_b = np.array(["chr1-150-250"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert set(result.columns) == {"region_a", "region_b"}
+
+    def test_overlapping_regions(self):
+        """Test that overlapping regions are correctly mapped."""
+        regions_a = np.array(["chr1-100-200", "chr1-300-400"])
+        regions_b = np.array(["chr1-150-250", "chr1-500-600"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        # chr1-150-250 overlaps with chr1-100-200
+        assert len(result) == 1
+        assert result.iloc[0]["region_a"] == "chr1-100-200"
+        assert result.iloc[0]["region_b"] == "chr1-150-250"
+
+    def test_no_overlapping_regions(self):
+        """Test with no overlapping regions."""
+        regions_a = np.array(["chr1-100-200", "chr1-300-400"])
+        regions_b = np.array(["chr2-100-200", "chr3-100-200"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert result.empty
+
+    def test_multiple_overlaps(self):
+        """Test when one region overlaps with multiple regions."""
+        regions_a = np.array(["chr1-100-300"])  # Large region
+        regions_b = np.array(["chr1-50-150", "chr1-200-350"])  # Two overlapping regions
+
+        result = _map_regions(regions_a, regions_b)
+
+        # Both regions_b overlap with the single region_a
+        assert len(result) == 2
+        assert set(result["region_b"]) == {"chr1-50-150", "chr1-200-350"}
+        assert all(result["region_a"] == "chr1-100-300")
+
+    def test_identical_regions(self):
+        """Test with identical regions."""
+        regions_a = np.array(["chr1-100-200", "chr2-100-200"])
+        regions_b = np.array(["chr1-100-200", "chr2-100-200"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert len(result) == 2
+
+    def test_empty_regions_a(self):
+        """Test with empty regions_a."""
+        regions_a = np.array([])
+        regions_b = np.array(["chr1-100-200"])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert result.empty
+
+    def test_empty_regions_b(self):
+        """Test with empty regions_b."""
+        regions_a = np.array(["chr1-100-200"])
+        regions_b = np.array([])
+
+        result = _map_regions(regions_a, regions_b)
+
+        assert result.empty
 
 
 # ============================================================================
@@ -166,6 +284,76 @@ class TestOcoeffHelper:
         # Intersection: TF1, TF2 (2)
         # ocoeff = 2 / min(2, 5) = 2/2 = 1.0
         assert result == 1.0
+
+    def test_use_overlap_false_requires_exact_match(self, grn_a, grn_overlapping_cres):
+        """Test that use_overlap=False requires exact CRE matches."""
+        result = _ocoeff(grn_a, grn_overlapping_cres, on=["cre"], use_overlap=False)
+
+        # No exact CRE matches between grn_a and grn_overlapping_cres
+        assert result == 0.0
+
+    def test_use_overlap_true_matches_overlapping_cres(self, grn_a, grn_overlapping_cres):
+        """Test that use_overlap=True matches overlapping CREs."""
+        result = _ocoeff(grn_a, grn_overlapping_cres, on=["cre"], use_overlap=True)
+
+        # grn_a CREs: chr1-100-200, chr1-300-400, chr2-100-200, chr2-300-400, chr3-100-200 (5 unique)
+        # grn_overlapping_cres: chr1-150-250, chr1-350-450, chr2-150-250, chr4-100-200 (4 unique)
+        # Overlapping pairs:
+        #   chr1-150-250 overlaps chr1-100-200
+        #   chr1-350-450 overlaps chr1-300-400
+        #   chr2-150-250 overlaps chr2-100-200
+        # 3 CREs from smaller set (4) have overlaps
+        # ocoeff = 3 / min(5, 4) = 3/4 = 0.75
+        assert result == pytest.approx(0.75)
+
+    def test_use_overlap_no_overlapping_cres(self, grn_a, grn_non_overlapping_cres):
+        """Test use_overlap=True with non-overlapping CREs."""
+        result = _ocoeff(grn_a, grn_non_overlapping_cres, on=["cre"], use_overlap=True)
+
+        # No overlapping regions
+        assert result == 0.0
+
+    def test_use_overlap_identical_cres(self, grn_a):
+        """Test use_overlap=True with identical CREs."""
+        result = _ocoeff(grn_a, grn_a.copy(), on=["cre"], use_overlap=True)
+
+        # Identical CREs should give perfect overlap
+        assert result == 1.0
+
+    def test_use_overlap_only_affects_cre_column(self, grn_a, grn_b):
+        """Test that use_overlap only affects CRE comparison."""
+        # For non-CRE columns, use_overlap should not change behavior
+        result_with = _ocoeff(grn_a, grn_b, on=["source"], use_overlap=True)
+        result_without = _ocoeff(grn_a, grn_b, on=["source"], use_overlap=False)
+
+        assert result_with == result_without
+
+    def test_use_overlap_with_edge_columns(self, grn_a, grn_b):
+        """Test that use_overlap does not affect multi-column comparisons."""
+        result_with = _ocoeff(grn_a, grn_b, on=["source", "target"], use_overlap=True)
+        result_without = _ocoeff(grn_a, grn_b, on=["source", "target"], use_overlap=False)
+
+        assert result_with == result_without
+
+    def test_use_overlap_asymmetric_sizes(self):
+        """Test use_overlap with asymmetric CRE set sizes."""
+        df_a = pd.DataFrame({"cre": ["chr1-100-200", "chr1-300-400"]})  # 2 CREs
+        df_b = pd.DataFrame(
+            {"cre": ["chr1-150-250", "chr1-350-450", "chr2-100-200", "chr3-100-200", "chr4-100-200"]}
+        )  # 5 CREs
+
+        result = _ocoeff(df_a, df_b, on=["cre"], use_overlap=True)
+
+        # df_a is smaller (2)
+        # Both CREs in df_a overlap with CREs in df_b
+        # ocoeff = 2 / min(2, 5) = 2/2 = 1.0
+        assert result == 1.0
+
+    def test_use_overlap_empty_dataframe(self, grn_a, empty_grn):
+        """Test use_overlap with empty DataFrame."""
+        result = _ocoeff(grn_a, empty_grn, on=["cre"], use_overlap=True)
+
+        assert result == 0.0
 
 
 # ============================================================================
@@ -260,6 +448,36 @@ class TestOcoeff:
         result = ocoeff({"A": grn_no_cre, "B": grn_no_cre_2})
 
         assert np.isnan(result.iloc[0]["cre"])
+
+    def test_cre_overlap_uses_genomic_overlap(self, grn_a, grn_overlapping_cres):
+        """Test that CRE comparison uses genomic overlap, not exact match."""
+        result = ocoeff({"A": grn_a, "B": grn_overlapping_cres})
+
+        # CREs are not identical but overlap genomically
+        # Should have non-zero overlap coefficient
+        assert result.iloc[0]["cre"] > 0.0
+        assert result.iloc[0]["cre"] == pytest.approx(0.75)
+
+    def test_cre_overlap_non_overlapping_regions(self, grn_a, grn_non_overlapping_cres):
+        """Test CRE overlap with non-overlapping genomic regions."""
+        result = ocoeff({"A": grn_a, "B": grn_non_overlapping_cres})
+
+        # CREs do not overlap genomically
+        assert result.iloc[0]["cre"] == 0.0
+
+    def test_cre_overlap_vs_exact_match_different(self, grn_a, grn_overlapping_cres):
+        """Test that genomic overlap gives different result than exact match would."""
+        result = ocoeff({"A": grn_a, "B": grn_overlapping_cres})
+
+        # With exact match, CRE overlap would be 0.0
+        # With genomic overlap, it should be > 0.0
+        assert result.iloc[0]["cre"] > 0.0
+
+        # But source/target/edge still use exact match
+        # so they may have different values
+        assert result.iloc[0]["source"] >= 0.0
+        assert result.iloc[0]["target"] >= 0.0
+        assert result.iloc[0]["edge"] >= 0.0
 
 
 # ============================================================================
