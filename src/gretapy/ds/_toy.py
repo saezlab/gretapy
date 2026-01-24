@@ -18,13 +18,28 @@ _TF_CELLTYPE = {
 
 # Default target genes per TF (immune-relevant, with overlap between TFs)
 # TFs that regulate the same celltype share target genes
+# Some "hub" genes (IRF4, RUNX1) are regulated by TFs across celltypes
 _TF_TARGETS = {
     "PAX5": ["CD19", "MS4A1", "CD79A", "BCL2", "IRF4"],
-    "EBF1": ["CD19", "MS4A1", "CD79A", "VPREB1", "IGLL1"],  # Overlaps with PAX5
-    "GATA3": ["CD3E", "IL7R", "TCF7", "FOXP3", "RUNX1"],
-    "TCF7": ["CD3E", "IL7R", "LEF1", "BCL11B", "RUNX1"],  # Overlaps with GATA3
-    "SPI1": ["CD14", "CD68", "CSF1R", "IRF4", "RUNX1"],
-    "CEBPA": ["CD14", "CD68", "CSF1R", "MPO", "LYZ"],  # Overlaps with SPI1
+    "EBF1": ["CD19", "MS4A1", "CD79A", "IRF4", "VPREB1"],  # Overlaps with PAX5, shares IRF4
+    "GATA3": ["CD3E", "IL7R", "TCF7", "RUNX1", "IRF4"],  # IRF4 is a hub gene
+    "TCF7": ["CD3E", "IL7R", "LEF1", "RUNX1", "BCL11B"],  # Overlaps with GATA3
+    "SPI1": ["CD14", "CD68", "CSF1R", "IRF4", "RUNX1"],  # IRF4, RUNX1 are hubs
+    "CEBPA": ["CD14", "CD68", "CSF1R", "RUNX1", "IRF4"],  # Overlaps with SPI1, shares hubs
+}
+
+# CREs that are shared between TFs of the same celltype (co-binding)
+# Format: {target_gene: {celltype: CRE_offset_from_TSS}}
+# TFs of the same celltype will share this CRE in addition to their unique ones
+_SHARED_CRES = {
+    "CD19": {"B cell": -5000},  # PAX5 and EBF1 co-bind near CD19 promoter
+    "MS4A1": {"B cell": -12000},  # Shared B cell enhancer
+    "CD3E": {"T cell": -8000},  # GATA3 and TCF7 co-bind
+    "IL7R": {"T cell": 15000},  # Shared T cell enhancer
+    "CD14": {"Monocyte": -3000},  # SPI1 and CEBPA co-bind at promoter
+    "CD68": {"Monocyte": -20000},  # Shared myeloid enhancer
+    "IRF4": {"B cell": -25000, "T cell": 30000, "Monocyte": -40000},  # Hub gene, multiple enhancers
+    "RUNX1": {"T cell": -15000, "Monocyte": 25000},  # Hub gene
 }
 
 # TSS positions for genes (hg38 approximate coordinates)
@@ -77,7 +92,8 @@ def toy(
 
     Creates biologically structured test data with RNA and ATAC modalities,
     along with a gene regulatory network (GRN) DataFrame. CREs are placed
-    within +/- 100kb of target gene TSS for biological realism.
+    within +/- 100kb of target gene TSS for biological realism. Some genes
+    (e.g., IRF4, RUNX1) act as "hub" genes regulated by 4+ TFs across celltypes.
 
     Parameters
     ----------
@@ -87,8 +103,8 @@ def toy(
     n_tfs : int
         Number of transcription factors. Must be between 1 and 6. TFs are paired
         by celltype (PAX5/EBF1 for B cells, GATA3/TCF7 for T cells, SPI1/CEBPA
-        for monocytes), allowing multiple TFs to regulate overlapping genes with
-        different CREs. Default is 3.
+        for monocytes). TFs of the same celltype can co-bind to shared CREs,
+        while also having their own unique CREs. Default is 3.
     n_targets_per_tf : int
         Number of target genes per TF. Must be between 1 and 5. Default is 5.
     n_peaks_per_target : int
@@ -157,14 +173,34 @@ def toy(
     all_genes = tf_names + target_genes
 
     # Build GRN DataFrame with TSS-proximal CREs
-    # Each TF gets unique CREs even for shared target genes
+    # TFs get unique CREs, but TFs of the same celltype can share CREs (co-binding)
     grn_records = []
     peak_set = set()  # Track unique peaks
     peak_names = []
     tf_target_peaks = {}  # Map (tf, target) -> list of peak names for ATAC patterns
+    cre_to_celltype = {}  # Track which celltype each CRE is accessible in
 
+    # First pass: generate shared CREs for co-binding TFs of the same celltype
+    shared_cre_map = {}  # Map (target, celltype) -> CRE name
+    for target, celltype_offsets in _SHARED_CRES.items():
+        if target not in _GENE_TSS:
+            continue
+        chrom, tss = _GENE_TSS[target]
+        for celltype, offset in celltype_offsets.items():
+            start = max(1, tss + offset)
+            end = start + 500
+            cre = f"{chrom}-{start}-{end}"
+            shared_cre_map[(target, celltype)] = cre
+            if cre not in peak_set:
+                peak_set.add(cre)
+                peak_names.append(cre)
+                cre_to_celltype[cre] = celltype
+
+    # Second pass: generate unique CREs per TF and add shared CREs where applicable
     for tf_idx, tf in enumerate(tf_names):
+        tf_celltype = _TF_CELLTYPE[tf]
         targets = _TF_TARGETS[tf][:n_targets_per_tf]
+
         for target in targets:
             # Get TSS info for this target
             if target in _GENE_TSS:
@@ -175,6 +211,22 @@ def toy(
 
             tf_target_peaks[(tf, target)] = []
 
+            # Add shared CRE if this TF's celltype has one for this target
+            shared_key = (target, tf_celltype)
+            if shared_key in shared_cre_map:
+                shared_cre = shared_cre_map[shared_key]
+                tf_target_peaks[(tf, target)].append(shared_cre)
+                score = np.random.uniform(0.5, 0.95)  # Shared CREs tend to have good scores
+                grn_records.append(
+                    {
+                        "source": tf,
+                        "target": target,
+                        "cre": shared_cre,
+                        "score": round(score, 2),
+                    }
+                )
+
+            # Add unique CREs for this TF
             for peak_idx in range(n_peaks_per_target):
                 # Place CRE within +/- 100kb of TSS
                 # Use tf_idx and peak_idx to ensure different TFs get different CREs
@@ -193,6 +245,7 @@ def toy(
                 if cre not in peak_set:
                     peak_set.add(cre)
                     peak_names.append(cre)
+                    cre_to_celltype[cre] = tf_celltype
 
                 score = np.random.uniform(0.4, 0.95)
                 grn_records.append(
