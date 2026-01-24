@@ -9,31 +9,56 @@ from decoupler._download import _log
 # Default TF-celltype associations for biologically structured expression
 _TF_CELLTYPE = {
     "PAX5": "B cell",
+    "EBF1": "B cell",  # Co-regulates B cell genes with PAX5
     "GATA3": "T cell",
+    "TCF7": "T cell",  # Co-regulates T cell genes with GATA3
     "SPI1": "Monocyte",
+    "CEBPA": "Monocyte",  # Co-regulates myeloid genes with SPI1
 }
 
-# Default target genes per TF (immune-relevant, with some overlap between TFs)
+# Default target genes per TF (immune-relevant, with overlap between TFs)
+# TFs that regulate the same celltype share target genes
 _TF_TARGETS = {
     "PAX5": ["CD19", "MS4A1", "CD79A", "BCL2", "IRF4"],
+    "EBF1": ["CD19", "MS4A1", "CD79A", "VPREB1", "IGLL1"],  # Overlaps with PAX5
     "GATA3": ["CD3E", "IL7R", "TCF7", "FOXP3", "RUNX1"],
-    "SPI1": ["CD14", "CD19", "MS4A1", "IRF4", "RUNX1"],  # Overlaps with PAX5/GATA3
+    "TCF7": ["CD3E", "IL7R", "LEF1", "BCL11B", "RUNX1"],  # Overlaps with GATA3
+    "SPI1": ["CD14", "CD68", "CSF1R", "IRF4", "RUNX1"],
+    "CEBPA": ["CD14", "CD68", "CSF1R", "MPO", "LYZ"],  # Overlaps with SPI1
 }
 
-# Chromosome assignments for CREs (biologically plausible loci)
-_TARGET_CHR = {
-    "CD19": "chr16",
-    "MS4A1": "chr11",
-    "CD79A": "chr19",
-    "BCL2": "chr18",
-    "IRF4": "chr6",
-    "CD3E": "chr11",
-    "IL7R": "chr5",
-    "TCF7": "chr5",
-    "FOXP3": "chrX",
-    "RUNX1": "chr21",
-    "CD14": "chr5",
-    "CD34": "chr1",
+# TSS positions for genes (hg38 approximate coordinates)
+# Format: (chromosome, TSS position)
+_GENE_TSS = {
+    # B cell genes
+    "CD19": ("chr16", 28931950),
+    "MS4A1": ("chr11", 60455809),
+    "CD79A": ("chr19", 41877233),
+    "BCL2": ("chr18", 63123346),
+    "IRF4": ("chr6", 391739),
+    "VPREB1": ("chr22", 22547505),
+    "IGLL1": ("chr22", 22355167),
+    # T cell genes
+    "CD3E": ("chr11", 118344316),
+    "IL7R": ("chr5", 35876274),
+    "TCF7": ("chr5", 134117803),
+    "FOXP3": ("chrX", 49250436),
+    "RUNX1": ("chr21", 34787801),
+    "LEF1": ("chr4", 108047038),
+    "BCL11B": ("chr14", 99169874),
+    # Myeloid genes
+    "CD14": ("chr5", 140631728),
+    "CD68": ("chr17", 7593628),
+    "CSF1R": ("chr5", 150053291),
+    "MPO": ("chr17", 58269861),
+    "LYZ": ("chr12", 69348350),
+    # TFs (for reference)
+    "PAX5": ("chr9", 36833275),
+    "EBF1": ("chr5", 158523083),
+    "GATA3": ("chr10", 8045378),
+    "SPI1": ("chr11", 47380115),
+    "CEBPA": ("chr19", 33299934),
+    "CD34": ("chr1", 207928564),
 }
 
 
@@ -45,12 +70,14 @@ def toy(
     celltypes: list[str] | None = None,
     seed: int = 42,
     verbose: bool = False,
+    max_expr: float = 12.0,
 ) -> tuple[mu.MuData, pd.DataFrame]:
     """
     Generate synthetic MuData and GRN for testing and demonstration.
 
     Creates biologically structured test data with RNA and ATAC modalities,
-    along with a gene regulatory network (GRN) DataFrame.
+    along with a gene regulatory network (GRN) DataFrame. CREs are placed
+    within +/- 100kb of target gene TSS for biological realism.
 
     Parameters
     ----------
@@ -58,11 +85,15 @@ def toy(
         Number of cells to generate. Should be divisible by number of celltypes
         for equal distribution. Default is 60.
     n_tfs : int
-        Number of transcription factors. Must be between 1 and 3. Default is 3.
+        Number of transcription factors. Must be between 1 and 6. TFs are paired
+        by celltype (PAX5/EBF1 for B cells, GATA3/TCF7 for T cells, SPI1/CEBPA
+        for monocytes), allowing multiple TFs to regulate overlapping genes with
+        different CREs. Default is 3.
     n_targets_per_tf : int
         Number of target genes per TF. Must be between 1 and 5. Default is 5.
     n_peaks_per_target : int
-        Number of CREs (peaks) per target gene. Default is 1.
+        Number of CREs (peaks) per target gene. Each CRE is placed within
+        +/- 100kb of the gene's TSS. Default is 1.
     celltypes : list[str] | None
         Custom celltype names. If None, uses default celltypes based on n_tfs:
         ["B cell", "T cell", "Monocyte"]. Default is None.
@@ -70,6 +101,9 @@ def toy(
         Random seed for reproducibility. Default is 42.
     verbose : bool
         Whether to log progress messages. Default is False.
+    max_expr : float
+        Maximum value for expression/accessibility values. Values are scaled
+        to resemble log-normalized counts (0 to max_expr). Default is 12.0.
 
     Returns
     -------
@@ -81,8 +115,8 @@ def toy(
     np.random.seed(seed)
 
     # Validate parameters
-    if n_tfs < 1 or n_tfs > 3:
-        raise ValueError("n_tfs must be between 1 and 3")
+    if n_tfs < 1 or n_tfs > 6:
+        raise ValueError("n_tfs must be between 1 and 6")
     if n_targets_per_tf < 1 or n_targets_per_tf > 5:
         raise ValueError("n_targets_per_tf must be between 1 and 5")
     if n_peaks_per_target < 1:
@@ -92,9 +126,15 @@ def toy(
     tf_names = list(_TF_CELLTYPE.keys())[:n_tfs]
     tf_celltypes = [_TF_CELLTYPE[tf] for tf in tf_names]
 
-    # Set up celltypes
+    # Set up celltypes (use unique celltypes from selected TFs)
     if celltypes is None:
-        celltypes = tf_celltypes
+        # Preserve order while getting unique celltypes
+        seen_ct = set()
+        celltypes = []
+        for ct in tf_celltypes:
+            if ct not in seen_ct:
+                celltypes.append(ct)
+                seen_ct.add(ct)
     n_celltypes = len(celltypes)
 
     if n_cells % n_celltypes != 0:
@@ -116,20 +156,44 @@ def toy(
                 seen.add(target)
     all_genes = tf_names + target_genes
 
-    # Build GRN DataFrame
+    # Build GRN DataFrame with TSS-proximal CREs
+    # Each TF gets unique CREs even for shared target genes
     grn_records = []
+    peak_set = set()  # Track unique peaks
     peak_names = []
-    peak_start_base = 10000000
+    tf_target_peaks = {}  # Map (tf, target) -> list of peak names for ATAC patterns
 
-    for tf in tf_names:
+    for tf_idx, tf in enumerate(tf_names):
         targets = _TF_TARGETS[tf][:n_targets_per_tf]
         for target in targets:
-            chrom = _TARGET_CHR.get(target, "chr1")
+            # Get TSS info for this target
+            if target in _GENE_TSS:
+                chrom, tss = _GENE_TSS[target]
+            else:
+                # Fallback for unknown genes
+                chrom, tss = "chr1", 10000000
+
+            tf_target_peaks[(tf, target)] = []
+
             for peak_idx in range(n_peaks_per_target):
-                start = peak_start_base + peak_idx * 1000
+                # Place CRE within +/- 100kb of TSS
+                # Use tf_idx and peak_idx to ensure different TFs get different CREs
+                offset = np.random.randint(-100000, 100000)
+                # Add TF-specific shift to ensure different TFs get different CREs
+                offset += tf_idx * 5000 + peak_idx * 1000
+                start = max(1, tss + offset)
                 end = start + 500
+
                 cre = f"{chrom}-{start}-{end}"
-                peak_names.append(cre)
+
+                # Track peaks for this TF-target pair
+                tf_target_peaks[(tf, target)].append(cre)
+
+                # Only add to peak list if not already present
+                if cre not in peak_set:
+                    peak_set.add(cre)
+                    peak_names.append(cre)
+
                 score = np.random.uniform(0.4, 0.95)
                 grn_records.append(
                     {
@@ -139,7 +203,6 @@ def toy(
                         "score": round(score, 2),
                     }
                 )
-            peak_start_base += n_peaks_per_target * 1000
 
     grn = pd.DataFrame(grn_records)
 
@@ -152,33 +215,66 @@ def toy(
         celltype_list.extend([ct] * count)
 
     # Create RNA expression matrix with biological structure
+    # Values resemble log-normalized counts (sparse, with most values low)
     n_genes = len(all_genes)
-    X_rna = np.random.rand(n_cells, n_genes).astype(np.float32)
+    # Use exponential distribution for sparse-like pattern, then scale
+    X_rna = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(np.float32)
+    X_rna = np.clip(X_rna, 0, max_expr * 0.4)  # Base expression is low
 
     # Add TF-specific expression patterns
     for i, tf in enumerate(tf_names):
         tf_idx = all_genes.index(tf)
-        ct = tf_celltypes[i] if i < len(tf_celltypes) else celltypes[i % len(celltypes)]
+        ct = tf_celltypes[i]
         # Find cells of this celltype
         cell_mask = np.array([c == ct for c in celltype_list])
-        X_rna[cell_mask, tf_idx] += 2.0
+        # Add higher expression for TF in its celltype
+        X_rna[cell_mask, tf_idx] += np.random.uniform(3.0, 6.0, size=cell_mask.sum())
+
+        # Also upregulate target genes in the corresponding celltype
+        targets = _TF_TARGETS[tf][:n_targets_per_tf]
+        for target in targets:
+            if target in all_genes:
+                target_idx = all_genes.index(target)
+                X_rna[cell_mask, target_idx] += np.random.uniform(2.0, 5.0, size=cell_mask.sum())
+
+    # Clip to max expression value
+    X_rna = np.clip(X_rna, 0, max_expr)
 
     # Create RNA AnnData
     rna = ad.AnnData(X=X_rna)
     rna.var_names = all_genes
     rna.obs_names = [f"Cell{i}" for i in range(n_cells)]
-    rna.obs["celltype"] = celltype_list
-    rna.layers["scaled"] = (X_rna - X_rna.mean(axis=0)) / (X_rna.std(axis=0) + 1e-6)
 
-    # Create ATAC accessibility matrix
+    # Create ATAC accessibility matrix with biological structure
     n_peaks = len(peak_names)
-    X_atac = np.random.rand(n_cells, n_peaks).astype(np.float32)
+    # Use exponential distribution for sparse-like pattern
+    X_atac = np.random.exponential(scale=0.8, size=(n_cells, n_peaks)).astype(np.float32)
+    X_atac = np.clip(X_atac, 0, max_expr * 0.3)  # Base accessibility is low
+
+    # Add TF-specific accessibility patterns
+    # CREs associated with a TF should be more accessible in cells where that TF is active
+    peak_name_to_idx = {p: i for i, p in enumerate(peak_names)}
+    for i, tf in enumerate(tf_names):
+        ct = tf_celltypes[i]
+        cell_mask = np.array([c == ct for c in celltype_list])
+        targets = _TF_TARGETS[tf][:n_targets_per_tf]
+
+        for target in targets:
+            # Get CREs associated with this TF-target pair
+            cre_list = tf_target_peaks.get((tf, target), [])
+            for cre in cre_list:
+                if cre in peak_name_to_idx:
+                    peak_idx = peak_name_to_idx[cre]
+                    # Increase accessibility in cells of the corresponding celltype
+                    X_atac[cell_mask, peak_idx] += np.random.uniform(2.0, 5.0, size=cell_mask.sum())
+
+    # Clip to max value
+    X_atac = np.clip(X_atac, 0, max_expr)
 
     # Create ATAC AnnData
     atac = ad.AnnData(X=X_atac)
     atac.var_names = peak_names
     atac.obs_names = rna.obs_names.copy()
-    atac.obs["celltype"] = celltype_list
 
     # Create MuData
     mdata = mu.MuData({"rna": rna, "atac": atac})
