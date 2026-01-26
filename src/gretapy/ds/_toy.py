@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from decoupler._download import _log
 
+from gretapy._utils import show_genome_annotation
+
 # Default TF-celltype associations for biologically structured expression
 _TF_CELLTYPE = {
     "PAX5": "B cell",
@@ -77,6 +79,74 @@ _GENE_TSS = {
 }
 
 
+def _check_overlap(chrom: str, start: int, end: int, cre_intervals: dict, min_gap: int = 2) -> bool:
+    """Check if a CRE overlaps with any existing CREs on the same chromosome."""
+    if chrom not in cre_intervals:
+        return False
+    for existing_start, existing_end in cre_intervals[chrom]:
+        # Check if intervals overlap or are too close (less than min_gap apart)
+        if not (end + min_gap <= existing_start or start >= existing_end + min_gap):
+            return True
+    return False
+
+
+def _find_non_overlapping_position(
+    chrom: str,
+    preferred_start: int,
+    cre_length: int,
+    cre_intervals: dict,
+    min_gap: int = 2,
+    search_range: int = 10000,
+) -> int:
+    """Find a non-overlapping position for a CRE, searching near the preferred position."""
+    # Try the preferred position first
+    if not _check_overlap(chrom, preferred_start, preferred_start + cre_length, cre_intervals, min_gap):
+        return preferred_start
+
+    # Search alternating upstream and downstream
+    for offset in range(1, search_range):
+        # Try downstream
+        candidate = preferred_start + offset
+        if candidate > 0 and not _check_overlap(chrom, candidate, candidate + cre_length, cre_intervals, min_gap):
+            return candidate
+        # Try upstream
+        candidate = preferred_start - offset
+        if candidate > 0 and not _check_overlap(chrom, candidate, candidate + cre_length, cre_intervals, min_gap):
+            return candidate
+
+    # Fallback: return a position far from existing CREs
+    return preferred_start + search_range
+
+
+def _add_cre(
+    chrom: str,
+    start: int,
+    cre_length: int,
+    cre_intervals: dict,
+    peak_set: set,
+    peak_names: list,
+    min_gap: int = 2,
+) -> str:
+    """Add a CRE ensuring no overlap with existing CREs. Returns the CRE name."""
+    # Find non-overlapping position
+    start = _find_non_overlapping_position(chrom, start, cre_length, cre_intervals, min_gap)
+    end = start + cre_length
+
+    cre = f"{chrom}-{start}-{end}"
+
+    # Track the interval
+    if chrom not in cre_intervals:
+        cre_intervals[chrom] = []
+    cre_intervals[chrom].append((start, end))
+
+    # Add to peak tracking if not already present
+    if cre not in peak_set:
+        peak_set.add(cre)
+        peak_names.append(cre)
+
+    return cre
+
+
 def toy(
     n_cells: int = 60,
     n_tfs: int = 3,
@@ -94,6 +164,10 @@ def toy(
     along with a gene regulatory network (GRN) DataFrame. CREs are placed
     within +/- 100kb of target gene TSS for biological realism. Some genes
     (e.g., IRF4, RUNX1) act as "hub" genes regulated by 4+ TFs across celltypes.
+
+    Additionally, promoter CREs (500bp) are generated for each gene based on
+    TSS positions from the hg38 genome annotation. These are placed within
+    +1000 upstream to -500 downstream of the TSS and included in the ATAC data.
 
     Parameters
     ----------
@@ -174,9 +248,13 @@ def toy(
 
     # Build GRN DataFrame with TSS-proximal CREs
     # TFs get unique CREs, but TFs of the same celltype can share CREs (co-binding)
+    # All CREs are exactly 500bp and separated by at least 2bp
+    cre_length = 500
+    min_gap = 2
     grn_records = []
     peak_set = set()  # Track unique peaks
     peak_names = []
+    cre_intervals = {}  # Track CRE intervals per chromosome for overlap checking
     tf_target_peaks = {}  # Map (tf, target) -> list of peak names for ATAC patterns
     cre_to_celltype = {}  # Track which celltype each CRE is accessible in
 
@@ -187,14 +265,10 @@ def toy(
             continue
         chrom, tss = _GENE_TSS[target]
         for celltype, offset in celltype_offsets.items():
-            start = max(1, tss + offset)
-            end = start + 500
-            cre = f"{chrom}-{start}-{end}"
+            preferred_start = max(1, tss + offset)
+            cre = _add_cre(chrom, preferred_start, cre_length, cre_intervals, peak_set, peak_names, min_gap)
             shared_cre_map[(target, celltype)] = cre
-            if cre not in peak_set:
-                peak_set.add(cre)
-                peak_names.append(cre)
-                cre_to_celltype[cre] = celltype
+            cre_to_celltype[cre] = celltype
 
     # Second pass: generate unique CREs per TF and add shared CREs where applicable
     for tf_idx, tf in enumerate(tf_names):
@@ -233,19 +307,13 @@ def toy(
                 offset = np.random.randint(-100000, 100000)
                 # Add TF-specific shift to ensure different TFs get different CREs
                 offset += tf_idx * 5000 + peak_idx * 1000
-                start = max(1, tss + offset)
-                end = start + 500
+                preferred_start = max(1, tss + offset)
 
-                cre = f"{chrom}-{start}-{end}"
+                cre = _add_cre(chrom, preferred_start, cre_length, cre_intervals, peak_set, peak_names, min_gap)
 
                 # Track peaks for this TF-target pair
                 tf_target_peaks[(tf, target)].append(cre)
-
-                # Only add to peak list if not already present
-                if cre not in peak_set:
-                    peak_set.add(cre)
-                    peak_names.append(cre)
-                    cre_to_celltype[cre] = tf_celltype
+                cre_to_celltype[cre] = tf_celltype
 
                 score = np.random.uniform(0.4, 0.95)
                 grn_records.append(
@@ -258,6 +326,49 @@ def toy(
                 )
 
     grn = pd.DataFrame(grn_records)
+
+    # Load genome annotation and generate promoter CREs for all genes
+    gann = show_genome_annotation("hg38")
+    gann_df = gann.df
+    gene_to_tss = {}
+    for gene in all_genes:
+        gene_rows = gann_df[gann_df["Name"] == gene]
+        if len(gene_rows) > 0:
+            row = gene_rows.iloc[0]
+            chrom = row["Chromosome"]
+            strand = row["Strand"]
+            # TSS is at Start for + strand, at End for - strand
+            tss = int(row["Start"]) if strand == "+" else int(row["End"])
+            gene_to_tss[gene] = (chrom, tss, strand)
+
+    # Generate promoter CREs for each gene
+    # Promoter region: +1000 upstream to -500 downstream of TSS
+    # Place a 500bp CRE within this region, close to TSS
+    promoter_peaks = {}  # Map gene -> promoter CRE name
+    for gene in all_genes:
+        if gene in gene_to_tss:
+            chrom, tss, strand = gene_to_tss[gene]
+        elif gene in _GENE_TSS:
+            # Fallback to hardcoded TSS if not in annotation
+            chrom, tss = _GENE_TSS[gene]
+            strand = "+"
+        else:
+            continue
+
+        # Place promoter CRE near TSS
+        # For + strand: upstream is lower coords, so CRE at [TSS-500, TSS]
+        # For - strand: upstream is higher coords, so CRE at [TSS, TSS+500]
+        if strand == "+":
+            # Random position within [-1000, -500] from TSS (upstream)
+            offset = np.random.randint(-1000, -500)
+            preferred_start = max(1, tss + offset)
+        else:
+            # Random position within [0, 500] from TSS (upstream for - strand)
+            offset = np.random.randint(0, 500)
+            preferred_start = max(1, tss + offset)
+
+        promoter_cre = _add_cre(chrom, preferred_start, cre_length, cre_intervals, peak_set, peak_names, min_gap)
+        promoter_peaks[gene] = promoter_cre
 
     # Create cell type assignments
     cells_per_type = n_cells // n_celltypes
@@ -320,6 +431,24 @@ def toy(
                     peak_idx = peak_name_to_idx[cre]
                     # Increase accessibility in cells of the corresponding celltype
                     X_atac[cell_mask, peak_idx] += np.random.uniform(2.0, 5.0, size=cell_mask.sum())
+
+    # Add promoter accessibility patterns
+    # Promoters should be accessible in cells where the gene is expressed
+    for i, tf in enumerate(tf_names):
+        ct = tf_celltypes[i]
+        cell_mask = np.array([c == ct for c in celltype_list])
+
+        # TF promoter accessible in its celltype
+        if tf in promoter_peaks and promoter_peaks[tf] in peak_name_to_idx:
+            peak_idx = peak_name_to_idx[promoter_peaks[tf]]
+            X_atac[cell_mask, peak_idx] += np.random.uniform(3.0, 6.0, size=cell_mask.sum())
+
+        # Target gene promoters accessible in the TF's celltype
+        targets = _TF_TARGETS[tf][:n_targets_per_tf]
+        for target in targets:
+            if target in promoter_peaks and promoter_peaks[target] in peak_name_to_idx:
+                peak_idx = peak_name_to_idx[promoter_peaks[target]]
+                X_atac[cell_mask, peak_idx] += np.random.uniform(2.0, 5.0, size=cell_mask.sum())
 
     # Clip to max value
     X_atac = np.clip(X_atac, 0, max_expr)
