@@ -124,7 +124,7 @@ def _plot_links(
     ax.set_yticklabels(yticks)
 
 
-def _plot_gannot(gs_gr: pr.PyRanges, x_min: int, x_max: int, ax: plt.Axes) -> None:
+def _plot_gannot(gs_gr: pr.PyRanges, x_min: int, x_max: int, target: str, ax: plt.Axes) -> None:
     """Plot genomic annotations (genes as arrows)."""
 
     def plot_gene(row, i, ax):
@@ -138,7 +138,16 @@ def _plot_gannot(gs_gr: pr.PyRanges, x_min: int, x_max: int, ax: plt.Axes) -> No
         ax.scatter([strt, end], [i, i], marker=s_marker, color="#440a82", s=10)
         ax.text(x_max, i, name, ha="left", va="center")
 
-    for i, row in gs_gr.df.iterrows():
+    # Sort genes by unstranded start site (TSS) descending, with target gene at top
+    df = gs_gr.df.copy()
+    df["_tss"] = np.where(df["Strand"] == "+", df["Start"], df["End"])
+    df = df.sort_values("_tss", ascending=False).reset_index(drop=True)
+    # Move target gene to the end so it appears at the top of the plot
+    target_row = df[df["Name"] == target]
+    other_rows = df[df["Name"] != target]
+    df = pd.concat([other_rows, target_row]).reset_index(drop=True)
+
+    for i, row in df.iterrows():
         plot_gene(row, i, ax)
 
     ax.set_xlim(x_min, x_max)
@@ -198,7 +207,7 @@ def links(
     target: str,
     tfs: list[str],
     gannot: pr.PyRanges | str = "hg38",
-    w_size: int = 250000,
+    w_size: int = 100_000,
     sample_col: str = "celltype",
     agg_mode: str = "mean",
     palette: dict[str, str] | None = None,
@@ -352,7 +361,7 @@ def links(
 
     # Plot gene annotations
     ax = axes[-1]
-    _plot_gannot(gs_gr, x_min, x_max, ax)
+    _plot_gannot(gs_gr, x_min, x_max, target, ax)
     ax.set_xlabel(chromosome)
 
     fig.subplots_adjust(wspace=0, hspace=0.0)
