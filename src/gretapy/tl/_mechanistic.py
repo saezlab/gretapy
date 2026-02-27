@@ -99,7 +99,7 @@ def _get_sim_hits(
     verbose: bool = True,
 ) -> pd.DataFrame:
     pvals = np.zeros((len(sss), sm_sets.shape[0]))
-    for i, pss in enumerate(tqdm(sss, disable=not verbose, ncols=80)):
+    for i, pss in enumerate(tqdm(sss, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}")):
         hits = set()
         for k in pss:
             if pss[k]:
@@ -190,7 +190,7 @@ def _tfa(
     # Infer enrichment activity scores
     scores = []
     pvals = []
-    for dataset in tqdm(db.obs.index, disable=not verbose, ncols=80):
+    for dataset in tqdm(db.obs.index, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         source = db.obs.loc[dataset, "source"]
         source_mat = db[[dataset], :].to_df()
         source_grn = grn[grn["source"] == source].rename(columns={"score": "weight"})
@@ -223,7 +223,7 @@ def _coefmat(
 ):
     coefmat = np.zeros((adata.var_names.size, adata.var_names.size))
     coefmat = pd.DataFrame(coefmat, index=adata.var_names, columns=adata.var_names)
-    for target in tqdm(adata.var_names, disable=not verbose, ncols=80):
+    for target in tqdm(adata.var_names, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         t_grn = grn[grn["target"] == target]
         sources = [s for s in t_grn["source"].unique() if s != target]
         if len(sources) >= smin:
@@ -286,7 +286,7 @@ def _frc(
     # Simulate perturbations per tf
     coefs = []
     pvals = []
-    for dataset in tqdm(fdb.obs_names, disable=not verbose, ncols=80):
+    for dataset in tqdm(fdb.obs_names, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         # Extract real lfc
         tf = fdb.obs.loc[dataset, "source"]
         if tf in profile.columns:

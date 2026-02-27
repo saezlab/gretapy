@@ -63,7 +63,7 @@ def _test_predictability(
     net = net.sort_values("abs_score", ascending=False)
     net = net.groupby(col_target)[col_source].apply(lambda x: list(x) if ntop is None else list(x)[:ntop])
     cor = []
-    for target in tqdm(net.index, disable=not verbose, ncols=80):
+    for target in tqdm(net.index, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         sources = net[target]
         sources = [s for s in sources if s != target]  # remove self loop
         if len(sources) >= 1:  # Needed if self loop is removed
@@ -184,7 +184,7 @@ def _gset(
     hits = hits[hits > thr_prop].index.values.astype("U")
     # Find pathway hits in grn
     sig_pws = set()
-    for source in tqdm(grn["source"].unique(), disable=not verbose, ncols=80):
+    for source in tqdm(grn["source"].unique(), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         features = grn[grn["source"] == source]["target"]
         pws = dc.mt.query_set(features=features, net=db)
         sig_pws.update(pws[pws["padj"] < thr_pval]["source"])

@@ -62,7 +62,7 @@ def _cre_column(
     tps = 0
     fps = 0
     fns = 0
-    for feature in tqdm(features_db, disable=not verbose, ncols=80):
+    for feature in tqdm(features_db, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         f_grn = pr_grn[pr_grn.df["Name"] == feature]
         f_db = db[db.df["Name"] == feature]
         tps += f_grn.overlap(f_db).df.shape[0]

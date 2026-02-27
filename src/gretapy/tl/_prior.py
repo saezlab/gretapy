@@ -78,7 +78,9 @@ def _find_pairs(
     verbose: bool = True,
 ) -> set:
     df = []
-    for tf_a, tf_b in tqdm(list(combinations(grn["source"].unique(), r=2)), disable=not verbose, ncols=80):
+    for tf_a, tf_b in tqdm(
+        list(combinations(grn["source"].unique(), r=2)), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"
+    ):
         s, p = _compute_overlap_pval(grn=grn, tf_a=tf_a, tf_b=tf_b)
         df.append([tf_a, tf_b, s, p])
     df = pd.DataFrame(df, columns=["tf_a", "tf_b", "stat", "pval"]).dropna()
