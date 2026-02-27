@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pyranges as pr
+from tqdm import tqdm
 
 from gretapy.tl._utils import _prc_rcl_f01
 
@@ -43,6 +44,7 @@ def _cre_column(
     peaks: np.ndarray | list,
     cats: np.ndarray | list | None,
     column: str,
+    verbose: bool = True,
 ) -> tuple:
     # Filter db
     if cats is not None:
@@ -60,7 +62,7 @@ def _cre_column(
     tps = 0
     fps = 0
     fns = 0
-    for feature in features_db:
+    for feature in tqdm(features_db, disable=not verbose, ncols=80):
         f_grn = pr_grn[pr_grn.df["Name"] == feature]
         f_db = db[db.df["Name"] == feature]
         tps += f_grn.overlap(f_db).df.shape[0]
@@ -72,7 +74,12 @@ def _cre_column(
 
 
 def _cre(
-    grn: pd.DataFrame, db: pd.DataFrame, peaks: np.ndarray | list, cats: np.ndarray | list | None, reverse: bool = False
+    grn: pd.DataFrame,
+    db: pd.DataFrame,
+    peaks: np.ndarray | list,
+    cats: np.ndarray | list | None,
+    reverse: bool = False,
+    verbose: bool = True,
 ) -> tuple:
     # Filter db
     if cats is not None:

@@ -21,6 +21,18 @@ from gretapy.tl._predictive import _gset, _omics
 from gretapy.tl._prior import _grn, _tfm, _tfp
 
 
+def _format_log_prefix(grn_name: str | None = None, dataset_name: str | None = None) -> str:
+    """Build the optional bracket prefix for log messages."""
+    parts = []
+    if grn_name is not None:
+        parts.append(grn_name)
+    if dataset_name is not None:
+        parts.append(dataset_name)
+    if parts:
+        return f"[{' | '.join(parts)}] "
+    return ""
+
+
 def benchmark(
     organism: str,
     grns: dict | pd.DataFrame,
@@ -28,6 +40,7 @@ def benchmark(
     terms: dict | None = None,
     metrics: str | list | None = None,
     min_edges: int = 5,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     """
     Run the benchmark for one or multiple GRNs across one or multiple datasets.
@@ -52,6 +65,8 @@ def benchmark(
         If None, all available metrics are evaluated.
     min_edges
         Minimum number of edges required in a GRN to run evaluation.
+    verbose
+        Whether to log progress messages and show progress bars.
 
     Returns
     -------
@@ -87,7 +102,7 @@ def benchmark(
     _check_organism(organism=organism)
     # Normalize grns to dictionary
     if isinstance(grns, pd.DataFrame):
-        grns_dict = {"grn": grns}
+        grns_dict = {None: grns}
     elif isinstance(grns, dict):
         grns_dict = grns
     else:
@@ -100,7 +115,6 @@ def benchmark(
     all_results = []
     for grn_name, grn_df in grns_dict.items():
         for dataset_name in datasets_list:
-            _log(f"Evaluating GRN '{grn_name}' on dataset '{dataset_name}'...", level="info", verbose=True)
             # Get terms for this dataset
             dataset_terms = None
             if terms is None:
@@ -115,10 +129,13 @@ def benchmark(
                 terms=dataset_terms,
                 metrics=metrics,
                 min_edges=min_edges,
+                grn_name=grn_name,
+                dataset_name=dataset_name,
+                verbose=verbose,
             )
             # Add identifiers
             if not result.empty:
-                result.insert(0, "grn", grn_name)
+                result.insert(0, "grn", grn_name if grn_name is not None else "grn")
                 result.insert(1, "dataset", dataset_name)
                 all_results.append(result)
     if not all_results:
@@ -133,6 +150,9 @@ def eval_grn_dataset(
     terms: dict | None,
     metrics: str | list | None = None,
     min_edges: int = 5,
+    grn_name: str | None = None,
+    dataset_name: str | None = None,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     """
     Evaluate a GRN against a dataset using multiple metrics.
@@ -155,6 +175,12 @@ def eval_grn_dataset(
     min_edges
         Minimum number of edges required in the GRN to run evaluation.
         GRNs with fewer edges will return an empty DataFrame.
+    grn_name
+        Optional name for the GRN (used in log messages).
+    dataset_name
+        Optional name for the dataset (used in log messages).
+    verbose
+        Whether to log progress messages and show progress bars.
 
     Returns
     -------
@@ -184,9 +210,12 @@ def eval_grn_dataset(
         _log(
             f"GRN has {grn.shape[0]} edges, minimum required is {min_edges}. Returning empty results.",
             level="warning",
-            verbose=True,
+            verbose=verbose,
         )
         return pd.DataFrame(columns=result_cols)
+    # Resolve dataset_name for logging
+    if dataset_name is None and isinstance(dataset, str):
+        dataset_name = dataset
     dataset = _check_dataset(organism=organism, dataset=dataset)
     terms = _check_terms(organism=organism, dataset=dataset, terms=terms)
     _check_dts_grn(dataset=dataset, grn=grn)
@@ -195,9 +224,11 @@ def eval_grn_dataset(
     is_mudata = isinstance(dataset, mu.MuData)
     can_run_genomic = has_cre and is_mudata
     if not has_cre:
-        _log("GRN does not have 'cre' column. Genomic metrics will be skipped.", level="warning", verbose=True)
+        _log("GRN does not have 'cre' column. Genomic metrics will be skipped.", level="warning", verbose=verbose)
     if not is_mudata:
-        _log("Dataset is AnnData (no ATAC modality). Genomic metrics will be skipped.", level="warning", verbose=True)
+        _log(
+            "Dataset is AnnData (no ATAC modality). Genomic metrics will be skipped.", level="warning", verbose=verbose
+        )
     # Extract data from dataset
     if is_mudata:
         genes, peaks, adata = (
@@ -205,18 +236,25 @@ def eval_grn_dataset(
             dataset.mod["atac"].var_names.tolist(),
             dataset.mod["rna"],
         )
+        adata.obs = dataset.obs.copy()
     else:
         genes, peaks, adata = dataset.var_names.tolist(), [], dataset
+    # Build log prefix
+    prefix = _format_log_prefix(grn_name=grn_name, dataset_name=dataset_name)
     # Evaluate metrics
     results = []
-    for db_name in metrics_list:
+    n_metrics = len(metrics_list)
+    for i, db_name in enumerate(metrics_list, 1):
         db_info = DATA[organism]["dbs"].get(db_name)
         if db_info is None:
             continue
         metric_type, category = db_info["metric"], METRIC_CATS.get(db_info["metric"], "Unknown")
+        _log(f"{prefix}{category} > {metric_type} > {db_name} [{i} / {n_metrics}]", level="info", verbose=verbose)
         # Handle metrics without file
         if db_info["fname"] is None:
-            result = _run_fileless_metric(metric_type, db_name, dataset, grn, adata, is_mudata, has_cre)
+            result = _run_fileless_metric(
+                metric_type, db_name, dataset, grn, adata, is_mudata, has_cre, verbose=verbose
+            )
             if result is not None:
                 results.append([category, metric_type, db_name, *result])
             continue
@@ -226,7 +264,7 @@ def eval_grn_dataset(
         # Load database and run metric
         db = read_db(organism=organism, db_name=db_name)
         cats = terms.get(db_name, None)
-        result = _run_metric(metric_type, db_name, grn, db, genes, peaks, cats, adata)
+        result = _run_metric(metric_type, db_name, grn, db, genes, peaks, cats, adata, verbose=verbose)
         if result is not None:
             results.append([category, metric_type, db_name, *result])
     return pd.DataFrame(results, columns=result_cols)
@@ -241,26 +279,27 @@ def _run_metric(
     peaks: list,
     cats: list | None,
     adata: ad.AnnData,
+    verbose: bool = True,
 ) -> tuple | None:
     """Run a metric that requires a database file."""
     if metric_type == "Reference GRN":
-        return _grn(grn=grn, db=db, genes=genes)
+        return _grn(grn=grn, db=db, genes=genes, verbose=verbose)
     elif metric_type == "TF markers":
-        return _tfm(grn=grn, db=db, genes=genes, cats=cats)
+        return _tfm(grn=grn, db=db, genes=genes, cats=cats, verbose=verbose)
     elif metric_type == "TF pairs":
-        return _tfp(grn=grn, db=db)
+        return _tfp(grn=grn, db=db, verbose=verbose)
     elif metric_type == "TF binding":
-        return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="source")
+        return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="source", verbose=verbose)
     elif metric_type == "CREs":
-        return _cre(grn=grn, db=db, peaks=peaks, cats=cats, reverse=(db_name == "ENCODE Blacklist"))
+        return _cre(grn=grn, db=db, peaks=peaks, cats=cats, reverse=(db_name == "ENCODE Blacklist"), verbose=verbose)
     elif metric_type == "CRE to gene links":
-        return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="target")
+        return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="target", verbose=verbose)
     elif metric_type == "Gene sets":
-        return _gset(adata=adata, grn=grn, db=db)
+        return _gset(adata=adata, grn=grn, db=db, verbose=verbose)
     elif metric_type == "TF scoring":
-        return _tfa(adata=db, grn=grn, db=db, cats=cats)
+        return _tfa(adata=db, grn=grn, db=db, cats=cats, verbose=verbose)
     elif metric_type == "Perturbation forecasting":
-        return _frc(adata=db, grn=grn, db=db, cats=cats)
+        return _frc(adata=db, grn=grn, db=db, cats=cats, verbose=verbose)
     return None
 
 
@@ -272,12 +311,13 @@ def _run_fileless_metric(
     adata: ad.AnnData,
     is_mudata: bool,
     has_cre: bool,
+    verbose: bool = True,
 ) -> tuple | None:
     """Run metrics that don't require a database file (Omics, Boolean rules)."""
     if metric_type == "Omics":
-        return _run_omics_metric(db_name, dataset, grn, is_mudata, has_cre)
+        return _run_omics_metric(db_name, dataset, grn, is_mudata, has_cre, verbose=verbose)
     elif metric_type == "Steady state simulation":
-        return _sim(adata=adata, grn=grn)
+        return _sim(adata=adata, grn=grn, verbose=verbose)
     return None
 
 
@@ -287,18 +327,43 @@ def _run_omics_metric(
     grn: pd.DataFrame,
     is_mudata: bool,
     has_cre: bool,
+    verbose: bool = True,
 ) -> tuple | None:
     """Run omics metric based on the specific type."""
     if db_name == "gene ~ TFs":
         return _omics(
-            data=dataset, grn=grn, col_source="source", col_target="target", mod_source="rna", mod_target="rna"
+            data=dataset,
+            grn=grn,
+            col_source="source",
+            col_target="target",
+            mod_source="rna",
+            mod_target="rna",
+            verbose=verbose,
         )
     elif db_name == "gene ~ CREs" and is_mudata and has_cre:
-        return _omics(data=dataset, grn=grn, col_source="cre", col_target="target", mod_source="atac", mod_target="rna")
+        return _omics(
+            data=dataset,
+            grn=grn,
+            col_source="cre",
+            col_target="target",
+            mod_source="atac",
+            mod_target="rna",
+            verbose=verbose,
+        )
     elif db_name == "CRE ~ TFs" and is_mudata and has_cre:
-        return _omics(data=dataset, grn=grn, col_source="source", col_target="cre", mod_source="rna", mod_target="atac")
+        return _omics(
+            data=dataset,
+            grn=grn,
+            col_source="source",
+            col_target="cre",
+            mod_source="rna",
+            mod_target="atac",
+            verbose=verbose,
+        )
     elif db_name in {"gene ~ CREs", "CRE ~ TFs"}:
         _log(
-            f"Skipping '{db_name}': requires MuData with ATAC and GRN with 'cre' column.", level="warning", verbose=True
+            f"Skipping '{db_name}': requires MuData with ATAC and GRN with 'cre' column.",
+            level="warning",
+            verbose=verbose,
         )
     return None

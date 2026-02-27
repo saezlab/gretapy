@@ -96,9 +96,10 @@ def _get_sim_hits(
     sm_sets: pd.Series,
     sources: set,
     thr_fisher_padj: float,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     pvals = np.zeros((len(sss), sm_sets.shape[0]))
-    for i, pss in enumerate(sss):
+    for i, pss in enumerate(tqdm(sss, disable=not verbose, ncols=80)):
         hits = set()
         for k in pss:
             if pss[k]:
@@ -137,6 +138,7 @@ def _sim(
     thr_deg_lfc: float = 2,
     thr_deg_padj: float = 2.22e-16,
     thr_fisher_padj: float = 0.01,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness but keep score
     grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
@@ -159,7 +161,9 @@ def _sim(
         primes = file_exchange.bnet2primes(bool_rules)
         logging.getLogger("pyboolnet.external.potassco").disabled = True  # Disable warnings
         sss = trap_spaces.compute_steady_states(primes, max_output=100_000)
-        hits = _get_sim_hits(sss=sss, sm_sets=sm_sets, sources=f_sources, thr_fisher_padj=thr_fisher_padj)
+        hits = _get_sim_hits(
+            sss=sss, sm_sets=sm_sets, sources=f_sources, thr_fisher_padj=thr_fisher_padj, verbose=verbose
+        )
         prc, rcl = _sss_prc_rcl(hits=hits)
         f01 = _f_beta_score(prc=prc, rcl=rcl)
     else:
@@ -174,6 +178,7 @@ def _tfa(
     cats: list | None,
     thr_pert_lfc: float = -0.5,
     thr_score_padj: float = 0.05,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness but keep score
     grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
@@ -185,7 +190,7 @@ def _tfa(
     # Infer enrichment activity scores
     scores = []
     pvals = []
-    for dataset in db.obs.index:
+    for dataset in tqdm(db.obs.index, disable=not verbose, ncols=80):
         source = db.obs.loc[dataset, "source"]
         source_mat = db[[dataset], :].to_df()
         source_grn = grn[grn["source"] == source].rename(columns={"score": "weight"})
@@ -218,7 +223,7 @@ def _coefmat(
 ):
     coefmat = np.zeros((adata.var_names.size, adata.var_names.size))
     coefmat = pd.DataFrame(coefmat, index=adata.var_names, columns=adata.var_names)
-    for target in tqdm(adata.var_names, disable=not verbose):
+    for target in tqdm(adata.var_names, disable=not verbose, ncols=80):
         t_grn = grn[grn["target"] == target]
         sources = [s for s in t_grn["source"].unique() if s != target]
         if len(sources) >= smin:
@@ -261,6 +266,7 @@ def _frc(
     min_size: int = 10,
     thr_cor_stat: float = 0.05,
     thr_cor_padj: float = 0.05,
+    verbose: bool = True,
 ) -> float:
     # Ensure uniqueness but keep score
     grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
@@ -280,7 +286,7 @@ def _frc(
     # Simulate perturbations per tf
     coefs = []
     pvals = []
-    for dataset in fdb.obs_names:
+    for dataset in tqdm(fdb.obs_names, disable=not verbose, ncols=80):
         # Extract real lfc
         tf = fdb.obs.loc[dataset, "source"]
         if tf in profile.columns:

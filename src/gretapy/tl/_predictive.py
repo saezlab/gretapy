@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as sts
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 from xgboost import XGBRegressor
 
 from gretapy.tl._utils import _f_beta_score, _prc_rcl_f01
@@ -54,6 +55,7 @@ def _test_predictability(
     mod_source: str | None,
     mod_target: str | None,
     ntop: int = 5,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     # Make unique and select ntop sources per target
     net = grn.drop_duplicates([col_source, col_target]).copy()
@@ -61,7 +63,7 @@ def _test_predictability(
     net = net.sort_values("abs_score", ascending=False)
     net = net.groupby(col_target)[col_source].apply(lambda x: list(x) if ntop is None else list(x)[:ntop])
     cor = []
-    for target in net.index:
+    for target in tqdm(net.index, disable=not verbose, ncols=80):
         sources = net[target]
         sources = [s for s in sources if s != target]  # remove self loop
         if len(sources) >= 1:  # Needed if self loop is removed
@@ -99,6 +101,7 @@ def _omics(
     test_size: float = 0.33,
     seed: int = 42,
     ntop: int = 5,
+    verbose: bool = True,
 ):
     # Split by train test
     train_obs_names, test_obs_names = train_test_split(
@@ -118,6 +121,7 @@ def _omics(
         mod_source=mod_source,
         mod_target=mod_target,
         ntop=ntop,
+        verbose=verbose,
     )
     sig_cor = cor[(cor["padj"] < 0.05) & (cor["coef"] > 0.05)]
     n_hits = sig_cor.shape[0]
@@ -168,6 +172,7 @@ def _gset(
     db: pd.DataFrame,
     thr_pval: float = 0.01,
     thr_prop: float = 0.20,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
@@ -179,7 +184,7 @@ def _gset(
     hits = hits[hits > thr_prop].index.values.astype("U")
     # Find pathway hits in grn
     sig_pws = set()
-    for source in grn["source"].unique():
+    for source in tqdm(grn["source"].unique(), disable=not verbose, ncols=80):
         features = grn[grn["source"] == source]["target"]
         pws = dc.mt.query_set(features=features, net=db)
         sig_pws.update(pws[pws["padj"] < thr_pval]["source"])

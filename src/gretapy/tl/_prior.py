@@ -3,6 +3,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 import scipy.stats as sts
+from tqdm import tqdm
 
 from gretapy.tl._utils import _prc_rcl_f01
 
@@ -11,6 +12,7 @@ def _grn(
     grn: pd.DataFrame,
     db: pd.DataFrame,
     genes: np.ndarray | list,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
@@ -32,6 +34,7 @@ def _tfm(
     db: pd.DataFrame,
     genes: np.ndarray | list,
     cats: np.ndarray | list | None,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
@@ -72,9 +75,10 @@ def _compute_overlap_pval(
 def _find_pairs(
     grn: pd.DataFrame,
     thr_pval: float,
+    verbose: bool = True,
 ) -> set:
     df = []
-    for tf_a, tf_b in combinations(grn["source"].unique(), r=2):
+    for tf_a, tf_b in tqdm(list(combinations(grn["source"].unique(), r=2)), disable=not verbose, ncols=80):
         s, p = _compute_overlap_pval(grn=grn, tf_a=tf_a, tf_b=tf_b)
         df.append([tf_a, tf_b, s, p])
     df = pd.DataFrame(df, columns=["tf_a", "tf_b", "stat", "pval"]).dropna()
@@ -91,6 +95,7 @@ def _tfp(
     grn: pd.DataFrame,
     db: pd.DataFrame,
     thr_pval: float = 0.01,
+    verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
@@ -99,7 +104,7 @@ def _tfp(
     grn = grn[grn["source"].isin(tfs)]
     db = {"|".join(sorted([a, b])) for a, b in zip(db[0], db[1], strict=True)}
     # Find pairs
-    p_grn = _find_pairs(grn=grn, thr_pval=thr_pval)
+    p_grn = _find_pairs(grn=grn, thr_pval=thr_pval, verbose=verbose)
     # Compute
     tps = len(p_grn & db)
     fps = len(p_grn - db)
