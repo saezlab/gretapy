@@ -1,3 +1,5 @@
+import time
+
 import anndata as ad
 import mudata as mu
 import pandas as pd
@@ -20,6 +22,8 @@ from gretapy.tl._mechanistic import _frc, _sim, _tfa
 from gretapy.tl._predictive import _gset, _omics
 from gretapy.tl._prior import _grn, _tfm, _tfp
 
+_SEP = "\u2550" * 50
+
 
 def _format_log_prefix(grn_name: str | None = None, dataset_name: str | None = None) -> str:
     """Build the optional bracket prefix for log messages."""
@@ -31,6 +35,16 @@ def _format_log_prefix(grn_name: str | None = None, dataset_name: str | None = N
     if parts:
         return f"[{' | '.join(parts)}] "
     return ""
+
+
+def _format_label(grn_name: str | None = None, dataset_name: str | None = None) -> str:
+    """Build a label string from available names."""
+    parts = []
+    if grn_name is not None:
+        parts.append(grn_name)
+    if dataset_name is not None:
+        parts.append(dataset_name)
+    return " | ".join(parts) if parts else ""
 
 
 def benchmark(
@@ -112,6 +126,12 @@ def benchmark(
     # Validate metrics
     _check_metrics(organism=organism, metrics=metrics)
     # Run benchmark
+    n_grns = len(grns_dict)
+    n_datasets = len(datasets_list)
+    _log(_SEP, level="info", verbose=verbose)
+    _log(f"Starting benchmark: {n_grns} GRN(s) x {n_datasets} dataset(s)", level="info", verbose=verbose)
+    _log(_SEP, level="info", verbose=verbose)
+    t_start_bench = time.time()
     all_results = []
     for grn_name, grn_df in grns_dict.items():
         for dataset_name in datasets_list:
@@ -138,6 +158,10 @@ def benchmark(
                 result.insert(0, "grn", grn_name if grn_name is not None else "grn")
                 result.insert(1, "dataset", dataset_name)
                 all_results.append(result)
+    elapsed = time.time() - t_start_bench
+    _log(_SEP, level="info", verbose=verbose)
+    _log(f"Benchmark complete ({len(all_results)} result(s), {elapsed:.1f}s)", level="info", verbose=verbose)
+    _log(_SEP, level="info", verbose=verbose)
     if not all_results:
         return pd.DataFrame(columns=["grn", "dataset", "category", "metric", "db", "precision", "recall", "f01"])
     return pd.concat(all_results, ignore_index=True)
@@ -241,6 +265,12 @@ def eval_grn_dataset(
         genes, peaks, adata = dataset.var_names.tolist(), [], dataset
     # Build log prefix
     prefix = _format_log_prefix(grn_name=grn_name, dataset_name=dataset_name)
+    label = _format_label(grn_name=grn_name, dataset_name=dataset_name)
+    label_suffix = f": {label}" if label else ""
+    _log(_SEP, level="info", verbose=verbose)
+    _log(f"Starting evaluation{label_suffix}", level="info", verbose=verbose)
+    _log(_SEP, level="info", verbose=verbose)
+    t_start_eval = time.time()
     # Evaluate metrics
     results = []
     n_metrics = len(metrics_list)
@@ -267,6 +297,10 @@ def eval_grn_dataset(
         result = _run_metric(metric_type, db_name, grn, db, genes, peaks, cats, adata, verbose=verbose)
         if result is not None:
             results.append([category, metric_type, db_name, *result])
+    elapsed = time.time() - t_start_eval
+    _log(_SEP, level="info", verbose=verbose)
+    _log(f"Evaluation complete{label_suffix} ({len(results)} metrics, {elapsed:.1f}s)", level="info", verbose=verbose)
+    _log(_SEP, level="info", verbose=verbose)
     return pd.DataFrame(results, columns=result_cols)
 
 
