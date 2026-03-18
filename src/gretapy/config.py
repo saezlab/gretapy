@@ -116,10 +116,10 @@ DATA = {
             },
         },
         "dts": {
-            "brain": {
+            "Brain": {
                 "fname": "hg38_dts_brain.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "38491288",
+                "geo": "GSE193688",
                 "terms": {
                     "TF-Marker": [
                         "Astrocyte cell",
@@ -338,10 +338,10 @@ DATA = {
                     ],
                 },
             },
-            "breast": {
+            "Breast": {
                 "fname": "hg38_dts_breast.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "39122969",
+                "geo": None,
                 "terms": {
                     "TF-Marker": [
                         "Breast",
@@ -552,10 +552,10 @@ DATA = {
                     ],
                 },
             },
-            "embryo": {
+            "Embryo": {
                 "fname": "hg38_dts_embryo.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "37369347",
+                "geo": "GSE218314",
                 "terms": {
                     "TF-Marker": [
                         "Embryo",
@@ -738,10 +738,10 @@ DATA = {
                     ],
                 },
             },
-            "eye": {
+            "Eye": {
                 "fname": "hg38_dts_eye.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "36277849",
+                "geo": "GSE196235",
                 "terms": {
                     "TF-Marker": [
                         "Eye",
@@ -868,10 +868,10 @@ DATA = {
                     ],
                 },
             },
-            "kidney": {
+            "Kidney": {
                 "fname": "hg38_dts_kidney.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "37333123",
+                "geo": None,
                 "terms": {
                     "TF-Marker": [
                         "Kidney",
@@ -1015,10 +1015,10 @@ DATA = {
                     ],
                 },
             },
-            "lung": {
+            "Lung": {
                 "fname": "hg38_dts_lung.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "39266564",
+                "geo": "GSE241468",
                 "terms": {
                     "TF-Marker": [
                         "Lung",
@@ -1026,7 +1026,6 @@ DATA = {
                         "Lung Carcinoma cell",
                         "Lung adenoCarcinoma cell",
                         "Lung adenocarcinoma",
-                        "Lung adenocarcinoma cell",
                         "Lung cancer cell",
                         "Lung carcinoma cell",
                         "Adenocarcinoma of lung cell",
@@ -1295,10 +1294,10 @@ DATA = {
                     ],
                 },
             },
-            "heart": {
+            "Heart": {
                 "fname": "hg38_dts_heart.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "37438528",
+                "geo": None,
                 "terms": {
                     "TF-Marker": [
                         "Heart",
@@ -1480,10 +1479,10 @@ DATA = {
                     ],
                 },
             },
-            "pbmc10k": {
+            "PBMC": {
                 "fname": "hg38_dts_pbmc10k.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": None,
+                "geo": None,
                 "terms": {
                     "TF-Marker": [
                         "B cell",
@@ -1784,10 +1783,10 @@ DATA = {
                     ],
                 },
             },
-            "pitupair": {
+            "Pituitary": {
                 "fname": "hg38_dts_pitupair.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "35263594",
+                "geo": "GSE178454",
                 "terms": {
                     "TF-Marker": [
                         "Pituitary",
@@ -1952,10 +1951,10 @@ DATA = {
                     ],
                 },
             },
-            "reprofibro": {
+            "Repr. Fibroblasts": {
                 "fname": "hg38_dts_reprofibro.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "37873116",
+                "geo": "GSE242419",
                 "terms": {
                     "TF-Marker": [
                         "Fibroblast cell",
@@ -2131,10 +2130,10 @@ DATA = {
                     ],
                 },
             },
-            "skin": {
+            "Skin": {
                 "fname": "hg38_dts_skin.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "36121124",
+                "geo": "GSE207335",
                 "terms": {
                     "TF-Marker": [
                         "Skin",
@@ -2196,7 +2195,6 @@ DATA = {
                         "WM262",
                         "WM451",
                         "WM853",
-                        "A375",
                         "HaCaT",
                         "Foreskin",
                         "Fibroblasts",
@@ -2487,10 +2485,10 @@ DATA = {
             },
         },
         "dts": {
-            "epalate": {
+            "Palate": {
                 "fname": "mm10_dts_epalate.h5mu",
-                "pubmed": "",
-                "geo": "",
+                "pubmed": "38280850",
+                "geo": "GSE218576",
                 "terms": {
                     "ChIP-Atlas": [
                         "Palate",
