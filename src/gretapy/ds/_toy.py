@@ -5,6 +5,8 @@ import mudata as mu
 import numpy as np
 import pandas as pd
 
+mu.set_options(pull_on_update=False)
+
 # Hardcoded GRN with hg38-style coordinates
 # Some TF-target pairs have multiple CREs (e.g., PAX5->CD19, GATA3->CD3E, SPI1->CD14)
 _GRN = pd.DataFrame(
@@ -52,6 +54,26 @@ _GRN = pd.DataFrame(
             "CEBPA",
             "CEBPA",
             "CEBPA",
+            # New hallmark-overlapping targets
+            # B cell
+            "PAX5",  # CD79B
+            "EBF1",  # CD79B
+            "PAX5",  # CCND2
+            "EBF1",  # CCND2
+            "PAX5",  # BANK1
+            # T cell
+            "GATA3",  # GZMA
+            "TCF7",  # GZMA
+            "GATA3",  # IL2RA
+            "TCF7",  # IL2RA
+            "GATA3",  # CD38
+            # Monocyte
+            "SPI1",  # IL1B
+            "CEBPA",  # IL1B
+            "SPI1",  # CXCL10
+            "CEBPA",  # CXCL10
+            "SPI1",  # PIM1
+            "CEBPA",  # PIM1
         ],
         "target": [
             # PAX5 targets (CD19 with 2 CREs)
@@ -96,6 +118,26 @@ _GRN = pd.DataFrame(
             "CSF1R",
             "RUNX1",
             "LYZ",
+            # New hallmark-overlapping targets
+            # B cell
+            "CD79B",
+            "CD79B",
+            "CCND2",
+            "CCND2",
+            "BANK1",
+            # T cell
+            "GZMA",
+            "GZMA",
+            "IL2RA",
+            "IL2RA",
+            "CD38",
+            # Monocyte
+            "IL1B",
+            "IL1B",
+            "CXCL10",
+            "CXCL10",
+            "PIM1",
+            "PIM1",
         ],
         "cre": [
             # PAX5 CREs (2 for CD19)
@@ -140,6 +182,26 @@ _GRN = pd.DataFrame(
             "chr5-150048291-150048791",
             "chr21-34777801-34778301",
             "chr12-69338350-69338850",
+            # New hallmark-overlapping CREs
+            # B cell (shared CREs for PAX5+EBF1 targets)
+            "chr17-63940000-63940500",  # CD79B (PAX5)
+            "chr17-63940000-63940500",  # CD79B (EBF1)
+            "chr12-4280000-4280500",  # CCND2 (PAX5)
+            "chr12-4280000-4280500",  # CCND2 (EBF1)
+            "chr4-101420000-101420500",  # BANK1 (PAX5)
+            # T cell
+            "chr5-55112000-55112500",  # GZMA (GATA3)
+            "chr5-55112000-55112500",  # GZMA (TCF7)
+            "chr10-6052000-6052500",  # IL2RA (GATA3)
+            "chr10-6052000-6052500",  # IL2RA (TCF7)
+            "chr4-15788000-15788500",  # CD38 (GATA3)
+            # Monocyte (shared CREs for SPI1+CEBPA targets)
+            "chr2-112846000-112846500",  # IL1B (SPI1)
+            "chr2-112846000-112846500",  # IL1B (CEBPA)
+            "chr4-76033000-76033500",  # CXCL10 (SPI1)
+            "chr4-76033000-76033500",  # CXCL10 (CEBPA)
+            "chr6-37180000-37180500",  # PIM1 (SPI1)
+            "chr6-37180000-37180500",  # PIM1 (CEBPA)
         ],
         "score": [
             0.85,
@@ -178,6 +240,23 @@ _GRN = pd.DataFrame(
             0.68,
             0.66,
             0.73,
+            # New hallmark-overlapping scores
+            0.74,  # PAX5->CD79B
+            0.71,  # EBF1->CD79B
+            0.69,  # PAX5->CCND2
+            0.67,  # EBF1->CCND2
+            0.72,  # PAX5->BANK1
+            0.75,  # GATA3->GZMA
+            0.70,  # TCF7->GZMA
+            0.77,  # GATA3->IL2RA
+            0.73,  # TCF7->IL2RA
+            0.68,  # GATA3->CD38
+            0.80,  # SPI1->IL1B
+            0.76,  # CEBPA->IL1B
+            0.78,  # SPI1->CXCL10
+            0.74,  # CEBPA->CXCL10
+            0.71,  # SPI1->PIM1
+            0.69,  # CEBPA->PIM1
         ],
     }
 )
@@ -194,12 +273,12 @@ _TF_CELLTYPE = {
 
 # Target genes per TF for expression patterns
 _TF_TARGETS = {
-    "PAX5": ["CD19", "MS4A1", "CD79A", "BCL2", "IRF4"],
-    "EBF1": ["CD19", "MS4A1", "CD79A", "IRF4", "VPREB1"],
-    "GATA3": ["CD3E", "IL7R", "LEF1", "RUNX1", "IRF4"],
-    "TCF7": ["CD3E", "IL7R", "LEF1", "RUNX1", "BCL11B"],
-    "SPI1": ["CD14", "CD68", "CSF1R", "IRF4", "RUNX1"],
-    "CEBPA": ["CD14", "CD68", "CSF1R", "RUNX1", "LYZ"],
+    "PAX5": ["CD19", "MS4A1", "CD79A", "BCL2", "IRF4", "CD79B", "CCND2", "BANK1"],
+    "EBF1": ["CD19", "MS4A1", "CD79A", "IRF4", "VPREB1", "CD79B", "CCND2"],
+    "GATA3": ["CD3E", "IL7R", "LEF1", "RUNX1", "IRF4", "GZMA", "IL2RA", "CD38"],
+    "TCF7": ["CD3E", "IL7R", "LEF1", "RUNX1", "BCL11B", "GZMA", "IL2RA"],
+    "SPI1": ["CD14", "CD68", "CSF1R", "IRF4", "RUNX1", "IL1B", "CXCL10", "PIM1"],
+    "CEBPA": ["CD14", "CD68", "CSF1R", "RUNX1", "LYZ", "IL1B", "CXCL10", "PIM1"],
 }
 
 # All genes (TFs + unique targets)
@@ -220,6 +299,16 @@ _TARGETS = [
     "CD68",
     "CSF1R",
     "LYZ",
+    # Hallmark-overlapping targets
+    "CD79B",
+    "CCND2",
+    "BANK1",
+    "GZMA",
+    "IL2RA",
+    "CD38",
+    "IL1B",
+    "CXCL10",
+    "PIM1",
 ]
 _GENES = _TFS + _TARGETS
 
@@ -250,6 +339,16 @@ _PEAKS = [
     "chr21-34777801-34778301",
     "chr5-150048291-150048791",
     "chr12-69338350-69338850",
+    # New hallmark-overlapping CREs (unique)
+    "chr17-63940000-63940500",  # CD79B
+    "chr12-4280000-4280500",  # CCND2
+    "chr4-101420000-101420500",  # BANK1
+    "chr5-55112000-55112500",  # GZMA
+    "chr10-6052000-6052500",  # IL2RA
+    "chr4-15788000-15788500",  # CD38
+    "chr2-112846000-112846500",  # IL1B
+    "chr4-76033000-76033500",  # CXCL10
+    "chr6-37180000-37180500",  # PIM1
     # Promoters for TFs (within 500bp upstream of TSS)
     "chr9-37034268-37034768",  # PAX5 (TSS=37034268, -)
     "chr5-159099916-159100416",  # EBF1 (TSS=159099916, -)
@@ -273,6 +372,16 @@ _PEAKS = [
     "chr17-7578991-7579491",  # CD68 (TSS=7579491, +)
     "chr5-150113372-150113872",  # CSF1R (TSS=150113372, -)
     "chr12-69347881-69348381",  # LYZ (TSS=69348381, +)
+    # Promoters for new hallmark-overlapping targets
+    "chr17-63932629-63933129",  # CD79B (TSS=63932629, -)
+    "chr12-4269271-4269771",  # CCND2 (TSS=4269771, +)
+    "chr4-101410786-101411286",  # BANK1 (TSS=101411286, +)
+    "chr5-55102146-55102646",  # GZMA (TSS=55102646, +)
+    "chr10-6062370-6062870",  # IL2RA (TSS=6062370, -)
+    "chr4-15777775-15778275",  # CD38 (TSS=15778275, +)
+    "chr2-112836816-112837316",  # IL1B (TSS=112836816, -)
+    "chr4-76023497-76023997",  # CXCL10 (TSS=76023497, -)
+    "chr6-37169652-37170152",  # PIM1 (TSS=37170152, +)
 ]
 
 # Map CREs to celltypes for accessibility patterns
@@ -304,6 +413,16 @@ _CRE_CELLTYPE = {
     "chr21-34777801-34778301": "Monocyte",
     "chr5-150048291-150048791": "Monocyte",
     "chr12-69338350-69338850": "Monocyte",
+    # New hallmark-overlapping CREs
+    "chr17-63940000-63940500": "B cell",  # CD79B
+    "chr12-4280000-4280500": "B cell",  # CCND2
+    "chr4-101420000-101420500": "B cell",  # BANK1
+    "chr5-55112000-55112500": "T cell",  # GZMA
+    "chr10-6052000-6052500": "T cell",  # IL2RA
+    "chr4-15788000-15788500": "T cell",  # CD38
+    "chr2-112846000-112846500": "Monocyte",  # IL1B
+    "chr4-76033000-76033500": "Monocyte",  # CXCL10
+    "chr6-37180000-37180500": "Monocyte",  # PIM1
 }
 
 # Map gene promoters to celltypes
@@ -333,6 +452,16 @@ _PROMOTER_CELLTYPE = {
     "chr17-7578991-7579491": "Monocyte",  # CD68
     "chr5-150113372-150113872": "Monocyte",  # CSF1R
     "chr12-69347881-69348381": "Monocyte",  # LYZ
+    # New hallmark-overlapping target promoters
+    "chr17-63932629-63933129": "B cell",  # CD79B
+    "chr12-4269271-4269771": "B cell",  # CCND2
+    "chr4-101410786-101411286": "B cell",  # BANK1
+    "chr5-55102146-55102646": "T cell",  # GZMA
+    "chr10-6062370-6062870": "T cell",  # IL2RA
+    "chr4-15777775-15778275": "T cell",  # CD38
+    "chr2-112836816-112837316": "Monocyte",  # IL1B
+    "chr4-76023497-76023997": "Monocyte",  # CXCL10
+    "chr6-37169652-37170152": "Monocyte",  # PIM1
     # Hub genes (accessible in multiple celltypes)
     "chr6-391239-391739": None,  # IRF4
     "chr21-36004667-36005167": None,  # RUNX1
