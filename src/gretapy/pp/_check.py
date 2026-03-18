@@ -107,7 +107,7 @@ def _check_metrics(
                 tmp_metrics.extend(df_metrics[df_metrics["db"] == metric]["db"].to_list())
             else:
                 raise ValueError(
-                    f"Invalid metric or database: '{metric}'. View available options: gretapy.tl.show_metrics()"
+                    f"Invalid metric or database: '{metric}'. View available options: gretapy.show_metrics()"
                 )
         metrics = list(set(tmp_metrics))
     else:
@@ -249,7 +249,7 @@ def _check_terms(
     terms_df = show_terms(organism=organism)
     for db in terms:
         assert db in DATA[organism]["dbs"], (
-            f'db="{db}" not found in databases. View available options: gretapy.tl.show_metrics()'
+            f'db="{db}" not found in databases. View available options: gretapy.show_metrics()'
         )
         if db.startswith("KnockTF"):
             db_t = "KnockTF"
