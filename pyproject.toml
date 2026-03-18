@@ -28,6 +28,7 @@ dependencies = [
   "llvmlite>=0.39",
   "mudata",
   "numba>=0.57",
+  "pyboolnet",
   "pyranges",
   # for debug logging (referenced from the issue template)
   "session-info2",
