@@ -171,7 +171,7 @@ def _check_dataset(
     """
     if isinstance(dataset, str):
         assert dataset in DATA[organism]["dts"], (
-            f'Dataset "{dataset}" not found in config. Run gretapy.ds.show_datasets() to see available datasets'
+            f'Dataset "{dataset}" not found in config. Run gretapy.show_datasets() to see available datasets'
         )
         dataset = read_dts(organism=organism, dts_name=dataset)
     elif isinstance(dataset, mu.MuData):
@@ -260,6 +260,6 @@ def _check_terms(
         diff_terms = list(db_terms - og_db_terms)
         n_diff = len(diff_terms)
         assert n_diff == 0, (
-            f"{n_diff} terms do not exist in db={db}: {diff_terms[:5]} View available options: gretapy.ds.show_terms()"
+            f"{n_diff} terms do not exist in db={db}: {diff_terms[:5]} View available options: gretapy.show_terms()"
         )
     return terms
