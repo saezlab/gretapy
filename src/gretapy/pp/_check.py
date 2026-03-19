@@ -152,8 +152,7 @@ def _check_grn(
 
 
 def _check_dataset(
-    organism: str,
-    dataset: str | mu.MuData | ad.AnnData,
+    organism: str, dataset: str | mu.MuData | ad.AnnData, verbose: bool = False
 ) -> mu.MuData | ad.AnnData:
     """
     Validate dataset input.
@@ -164,6 +163,8 @@ def _check_dataset(
         Which organism to use.
     dataset
         Dataset name (str) or loaded data object (MuData/AnnData).
+    verbose : bool
+        Whether to print progress messages. Default is False.
 
     Returns
     -------
@@ -173,7 +174,7 @@ def _check_dataset(
         assert dataset in DATA[organism]["dts"], (
             f'Dataset "{dataset}" not found in config. Run gretapy.show_datasets() to see available datasets'
         )
-        dataset = read_dts(organism=organism, dts_name=dataset)
+        dataset = read_dts(organism=organism, dts_name=dataset, verbose=verbose)
     elif isinstance(dataset, mu.MuData):
         assert {"rna", "atac"}.issubset(dataset.mod), 'Modalities "rna" and "atac" missing in dataset.mod'
         assert "celltype" in dataset.obs.columns, 'Column "celltype" not found in dataset.obs'
