@@ -30,7 +30,7 @@ def _download_dts(
         m = f"Dataset {dts_name} saved in {path_fname}"
         _log(m, level="info", verbose=verbose)
     else:
-        m = f"Database {dts_name} found in {path_fname}"
+        m = f"Dataset {dts_name} found in {path_fname}"
         _log(m, level="info", verbose=verbose)
     return path_fname
 
