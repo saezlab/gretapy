@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pyranges as pr
 from decoupler._download import _log
+from tqdm import tqdm
 
 from gretapy.ds._db import read_db
 from gretapy.pp._check import _check_organism
@@ -42,7 +43,7 @@ def random(
     g_perc: float = 0.5,
     scale: float = 5.0,
     tf_g_ratio: float = 0.5,
-    w_size: int = 50000,
+    w_size: int = 250_000,
     min_targets: int = 5,
     seed: int = 42,
     verbose: bool = False,
@@ -91,8 +92,7 @@ def random(
     # Get TFs
     if tfs is None:
         _log("Loading TFs from LambertTFs...", level="info", verbose=verbose)
-        tfs_db = read_db(organism=organism, db_name="LambertTFs", verbose=verbose)
-        tfs = tfs_db.iloc[:, 0].values.astype("U")
+        tfs = read_db(organism=organism, db_name="Lambert TFs", verbose=verbose)
     tfs = np.array(list(set(genes) & set(tfs)))
     _log(f"Found {len(tfs)} TFs in dataset", level="info", verbose=verbose)
 
@@ -115,7 +115,7 @@ def random(
     # Generate peak-gene connections
     _log("Generating random peak-gene connections...", level="info", verbose=verbose)
     p2g_rows = []
-    for i, gene in enumerate(sampled_genes):
+    for i, gene in enumerate(tqdm(sampled_genes, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}")):
         o_cres = _get_overlap_cres(gene, gannot, cres_pr, w_size)
         if o_cres is not None:
             n_cre = min(n_cres_per_gene[i], len(o_cres))
@@ -131,11 +131,11 @@ def random(
 
     # Generate TF-peak connections
     _log("Generating random TF-peak connections...", level="info", verbose=verbose)
-    cres = p2g["cre"].unique()
+    cres = p2g["cre"].astype("U").unique()
     n_tfs_per_cre = np.ceil(rng.exponential(scale=scale, size=len(cres))).astype(int)
 
     tfb_rows = []
-    for i, cre in enumerate(cres):
+    for i, cre in enumerate(tqdm(cres, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}")):
         n_tf = n_tfs_per_cre[i]
         r_tfs = rng.choice(tfs, min(n_tf, len(tfs)), replace=False)
         for tf in r_tfs:
