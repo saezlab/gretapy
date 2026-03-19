@@ -97,7 +97,7 @@ def collectri(
 
     # Filter TFs with less than min_targets targets
     n_targets = grn.groupby(["source"]).size().reset_index(name="counts")
-    n_targets = n_targets[n_targets["counts"] >= min_targets]
+    n_targets = n_targets[n_targets["counts"] > min_targets]
     grn = grn[grn["source"].isin(n_targets["source"])]
     _log(f"GRN edges after min_targets filtering: {len(grn)}", level="info", verbose=verbose)
 
