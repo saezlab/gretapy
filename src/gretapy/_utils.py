@@ -29,14 +29,14 @@ def show_organisms() -> list:
     return list(DATA.keys())
 
 
-def show_datasets(organism: str) -> pd.DataFrame:
+def show_datasets(organism: str | None = None) -> pd.DataFrame:
     """
     Show all available datasets for an organism.
 
     Parameters
     ----------
     organism
-        Which organism to use (e.g., "hg38", "mm10").
+        Which organism to use (e.g., "hg38", "mm10"). If None, shows datasets for all organisms.
 
     Returns
     -------
@@ -50,29 +50,37 @@ def show_datasets(organism: str) -> pd.DataFrame:
 
         gt.show_datasets(organism="hg38")
     """
-    organisms = show_organisms()
-    assert organism in organisms, f"organism={organism} not available ({organisms})"
-    datasets = DATA[organism]["dts"]
+    assert isinstance(organism, str) or organism is None
     rows = []
-    for name, info in datasets.items():
-        rows.append(
-            {
-                "name": name,
-                "pubmed": info.get("pubmed", ""),
-                "geo": info.get("geo", ""),
-            }
-        )
-    return pd.DataFrame(rows)
+    for org in DATA:
+        datasets = DATA[org]["dts"]
+        for name, info in datasets.items():
+            rows.append(
+                {
+                    "organism": org,
+                    "name": name,
+                    "pubmed": info.get("pubmed", ""),
+                    "geo": info.get("geo", ""),
+                }
+            )
+    df = pd.DataFrame(rows)
+    df = df.sort_values(["organism", "name"])
+    if organism:
+        organisms = show_organisms()
+        assert organism in organisms, f"organism={organism} not available ({organisms})"
+        df = df[df["organism"] == organism].drop(columns="organism")
+    df = df.reset_index(drop=True)
+    return df
 
 
-def show_terms(organism: str) -> pd.DataFrame:
+def show_terms(organism: str | None = None) -> pd.DataFrame:
     """
     Show all available terms for filtering databases.
 
     Parameters
     ----------
     organism
-        Which organism to use (e.g., "hg38", "mm10").
+        Which organism to use (e.g., "hg38", "mm10"). If None, shows terms for all organisms.
 
     Returns
     -------
@@ -86,18 +94,27 @@ def show_terms(organism: str) -> pd.DataFrame:
 
         gt.show_terms(organism="hg38")
     """
-    organisms = show_organisms()
-    assert organism in organisms, f"organism={organism} not available ({organisms})"
-    fname_terms = DATA[organism]["terms"]
-    path_terms = os.path.join(PATH_DATA, fname_terms)
-    if not os.path.isfile(path_terms):
-        url = URL_STR + fname_terms + URL_END
-        data = _download(url, verbose=False)
-        data.seek(0)
-        with open(path_terms, "wb") as f:
-            shutil.copyfileobj(data, f)
-    terms_df = pd.read_csv(path_terms)
-    return terms_df
+    assert isinstance(organism, str) or organism is None
+    dfs = []
+    for org in DATA:
+        fname_terms = DATA[org]["terms"]
+        path_terms = os.path.join(PATH_DATA, fname_terms)
+        if not os.path.isfile(path_terms):
+            url = URL_STR + fname_terms + URL_END
+            data = _download(url, verbose=False)
+            data.seek(0)
+            with open(path_terms, "wb") as f:
+                shutil.copyfileobj(data, f)
+        terms_df = pd.read_csv(path_terms)
+        terms_df.insert(0, "organism", org)
+        dfs.append(terms_df)
+    df = pd.concat(dfs)
+    if organism:
+        organisms = show_organisms()
+        assert organism in organisms, f"organism={organism} not available ({organisms})"
+        df = df[df["organism"] == organism].drop(columns="organism")
+    df = df.reset_index(drop=True)
+    return df
 
 
 def show_genome_annotation(organism: str) -> pr.PyRanges:
