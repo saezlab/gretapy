@@ -14,28 +14,6 @@ def _get_cres_pr(peaks: np.ndarray) -> pr.PyRanges:
     return pr.PyRanges(pd.DataFrame(cres, columns=["Chromosome", "Start", "End"]))
 
 
-def _get_window(gannot: pr.PyRanges, target: str, w_size: int) -> pr.PyRanges:
-    target_gr = gannot[gannot.df["Name"] == target]
-    tss = target_gr.df["Start"].values[0] + 1000
-    return pr.from_dict(
-        {
-            "Chromosome": target_gr.Chromosome,
-            "Start": tss - w_size,
-            "End": tss + w_size,
-        }
-    )
-
-
-def _get_overlap_cres(gene: str, gannot: pr.PyRanges, cres_pr: pr.PyRanges, w_size: int) -> np.ndarray | None:
-    wnd = _get_window(gannot, target=gene, w_size=w_size)
-    o_cres = cres_pr.overlap(wnd)
-    if len(o_cres) > 0:
-        return o_cres.df.assign(
-            name=lambda x: x["Chromosome"].astype(str) + "-" + x["Start"].astype(str) + "-" + x["End"].astype(str)
-        )["name"].values
-    return None
-
-
 def random(
     mdata: mu.MuData,
     organism: str = "hg38",
@@ -109,8 +87,10 @@ def random(
     genes = genes[np.isin(genes, list(g_in_ann))]
     _log(f"Genes in annotation: {len(genes)}", level="info", verbose=verbose)
 
-    # Get peaks as PyRanges
-    cres_pr = _get_cres_pr(peaks)
+    # Get peaks as PyRanges (with original order index for deterministic sampling)
+    cres_df = pd.DataFrame([c.split("-") for c in peaks], columns=["Chromosome", "Start", "End"])
+    cres_df["_idx"] = np.arange(len(cres_df))
+    cres_pr = pr.PyRanges(cres_df)
 
     # p2g phase — own rng
     rng = np.random.default_rng(seed=seed)
@@ -122,9 +102,41 @@ def random(
 
     # Generate peak-gene connections
     _log("Generating random peak-gene connections...", level="info", verbose=verbose)
+
+    # Build all gene windows at once
+    gannot_df = gannot.df
+    gannot_first = gannot_df.drop_duplicates(subset="Name", keep="first").set_index("Name")
+    gannot_first = gannot_first.loc[gannot_first.index.intersection(sampled_genes)]
+    tss = gannot_first["Start"].values + 1000
+    windows_df = pd.DataFrame(
+        {
+            "Chromosome": gannot_first["Chromosome"].values,
+            "Start": tss - w_size,
+            "End": tss + w_size,
+            "Name": gannot_first.index.values,
+        }
+    )
+    windows_pr = pr.PyRanges(windows_df)
+
+    # Single vectorized join to find all overlapping peaks
+    joined = windows_pr.join(cres_pr, suffix="_peak")
+    joined_df = joined.df
+    joined_df["cre"] = (
+        joined_df["Chromosome"].astype(str)
+        + "-"
+        + joined_df["Start_peak"].astype(str)
+        + "-"
+        + joined_df["End_peak"].astype(str)
+    )
+
+    # Group overlapping peaks by gene, preserving original peak order
+    joined_df = joined_df.sort_values("_idx")
+    gene_to_cres = joined_df.groupby("Name")["cre"].apply(lambda x: x.values).to_dict()
+
+    # Sample peaks per gene in the same order as before
     p2g_rows = []
     for i, gene in enumerate(sampled_genes):
-        o_cres = _get_overlap_cres(gene, gannot, cres_pr, w_size)
+        o_cres = gene_to_cres.get(gene)
         if o_cres is not None:
             n_cre = min(n_cres_per_gene[i], len(o_cres))
             r_cres = rng.choice(o_cres, n_cre, replace=False)
