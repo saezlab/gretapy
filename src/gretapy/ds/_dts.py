@@ -21,7 +21,7 @@ def _download_dts(
     fname = DATA[organism]["dts"][dts_name]["fname"]
     path_fname = os.path.join(PATH_DATA, fname)
     if not os.path.isfile(path_fname):
-        url = URL_STR + fname + URL_END
+        url = URL_STR + fname + ".gz" + URL_END
         data = _download(url, verbose=verbose)
         data.seek(0)  # Move pointer to beginning
         with gzip.open(data, "rb") as gz_file:
