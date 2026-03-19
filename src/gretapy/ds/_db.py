@@ -72,4 +72,6 @@ def read_db(organism: str, db_name: str, verbose: bool = False) -> pd.DataFrame:
         db = pd.read_csv(path_fname, compression="gzip")
     elif f_format == "h5ad":
         db = ad.read_h5ad(path_fname)
+    elif f_format == "txt":
+        db = pd.read_csv(path_fname, header=None)[0].tolist()
     return db

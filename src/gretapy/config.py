@@ -1,7 +1,7 @@
 import os
 
 PATH_DATA = os.path.join(".", "gretapy_data")
-ID_ZENODO = 19101616
+ID_ZENODO = 19116312
 URL_STR = f"https://zenodo.org/records/{ID_ZENODO}/files/"
 URL_END = "?download=1"
 
@@ -10,6 +10,11 @@ DATA = {
         "gann": "hg38_gann.bed.gz",
         "terms": "hg38_terms.csv.gz",
         "dbs": {
+            # Extra
+            "Lambert TFs": {
+                "fname": "hg38_tf_lambert.txt.gz",
+                "metric": None,
+            },
             # Prior knowledge
             "Human Protein Atlas (HPA)": {
                 "fname": "hg38_tfm_hpa.tsv.gz",
@@ -117,7 +122,7 @@ DATA = {
         },
         "dts": {
             "Brain": {
-                "fname": "hg38_dts_brain.h5mu",
+                "fname": "hg38_dts_brain_all.h5mu",
                 "pubmed": "38491288",
                 "geo": "GSE193688",
                 "terms": {
@@ -553,7 +558,7 @@ DATA = {
                 },
             },
             "Embryo": {
-                "fname": "hg38_dts_embryo.h5mu",
+                "fname": "hg38_dts_embryo_all.h5mu",
                 "pubmed": "37369347",
                 "geo": "GSE218314",
                 "terms": {
@@ -869,7 +874,7 @@ DATA = {
                 },
             },
             "Kidney": {
-                "fname": "hg38_dts_kidney.h5mu",
+                "fname": "hg38_dts_kidney_all.h5mu",
                 "pubmed": "37333123",
                 "geo": None,
                 "terms": {
@@ -1295,7 +1300,7 @@ DATA = {
                 },
             },
             "Heart": {
-                "fname": "hg38_dts_heart.h5mu",
+                "fname": "hg38_dts_heart_all.h5mu",
                 "pubmed": "37438528",
                 "geo": None,
                 "terms": {
@@ -1784,7 +1789,7 @@ DATA = {
                 },
             },
             "Pituitary": {
-                "fname": "hg38_dts_pitupair.h5mu",
+                "fname": "hg38_dts_pitupair_all.h5mu",
                 "pubmed": "35263594",
                 "geo": "GSE178454",
                 "terms": {
@@ -2131,7 +2136,7 @@ DATA = {
                 },
             },
             "Skin": {
-                "fname": "hg38_dts_skin.h5mu",
+                "fname": "hg38_dts_skin_all.h5mu",
                 "pubmed": "36121124",
                 "geo": "GSE207335",
                 "terms": {
@@ -2411,6 +2416,11 @@ DATA = {
     "mm10": {
         "terms": "mm10_terms.csv.gz",
         "dbs": {
+            # Extra
+            "Lambert TFs": {
+                "fname": "mm10_tf_lambert.txt.gz",
+                "metric": None,
+            },
             # Prior knowledge
             "CollecTRI": {
                 "fname": "mm10_gst_collectri.csv.gz",
@@ -2486,7 +2496,7 @@ DATA = {
         },
         "dts": {
             "Palate": {
-                "fname": "mm10_dts_epalate.h5mu",
+                "fname": "mm10_dts_epalate_all.h5mu",
                 "pubmed": "38280850",
                 "geo": "GSE218576",
                 "terms": {

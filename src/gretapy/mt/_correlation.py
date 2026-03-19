@@ -6,15 +6,16 @@ import scipy.stats as sts
 from decoupler._download import _log
 
 from gretapy.ds._db import read_db
+from gretapy.mt._utils import _trim_grn
 from gretapy.pp._check import _check_organism
 
 
 def correlation(
     mdata: mu.MuData,
-    tfs: np.ndarray | list,
+    tfs: np.ndarray | list | None = None,
     organism: str = "hg38",
     method: str = "pearson",
-    thr_r: float = 0.3,
+    thr_r: float = 0.1,
     min_targets: int = 5,
     verbose: bool = False,
 ) -> pd.DataFrame:
@@ -26,13 +27,13 @@ def correlation(
     mdata
         MuData object with "rna" and "atac" modalities.
     tfs
-        Array or list of transcription factor names.
+        Array or list of transcription factor names. If ``None`` it uses Lambert TFs.
     organism
         Which organism to use. Default is "hg38".
     method
         Correlation method: "pearson" or "spearman". Default is "pearson".
     thr_r
-        Minimum absolute correlation threshold. Default is 0.3.
+        Minimum absolute correlation threshold. Default is 0.1.
     min_targets
         Minimum number of targets required for a TF to be included. Default is 5.
     verbose
@@ -50,6 +51,12 @@ def correlation(
         raise ValueError('MuData must contain "rna" and "atac" modalities')
     if method not in {"pearson", "spearman"}:
         raise ValueError(f'method must be "pearson" or "spearman", got {method}')
+    assert isinstance(tfs, list | np.ndarray) or tfs is None, f"tfs must be list, np.ndarray or None, got {type(tfs)}"
+
+    # Get TFs
+    if tfs is None:
+        _log("Loading TFs from LambertTFs...", level="info", verbose=verbose)
+        tfs = read_db(organism=organism, db_name="Lambert TFs")
 
     genes = mdata.mod["rna"].var_names.astype("U")
     peaks = mdata.mod["atac"].var_names.astype("U")
@@ -105,10 +112,13 @@ def correlation(
 
     # Filter TFs with less than min_targets targets
     n_targets = grn.groupby(["source"]).size().reset_index(name="counts")
-    n_targets = n_targets[n_targets["counts"] >= min_targets]
+    n_targets = n_targets[n_targets["counts"] > min_targets]
     grn = grn[grn["source"].isin(n_targets["source"])]
     _log(f"GRN edges after min_targets filtering: {len(grn)}", level="info", verbose=verbose)
 
     grn = grn.reset_index(drop=True)
+
+    # Trim
+    grn = _trim_grn(grn)
 
     return grn
