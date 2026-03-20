@@ -139,16 +139,15 @@ def _omics(
     return prc, rcl, f01
 
 
-def _ora_overlap_fdr(features, net, n_bg=20000):
+def _ora_overlap_fdr(features, pw_targets, n_bg=20000):
     """Run ORA with FDR applied only to pathways with overlap > 0."""
     features_set = set(features)
     results = []
-    for source in net["source"].unique():
-        targets = set(net[net["source"] == source]["target"])
-        a = len(features_set.intersection(targets))
+    for source, targets in pw_targets.items():
+        a = len(features_set & targets)
         if a > 0:
-            b = len(targets.difference(features_set))
-            c = len(features_set.difference(targets))
+            b = len(targets) - a
+            c = len(features_set) - a
             d = int(n_bg - a - b - c)
             _, pv = sts.fisher_exact([[a, b], [c, d]], alternative="greater")
             results.append([source, pv])
@@ -181,10 +180,11 @@ def _gset(
     hits = hits.sort_values(ascending=False) / padj.shape[0]
     hits = hits[hits > thr_prop].index.values.astype("U")
     # Find pathway hits in grn
+    pw_targets = {src: set(tgts) for src, tgts in db.groupby("source")["target"]}
     sig_pws = set()
     for source in tqdm(grn["source"].unique(), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         features = grn[grn["source"] == source]["target"]
-        pws = _ora_overlap_fdr(features=features, net=db)
+        pws = _ora_overlap_fdr(features=features, pw_targets=pw_targets)
         sig_pws.update(pws[pws["padj"] < thr_pval]["source"])
     sig_pws = np.array(list(sig_pws))
     # Compute
