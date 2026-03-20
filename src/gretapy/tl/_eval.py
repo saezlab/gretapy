@@ -318,11 +318,11 @@ def _run_metric(
     """Run a metric that requires a database file."""
     if metric_type == "Reference GRN":
         return _grn(grn=grn, db=db, genes=genes, verbose=verbose)
-    elif metric_type == "TF markers":
+    elif metric_type == "TF Markers":
         return _tfm(grn=grn, db=db, genes=genes, cats=cats, verbose=verbose)
     elif metric_type == "TF Pairs":
         return _tfp(grn=grn, db=db, genes=genes, verbose=verbose)
-    elif metric_type == "TF binding":
+    elif metric_type == "TF Binding":
         return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="source", verbose=verbose)
     elif metric_type == "CREs":
         return _cre(grn=grn, db=db, peaks=peaks, cats=cats, reverse=(db_name == "ENCODE Blacklist"), verbose=verbose)

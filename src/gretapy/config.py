@@ -15,14 +15,14 @@ DATA = {
                 "fname": "hg38_tf_lambert.txt.gz",
                 "metric": None,
             },
-            # Prior knowledge
+            # Literature
             "Human Protein Atlas (HPA)": {
                 "fname": "hg38_tfm_hpa.tsv.gz",
-                "metric": "TF markers",
+                "metric": "TF Markers",
             },
             "TF-Marker": {
                 "fname": "hg38_tfm_tfmdb.tsv.gz",
-                "metric": "TF markers",
+                "metric": "TF Markers",
             },
             "Europe PMC": {
                 "fname": "hg38_tfp_europmc.tsv.gz",
@@ -39,15 +39,15 @@ DATA = {
             # Genomic
             "ChIP-Atlas": {
                 "fname": "hg38_tfb_chipatlas.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "ReMap 2022": {
                 "fname": "hg38_tfb_remap2022.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "UniBind": {
                 "fname": "hg38_tfb_unibind.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "ENCODE Blacklist": {
                 "fname": "hg38_cre_blacklist.bed.gz",
@@ -2421,7 +2421,7 @@ DATA = {
                 "fname": "mm10_tf_lambert.txt.gz",
                 "metric": None,
             },
-            # Prior knowledge
+            # Literature
             "CollecTRI": {
                 "fname": "mm10_gst_collectri.csv.gz",
                 "metric": "Reference GRN",
@@ -2429,15 +2429,15 @@ DATA = {
             # Genomic
             "ChIP-Atlas": {
                 "fname": "mm10_tfb_chipatlas.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "ReMap 2022": {
                 "fname": "mm10_tfb_remap2022.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "UniBind": {
                 "fname": "mm10_tfb_unibind.bed.gz",
-                "metric": "TF binding",
+                "metric": "TF Binding",
             },
             "ENCODE Blacklist": {
                 "fname": "hg38_cre_blacklist.bed.gz",
@@ -2599,10 +2599,10 @@ DATA = {
 }
 
 METRIC_CATS = {
-    "TF markers": "Prior Knowledge",
-    "TF Pairs": "Prior Knowledge",
-    "Reference GRN": "Prior Knowledge",
-    "TF binding": "Genomic",
+    "TF Markers": "Literature",
+    "TF Pairs": "Literature",
+    "Reference GRN": "Literature",
+    "TF Binding": "Genomic",
     "CREs": "Genomic",
     "CRE to gene links": "Genomic",
     "Gene sets": "Predictive",
