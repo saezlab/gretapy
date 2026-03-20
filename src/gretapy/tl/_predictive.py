@@ -139,31 +139,22 @@ def _omics(
     return prc, rcl, f01
 
 
-"""
-# deal with andata, only test g ~ tf
-def _omics(
-    data: mu.MuData | ad.AnnData,
-    test_size: float = 0.33,
-    seed: int = 42,
-):
-    # Split by train test
-    train_obs_names, test_obs_names = train_test_split(
-        data.obs_names,
-        test_size=test_size,
-        random_state=seed,
-        stratify=data.obs['celltype'],
-    )
-    if isinstance(data, mu.MuData):
-        cor_kwargs = {
-            'g ~ tf': {'col_source': 'source', 'col_target': 'target', 'mod_source': 'rna', 'mod_target': 'rna'},
-            'cre ~ tf': {'col_source': 'source', 'col_target': 'cre', 'mod_source': 'rna', 'mod_target': 'atac'},
-            'g ~ cre': {'col_source': 'cre', 'col_target': 'target', 'mod_source': 'atac', 'mod_target': 'rna'},
-        }
-    else:
-        cor_kwargs = {
-            'g ~ tf': {'col_source': 'source', 'col_target': 'target', 'mod_source': None, 'mod_target': None},
-        }
-"""
+def _ora_overlap_fdr(features, net, n_bg=20000):
+    """Run ORA with FDR applied only to pathways with overlap > 0."""
+    features_set = set(features)
+    results = []
+    for source in net["source"].unique():
+        targets = set(net[net["source"] == source]["target"])
+        a = len(features_set.intersection(targets))
+        if a > 0:
+            b = len(targets.difference(features_set))
+            c = len(features_set.difference(targets))
+            d = int(n_bg - a - b - c)
+            _, pv = sts.fisher_exact([[a, b], [c, d]], alternative="greater")
+            results.append([source, pv])
+    df = pd.DataFrame(results, columns=["source", "pval"])
+    df["padj"] = sts.false_discovery_control(df["pval"], method="bh")
+    return df
 
 
 def _gset(
@@ -178,15 +169,22 @@ def _gset(
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
     # Infer pathway enrichment scores
     dc.mt.ulm(data=adata, net=db)
-    # Find pathway hits in single cell
-    hits = ((adata.obsm["padj_ulm"] < thr_pval) & (adata.obsm["score_ulm"] > 0)).sum(0)
-    hits = hits.sort_values(ascending=False) / adata.obsm["padj_ulm"].shape[0]
+    scores = adata.obsm["score_ulm"]
+    # Recompute raw p-values from t-values (matching ULM internals)
+    df_t = adata.shape[1] - 2
+    raw_pvals = 2 * sts.t.sf(np.abs(scores.values), df_t)
+    # Apply global FDR correction (old behavior: flatten, correct, reshape)
+    flat_padj = sts.false_discovery_control(raw_pvals.ravel(), method="bh")
+    padj = pd.DataFrame(flat_padj.reshape(raw_pvals.shape), index=scores.index, columns=scores.columns)
+    # Find pathway hits
+    hits = ((padj < thr_pval) & (scores > 0)).sum(0)
+    hits = hits.sort_values(ascending=False) / padj.shape[0]
     hits = hits[hits > thr_prop].index.values.astype("U")
     # Find pathway hits in grn
     sig_pws = set()
     for source in tqdm(grn["source"].unique(), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         features = grn[grn["source"] == source]["target"]
-        pws = dc.mt.query_set(features=features, net=db)
+        pws = _ora_overlap_fdr(features=features, net=db)
         sig_pws.update(pws[pws["padj"] < thr_pval]["source"])
     sig_pws = np.array(list(sig_pws))
     # Compute
