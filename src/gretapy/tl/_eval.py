@@ -292,7 +292,7 @@ def eval_grn_dataset(
         if metric_type in {"TF binding", "CREs", "CRE to gene links"} and not can_run_genomic:
             continue
         # Load database and run metric
-        db = read_db(organism=organism, db_name=db_name)
+        db = read_db(organism=organism, db_name=db_name, verbose=verbose)
         cats = terms.get(db_name, None)
         result = _run_metric(metric_type, db_name, grn, db, genes, peaks, cats, adata, verbose=verbose)
         if result is not None:
