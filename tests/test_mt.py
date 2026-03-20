@@ -9,9 +9,9 @@ import pandas as pd
 import pyranges as pr
 import pytest
 
-from gretapy.mt._collectri import collectri
 from gretapy.mt._correlation import correlation
-from gretapy.mt._random import _get_cres_pr, _get_overlap_cres, _get_window, random
+from gretapy.mt._lit_grn import lit_grn
+from gretapy.mt._random import _get_cres_pr, random
 
 # ============================================================================
 # Fixtures specific to mt module tests
@@ -100,7 +100,7 @@ def mock_promoters_db():
 @pytest.fixture
 def mock_lambert_tfs():
     """Mock LambertTFs database."""
-    return pd.DataFrame({0: ["PAX5", "GATA3", "SPI1", "TCF7", "RUNX1"]})
+    return ["PAX5", "GATA3", "SPI1", "TCF7", "RUNX1"]
 
 
 @pytest.fixture
@@ -196,62 +196,18 @@ class TestGetCresPr:
         assert df.iloc[1]["Chromosome"] == "chrX"
 
 
-class TestGetWindow:
-    """Tests for _get_window helper function."""
-
-    def test_returns_pyranges(self, mock_promoters_db):
-        """Test that function returns a PyRanges object."""
-        result = _get_window(gannot=mock_promoters_db, target="CD19", w_size=50000)
-
-        assert isinstance(result, pr.PyRanges)
-
-    def test_window_size_respected(self, mock_promoters_db):
-        """Test that window size is respected."""
-        w_size = 10000
-        result = _get_window(gannot=mock_promoters_db, target="CD19", w_size=w_size)
-        df = result.df
-
-        # Window should be 2*w_size wide
-        window_width = df["End"].iloc[0] - df["Start"].iloc[0]
-        assert window_width == 2 * w_size
-
-
-class TestGetOverlapCres:
-    """Tests for _get_overlap_cres helper function."""
-
-    def test_returns_array_when_overlaps_exist(self, mock_promoters_db):
-        """Test that function returns array when overlaps exist."""
-        peaks = np.array(["chr16-28931000-28931500", "chr11-60223000-60223500"])
-        cres_pr = _get_cres_pr(peaks)
-
-        result = _get_overlap_cres(gene="CD19", gannot=mock_promoters_db, cres_pr=cres_pr, w_size=50000)
-
-        assert result is not None
-        assert len(result) > 0
-
-    def test_returns_none_when_no_overlaps(self, mock_promoters_db):
-        """Test that function returns None when no overlaps."""
-        # Peaks on different chromosome
-        peaks = np.array(["chr22-100-200", "chr22-300-400"])
-        cres_pr = _get_cres_pr(peaks)
-
-        result = _get_overlap_cres(gene="CD19", gannot=mock_promoters_db, cres_pr=cres_pr, w_size=50000)
-
-        assert result is None
-
-
 # ============================================================================
-# collectri function tests
+# lit_grn function tests
 # ============================================================================
 
 
-class TestCollectri:
-    """Tests for collectri function."""
+class TestLitGrn:
+    """Tests for lit_grn function."""
 
     def test_invalid_mdata_type_raises(self):
         """Test that non-MuData input raises ValueError."""
         with pytest.raises(ValueError, match="must be a MuData object"):
-            collectri(mdata="not_a_mudata")
+            lit_grn(mdata="not_a_mudata")
 
     def test_missing_rna_modality_raises(self):
         """Test that missing rna modality raises ValueError."""
@@ -259,7 +215,7 @@ class TestCollectri:
         mdata = mu.MuData({"atac": atac})
 
         with pytest.raises(ValueError, match='must contain "rna" and "atac"'):
-            collectri(mdata=mdata)
+            lit_grn(mdata=mdata)
 
     def test_missing_atac_modality_raises(self):
         """Test that missing atac modality raises ValueError."""
@@ -267,52 +223,68 @@ class TestCollectri:
         mdata = mu.MuData({"rna": rna})
 
         with pytest.raises(ValueError, match='must contain "rna" and "atac"'):
-            collectri(mdata=mdata)
+            lit_grn(mdata=mdata)
 
     def test_invalid_organism_raises(self, mudata_for_mt):
         """Test that invalid organism raises ValueError."""
         with pytest.raises(ValueError, match="Invalid organism"):
-            collectri(mdata=mudata_for_mt, organism="invalid")
+            lit_grn(mdata=mudata_for_mt, organism="invalid")
 
-    @patch("gretapy.mt._collectri.read_db")
+    def test_invalid_grn_string_raises(self, mudata_for_mt):
+        """Test that invalid GRN string raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid grn string"):
+            lit_grn(mdata=mudata_for_mt, grn="InvalidDB")
+
+    def test_invalid_grn_type_raises(self, mudata_for_mt):
+        """Test that invalid GRN type raises ValueError."""
+        with pytest.raises(ValueError, match="grn must be a string or pandas DataFrame"):
+            lit_grn(mdata=mudata_for_mt, grn=42)
+
+    def test_custom_dataframe_missing_columns_raises(self, mudata_for_mt):
+        """Test that custom DataFrame missing required columns raises ValueError."""
+        bad_df = pd.DataFrame({"source": ["TF1"], "target": ["G1"]})  # missing 'weight'
+        with pytest.raises(ValueError, match="missing required columns"):
+            lit_grn(mdata=mudata_for_mt, grn=bad_df)
+
+    @patch("gretapy.mt._lit_grn.read_db")
     def test_returns_dataframe(self, mock_read_db, mudata_for_mt, mock_collectri_grn, mock_promoters_db):
         """Test that function returns a DataFrame."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
             mock_collectri_grn if db_name == "CollecTRI" else mock_promoters_db
         )
 
-        result = collectri(mdata=mudata_for_mt, organism="hg38", min_targets=1)
+        result = lit_grn(mdata=mudata_for_mt, grn="CollecTRI", organism="hg38", min_targets=1)
 
         assert isinstance(result, pd.DataFrame)
 
-    @patch("gretapy.mt._collectri.read_db")
+    @patch("gretapy.mt._lit_grn.read_db")
     def test_output_columns(self, mock_read_db, mudata_for_mt, mock_collectri_grn, mock_promoters_db):
         """Test that output has correct columns."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
             mock_collectri_grn if db_name == "CollecTRI" else mock_promoters_db
         )
 
-        result = collectri(mdata=mudata_for_mt, organism="hg38", min_targets=1)
+        result = lit_grn(mdata=mudata_for_mt, grn="CollecTRI", organism="hg38", min_targets=1)
 
         assert "source" in result.columns
         assert "cre" in result.columns
         assert "target" in result.columns
         assert "score" in result.columns
 
-    @patch("gretapy.mt._collectri.read_db")
+    @patch("gretapy.mt._lit_grn.read_db")
     def test_min_targets_filtering(self, mock_read_db, mudata_for_mt, mock_collectri_grn, mock_promoters_db):
         """Test that min_targets parameter filters TFs."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
             mock_collectri_grn if db_name == "CollecTRI" else mock_promoters_db
         )
 
-        result_low = collectri(mdata=mudata_for_mt, organism="hg38", min_targets=1)
-        result_high = collectri(mdata=mudata_for_mt, organism="hg38", min_targets=100)
+        result_low = lit_grn(mdata=mudata_for_mt, grn="CollecTRI", organism="hg38", min_targets=1)
+        result_high = lit_grn(mdata=mudata_for_mt, grn="CollecTRI", organism="hg38", min_targets=100)
 
         # Higher min_targets should result in fewer or equal TFs
         assert len(result_high) <= len(result_low)
 
-    @patch("gretapy.mt._collectri.read_db")
+    @patch("gretapy.mt._lit_grn.read_db")
     def test_filters_by_available_genes(self, mock_read_db, mock_collectri_grn, mock_promoters_db):
         """Test that GRN is filtered by genes available in MuData."""
         # Create MuData with only some genes
@@ -326,13 +298,46 @@ class TestCollectri:
             mock_collectri_grn if db_name == "CollecTRI" else mock_promoters_db
         )
 
-        result = collectri(mdata=mdata, organism="hg38", min_targets=1)
+        result = lit_grn(mdata=mdata, grn="CollecTRI", organism="hg38", min_targets=1)
 
         # All sources and targets in result should be in mdata genes
         genes = set(mdata.mod["rna"].var_names)
         if len(result) > 0:
             assert set(result["source"]).issubset(genes)
             assert set(result["target"]).issubset(genes)
+
+    @patch("gretapy.mt._lit_grn.read_db")
+    def test_dorothea_string_input(self, mock_read_db, mudata_for_mt, mock_collectri_grn, mock_promoters_db):
+        """Test that DoRoTHeA string input works."""
+        mock_read_db.side_effect = lambda organism, db_name, verbose: (
+            mock_collectri_grn if db_name == "DoRoTHeA" else mock_promoters_db
+        )
+
+        result = lit_grn(mdata=mudata_for_mt, grn="DoRoTHeA", organism="hg38", min_targets=1)
+
+        assert isinstance(result, pd.DataFrame)
+        # Verify read_db was called with DoRoTHeA
+        mock_read_db.assert_any_call(organism="hg38", db_name="DoRoTHeA", verbose=False)
+
+    @patch("gretapy.mt._lit_grn.read_db")
+    def test_custom_dataframe_input(self, mock_read_db, mudata_for_mt, mock_promoters_db):
+        """Test that custom DataFrame input works."""
+        custom_grn = pd.DataFrame(
+            {
+                "source": ["PAX5", "PAX5", "GATA3", "GATA3", "SPI1", "SPI1"],
+                "target": ["CD19", "MS4A1", "CD3E", "IL7R", "CD14", "CD79A"],
+                "weight": [1.0, 0.8, 0.9, 0.7, 0.85, 0.6],
+            }
+        )
+        # Only Promoters should be downloaded, not a GRN database
+        mock_read_db.return_value = mock_promoters_db
+
+        result = lit_grn(mdata=mudata_for_mt, grn=custom_grn, organism="hg38", min_targets=1)
+
+        assert isinstance(result, pd.DataFrame)
+        # read_db should only be called once (for Promoters), not for a GRN
+        assert mock_read_db.call_count == 1
+        mock_read_db.assert_called_once_with(organism="hg38", db_name="Promoters", verbose=False)
 
 
 # ============================================================================
@@ -521,7 +526,7 @@ class TestRandom:
     def test_returns_dataframe(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that function returns a DataFrame."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -532,7 +537,7 @@ class TestRandom:
     def test_output_columns(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that output has correct columns."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -547,7 +552,7 @@ class TestRandom:
     def test_reproducibility_with_seed(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that same seed produces same results."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result1 = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -559,7 +564,7 @@ class TestRandom:
     def test_different_seeds_different_results(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that different seeds produce different results."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result1 = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -591,7 +596,7 @@ class TestRandom:
     def test_g_perc_parameter(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that g_perc controls percentage of genes sampled."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result_low = random(mdata=mudata_for_mt, organism="hg38", g_perc=0.1, min_targets=1, seed=42)
@@ -606,7 +611,7 @@ class TestRandom:
     def test_min_targets_filtering(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that min_targets parameter filters TFs."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result_low = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -619,7 +624,7 @@ class TestRandom:
     def test_score_is_one(self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db):
         """Test that all scores are 1.0 for random GRN."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_lambert_tfs if db_name == "LambertTFs" else mock_promoters_db
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
         result = random(mdata=mudata_for_mt, organism="hg38", min_targets=1, seed=42)
@@ -648,10 +653,10 @@ class TestRandom:
                 }
             )
         )
-        mock_tfs = pd.DataFrame({0: ["GENE1", "GENE2"]})
+        mock_tfs = ["GENE1", "GENE2"]
 
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_tfs if db_name == "LambertTFs" else mock_promoters
+            mock_tfs if db_name == "Lambert TFs" else mock_promoters
         )
 
         result = random(mdata=mdata, organism="hg38", min_targets=1, seed=42)

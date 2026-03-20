@@ -15,6 +15,10 @@ DATA = {
                 "fname": "hg38_tf_lambert.txt.gz",
                 "metric": None,
             },
+            "DoRothEA": {
+                "fname": "hg38_gst_dorothea.csv.gz",
+                "metric": None,
+            },
             # Literature
             "Human Protein Atlas (HPA)": {
                 "fname": "hg38_tfm_hpa.tsv.gz",
@@ -2419,6 +2423,10 @@ DATA = {
             # Extra
             "Lambert TFs": {
                 "fname": "mm10_tf_lambert.txt.gz",
+                "metric": None,
+            },
+            "DoRothEA": {
+                "fname": "hg38_gst_dorothea.csv.gz",
                 "metric": None,
             },
             # Literature

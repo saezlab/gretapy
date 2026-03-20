@@ -9,7 +9,7 @@ Methods for inferring gene regulatory networks.
 .. autosummary::
     :toctree: generated
 
-    collectri
+    lit_grn
     correlation
     random
 ```
