@@ -109,11 +109,11 @@ DATA = {
             # Mechanistic
             "KnockTF (scoring)": {
                 "fname": "hg38_prt_knocktf.h5ad",
-                "metric": "TF scoring",
+                "metric": "TF Scoring",
             },
             "KnockTF (forecasting)": {
                 "fname": "hg38_prt_knocktf.h5ad",
-                "metric": "Perturbation forecasting",
+                "metric": "Perturbation Forecasting",
             },
             "Boolean rules": {
                 "fname": None,
@@ -2483,11 +2483,11 @@ DATA = {
             # Mechanistic
             "KnockTF (scoring)": {
                 "fname": "m10_prt_knocktf.h5ad.gz",
-                "metric": "TF scoring",
+                "metric": "TF Scoring",
             },
             "KnockTF (forecasting)": {
                 "fname": "m10_prt_knocktf.h5ad.gz",
-                "metric": "Perturbation forecasting",
+                "metric": "Perturbation Forecasting",
             },
             "Boolean rules": {
                 "fname": None,
@@ -2607,7 +2607,7 @@ METRIC_CATS = {
     "CRE to gene links": "Genomic",
     "Gene sets": "Predictive",
     "Omics": "Predictive",
-    "TF scoring": "Mechanistic",
-    "Perturbation forecasting": "Mechanistic",
+    "TF Scoring": "Mechanistic",
+    "Perturbation Forecasting": "Mechanistic",
     "Steady state simulation": "Mechanistic",
 }

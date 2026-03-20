@@ -330,10 +330,10 @@ def _run_metric(
         return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="target", verbose=verbose)
     elif metric_type == "Gene sets":
         return _gset(adata=adata, grn=grn, db=db, verbose=verbose)
-    elif metric_type == "TF scoring":
+    elif metric_type == "TF Scoring":
         return _tfa(adata=db, grn=grn, db=db, cats=cats, verbose=verbose)
-    elif metric_type == "Perturbation forecasting":
-        return _frc(adata=db, grn=grn, db=db, cats=cats, verbose=verbose)
+    elif metric_type == "Perturbation Forecasting":
+        return _frc(adata=adata, grn=grn, db=db, cats=cats, verbose=verbose)
     return None
 
 

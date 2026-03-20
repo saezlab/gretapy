@@ -246,7 +246,7 @@ def _simulate(
     # Propagate
     delta_sim = delta_init.copy()
     for _ in range(n_steps):
-        delta_sim = delta_sim.dot(coefmat)
+        delta_sim = delta_sim.dot(coefmat.T)
         delta_sim[delta_init != 0] = delta_init
         gex_tmp = df + delta_sim
         gex_tmp[gex_tmp < 0] = 0.0
@@ -268,8 +268,9 @@ def _frc(
     thr_cor_padj: float = 0.05,
     verbose: bool = True,
 ) -> float:
-    # Ensure uniqueness but keep score
-    grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
+    # Ensure uniqueness, keep first occurrence
+    grn = grn.drop_duplicates(["source", "target"], keep="first")
+    grn_sources = set(grn["source"])
     # Filter for grn genes
     g_universe = set(grn["source"]) | set(grn["target"])
     fdata = adata[:, adata.var_names.isin(g_universe)].copy()
@@ -277,19 +278,23 @@ def _frc(
     msk = (db.obs["source"].isin(adata.var_names)) & (db.obs["logFC"] < thr_pert_lfc)
     if cats is not None:
         msk = msk & db.obs["Tissue.Type"].isin(cats)
-    g_universe = list(g_universe & set(db.var_names))  # Subset by overlap with rna
-    fdb = db[:, g_universe].copy()
-    # Fit grn
-    coefmat = _coefmat(adata=fdata, grn=grn)
+    g_universe = list(g_universe & set(db.var_names))
+    fdb = db[msk][:, g_universe].copy()
+    # Fit grn with OLS (alpha=0), allow single-regulator targets
+    coefmat = _coefmat(adata=fdata, grn=grn, alpha=0, smin=1)
+    # Determine valid TFs (targets with at least 3 non-zero regulators)
+    valid_tfs = set(coefmat.index[(coefmat != 0).sum(axis=1) >= 3])
     # Generate seed gex profile
     profile = fdata.to_df().mean(0).to_frame().T
+    # Count GRN source experiments for precision denominator
+    n_grn_tfs_in_prt = fdb.obs["source"].isin(grn_sources).sum()
     # Simulate perturbations per tf
     coefs = []
     pvals = []
     for dataset in tqdm(fdb.obs_names, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         # Extract real lfc
         tf = fdb.obs.loc[dataset, "source"]
-        if tf in profile.columns:
+        if tf in valid_tfs:
             y = fdb[[dataset], :].to_df()
             y = y[y != 0].dropna(axis=1)
             # Run perturbation simulation for the current TF
@@ -310,7 +315,7 @@ def _frc(
     # Compute metrics
     tp = np.sum((coefs > thr_cor_stat) & (padj < thr_cor_padj))
     if tp > 0:
-        prc = tp / coefs.size
+        prc = tp / n_grn_tfs_in_prt
         rcl = tp / fdb.obs.shape[0]
         f01 = _f_beta_score(prc=prc, rcl=rcl)
     else:
