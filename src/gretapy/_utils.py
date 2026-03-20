@@ -179,8 +179,9 @@ def show_metrics(organism: str | None = None) -> pd.DataFrame:
         org_dbs = DATA[org]["dbs"]
         for db in org_dbs:
             metric = org_dbs[db]["metric"]
-            metric_cat = METRIC_CATS[metric]
-            df.append([org, metric_cat, metric, db])
+            if metric is not None:
+                metric_cat = METRIC_CATS[metric]
+                df.append([org, metric_cat, metric, db])
     cols = ["organism", "category", "metric", "db"]
     df = pd.DataFrame(df, columns=cols)
     df = df.sort_values(cols)
