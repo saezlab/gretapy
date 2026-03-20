@@ -195,7 +195,7 @@ def _tfa(
         source_mat = db[[dataset], :].to_df()
         source_grn = grn[grn["source"] == source].rename(columns={"score": "weight"})
         if source_grn.shape[0] >= 3:
-            score, pval = dc.mt.ulm(data=source_mat, net=source_grn)
+            score, pval = dc.mt.ulm(data=source_mat, net=source_grn, tmin=3)
             score, pval = float(score.values[0, 0]), float(pval.values[0, 0])
             scores.append(score)
             pvals.append(pval)
