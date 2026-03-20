@@ -134,20 +134,15 @@ def _sss_prc_rcl(hits: pd.DataFrame) -> tuple:
 
 def _run_sim_block(queue, sgrn, indegree, sm_sets, f_sources, thr_fisher_padj, verbose):
     """Run the Boolean simulation block in a subprocess."""
-    try:
-        file_exchange, trap_spaces = _get_pyboolnet()
-        bool_rules = _define_bool_rules(grn=sgrn, indegree=indegree)
-        primes = file_exchange.bnet2primes(bool_rules)
-        logging.getLogger("pyboolnet.external.potassco").disabled = True
-        sss = trap_spaces.compute_steady_states(primes, max_output=100_000)
-        hits = _get_sim_hits(
-            sss=sss, sm_sets=sm_sets, sources=f_sources, thr_fisher_padj=thr_fisher_padj, verbose=verbose
-        )
-        prc, rcl = _sss_prc_rcl(hits=hits)
-        f01 = _f_beta_score(prc=prc, rcl=rcl)
-        queue.put((prc, rcl, f01))
-    except (OSError, ValueError, RuntimeError):
-        queue.put((np.nan, np.nan, np.nan))
+    file_exchange, trap_spaces = _get_pyboolnet()
+    bool_rules = _define_bool_rules(grn=sgrn, indegree=indegree)
+    primes = file_exchange.bnet2primes(bool_rules)
+    logging.getLogger("pyboolnet.external.potassco").disabled = True
+    sss = trap_spaces.compute_steady_states(primes, max_output=100_000)
+    hits = _get_sim_hits(sss=sss, sm_sets=sm_sets, sources=f_sources, thr_fisher_padj=thr_fisher_padj, verbose=verbose)
+    prc, rcl = _sss_prc_rcl(hits=hits)
+    f01 = _f_beta_score(prc=prc, rcl=rcl)
+    queue.put((prc, rcl, f01))
 
 
 def _sim(
@@ -187,6 +182,8 @@ def _sim(
             proc.terminate()
             proc.join()
             prc, rcl, f01 = np.nan, np.nan, np.nan
+        elif proc.exitcode != 0:
+            raise RuntimeError(f"Boolean simulation subprocess failed with exit code {proc.exitcode}")
         else:
             prc, rcl, f01 = queue.get()
     else:
