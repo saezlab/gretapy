@@ -320,7 +320,7 @@ def _run_metric(
         return _grn(grn=grn, db=db, genes=genes, verbose=verbose)
     elif metric_type == "TF markers":
         return _tfm(grn=grn, db=db, genes=genes, cats=cats, verbose=verbose)
-    elif metric_type == "TF pairs":
+    elif metric_type == "TF Pairs":
         return _tfp(grn=grn, db=db, genes=genes, verbose=verbose)
     elif metric_type == "TF binding":
         return _cre_column(grn=grn, db=db, genes=genes, peaks=peaks, cats=cats, column="source", verbose=verbose)

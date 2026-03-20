@@ -53,35 +53,28 @@ def _tfm(
     return prc, rcl, f01
 
 
-def _compute_overlap_pval(
-    grn: pd.DataFrame,
-    tf_a: str,
-    tf_b: str,
-) -> tuple:
-    trg_a = set(grn[grn["source"] == tf_a]["target"])
-    trg_b = set(grn[grn["source"] == tf_b]["target"])
-    total = set(grn["target"])
-    a = len(trg_a & trg_b)
-    if a > 0:
-        b = len(trg_a - trg_b)
-        c = len(trg_b - trg_a)
-        d = len(total - (trg_a | trg_b))
-        s, p = sts.fisher_exact([[a, b], [c, d]], alternative="greater")
-    else:
-        s, p = 0.0, 1.0
-    return s, p
-
-
 def _find_pairs(
     grn: pd.DataFrame,
     thr_pval: float,
     verbose: bool = True,
 ) -> set:
+    # Pre-compute target sets per TF and total targets once
+    targets_per_tf = grn.groupby("source")["target"].apply(set).to_dict()
+    total = set(grn["target"])
+    n_total = len(total)
+    tfs = list(targets_per_tf)
     df = []
-    for tf_a, tf_b in tqdm(
-        list(combinations(grn["source"].unique(), r=2)), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"
-    ):
-        s, p = _compute_overlap_pval(grn=grn, tf_a=tf_a, tf_b=tf_b)
+    for tf_a, tf_b in tqdm(list(combinations(tfs, r=2)), disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
+        trg_a = targets_per_tf[tf_a]
+        trg_b = targets_per_tf[tf_b]
+        a = len(trg_a & trg_b)
+        if a > 0:
+            b = len(trg_a) - a
+            c = len(trg_b) - a
+            d = n_total - len(trg_a | trg_b)
+            s, p = sts.fisher_exact([[a, b], [c, d]], alternative="greater")
+        else:
+            s, p = 0.0, 1.0
         df.append([tf_a, tf_b, s, p])
     df = pd.DataFrame(df, columns=["tf_a", "tf_b", "stat", "pval"]).dropna()
     if df.shape[0] > 0:

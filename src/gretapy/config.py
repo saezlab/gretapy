@@ -26,11 +26,11 @@ DATA = {
             },
             "Europe PMC": {
                 "fname": "hg38_tfp_europmc.tsv.gz",
-                "metric": "TF pairs",
+                "metric": "TF Pairs",
             },
             "IntAct": {
                 "fname": "hg38_tfp_intact.tsv.gz",
-                "metric": "TF pairs",
+                "metric": "TF Pairs",
             },
             "CollecTRI": {
                 "fname": "hg38_gst_collectri.csv.gz",
@@ -2600,7 +2600,7 @@ DATA = {
 
 METRIC_CATS = {
     "TF markers": "Prior Knowledge",
-    "TF pairs": "Prior Knowledge",
+    "TF Pairs": "Prior Knowledge",
     "Reference GRN": "Prior Knowledge",
     "TF binding": "Genomic",
     "CREs": "Genomic",
