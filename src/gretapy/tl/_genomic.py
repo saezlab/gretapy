@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 from gretapy.tl._utils import _prc_rcl_f01
 
-# TODO: cats = [re.escape(c) for c in cats]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Else results are different
 # TODO: assert that genes and cres in grn are in mdata input
 # TODO: add grn.empty check in main function, not in individual metrics
 # TODO: actually that at least 5 edges, else many errors in metrics (tfp, omics, etc)
@@ -24,6 +23,7 @@ def _grn_to_pr(
         pr_grn = pr_grn[["Chromosome", "Start", "End", column]].rename(columns={column: "Name"})
     else:
         pr_grn = pr_grn[["Chromosome", "Start", "End"]]
+    pr_grn = pr_grn.drop_duplicates()
     pr_grn = pr.PyRanges(pr_grn)
     return pr_grn
 
@@ -48,7 +48,9 @@ def _cre_column(
 ) -> tuple:
     # Filter db
     if cats is not None:
-        db = db[db.df["Score"].str.contains("|".join(cats))]
+        cats_set = set(cats)
+        mask = db.df["Score"].apply(lambda x: any(c.strip() in cats_set for c in x.split(",")))
+        db = db[mask]
     db = db[db.df["Name"].astype("U").isin(genes)]
     pr_peaks = _peaks_to_pr(peaks)
     db = db.overlap(pr_peaks)
@@ -83,7 +85,9 @@ def _cre(
 ) -> tuple:
     # Filter db
     if cats is not None:
-        db = db[db.df["Score"].str.contains("|".join(cats))]
+        cats_set = set(cats)
+        mask = db.df["Score"].apply(lambda x: any(c.strip() in cats_set for c in x.split(",")))
+        db = db[mask]
     pr_peaks = _peaks_to_pr(peaks)
     db = db.overlap(pr_peaks)
     # Compute
