@@ -17,7 +17,9 @@ def _download_db(
 ) -> str:
     os.makedirs(PATH_DATA, exist_ok=True)
     assert organism in DATA, f"organism={organism} not available:\n{DATA.keys()}"
-    assert db_name in DATA[organism]["dbs"], f"db_name={db_name} not available as a database:\n{DATA[organism]['dbs']}"
+    assert db_name in DATA[organism]["dbs"], (
+        f"db_name={db_name} not available as a database:\n{DATA[organism]['dbs'].keys()}"
+    )
     fname = DATA[organism]["dbs"][db_name]["fname"]
     path_fname = os.path.join(PATH_DATA, fname)
     if not os.path.isfile(path_fname):
