@@ -96,11 +96,14 @@ def _find_pairs(
 def _tfp(
     grn: pd.DataFrame,
     db: pd.DataFrame,
+    genes: np.ndarray | list,
     thr_pval: float = 0.01,
     verbose: bool = True,
 ) -> tuple:
     # Ensure uniqueness
     grn = grn[["source", "target"]].drop_duplicates(["source", "target"])
+    # Filter resource by measured genes
+    db = db[db[0].astype("U").isin(genes) & db[1].astype("U").isin(genes)]
     # Filter grn
     tfs = set(db[0]) | set(db[1])
     grn = grn[grn["source"].isin(tfs)]
