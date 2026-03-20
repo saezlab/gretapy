@@ -331,7 +331,7 @@ def _run_metric(
     elif metric_type == "Gene sets":
         return _gset(adata=adata, grn=grn, db=db, verbose=verbose)
     elif metric_type == "TF Scoring":
-        return _tfa(adata=db, grn=grn, db=db, cats=cats, verbose=verbose)
+        return _tfa(adata=adata, grn=grn, db=db, cats=cats, verbose=verbose)
     elif metric_type == "Perturbation Forecasting":
         return _frc(adata=adata, grn=grn, db=db, cats=cats, verbose=verbose)
     return None
