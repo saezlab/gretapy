@@ -348,7 +348,7 @@ DATA = {
                 },
             },
             "Breast": {
-                "fname": "hg38_dts_breast.h5mu",
+                "fname": "hg38_dts_breast_all.h5mu",
                 "pubmed": "39122969",
                 "geo": None,
                 "terms": {
@@ -748,7 +748,7 @@ DATA = {
                 },
             },
             "Eye": {
-                "fname": "hg38_dts_eye.h5mu",
+                "fname": "hg38_dts_eye_all.h5mu",
                 "pubmed": "36277849",
                 "geo": "GSE196235",
                 "terms": {
@@ -1025,7 +1025,7 @@ DATA = {
                 },
             },
             "Lung": {
-                "fname": "hg38_dts_lung.h5mu",
+                "fname": "hg38_dts_lung_all.h5mu",
                 "pubmed": "39266564",
                 "geo": "GSE241468",
                 "terms": {
@@ -1489,7 +1489,7 @@ DATA = {
                 },
             },
             "PBMC": {
-                "fname": "hg38_dts_pbmc10k.h5mu",
+                "fname": "hg38_dts_pbmc10k_all.h5mu",
                 "pubmed": None,
                 "geo": None,
                 "terms": {
@@ -1961,7 +1961,7 @@ DATA = {
                 },
             },
             "Repr. Fibroblasts": {
-                "fname": "hg38_dts_reprofibro.h5mu",
+                "fname": "hg38_dts_reprofibro_all.h5mu",
                 "pubmed": "37873116",
                 "geo": "GSE242419",
                 "terms": {
