@@ -347,7 +347,7 @@ def ranking(
     Parameters
     ----------
     df : pd.DataFrame
-        Metrics dataframe with columns: class, task, db, org, dts, name, prc, rcl, f01.
+        Metrics dataframe with columns: class, task, db, dts, name, f01.
     level : str
         ``'class'`` for summary heatmap at class level (Predictive, Genomic, etc.),
         ``'task'`` for the fine-grained (db, task) heatmap with hierarchical headers.
@@ -366,7 +366,8 @@ def ranking(
         palette = PALETTE
 
     # Filter excluded datasets
-    df = df[~df["dts"].isin(EXCLUDE_DATASETS)].copy()
+    if "dts" in df.columns:
+        df = df[~df["dts"].isin(EXCLUDE_DATASETS)].copy()
 
     # Compute overall mean and class-level aggregation (needed for method ordering)
     overall_mean, class_mean = _compute_aggregations(df)
