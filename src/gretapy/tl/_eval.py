@@ -49,8 +49,8 @@ def _format_label(grn_name: str | None = None, dataset_name: str | None = None) 
 
 def benchmark(
     organism: str,
-    grns: dict | pd.DataFrame,
-    datasets: str | list | None = None,
+    grns: dict,
+    datasets: list | dict | None = None,
     terms: dict | None = None,
     metrics: str | list | None = None,
     min_edges: int = 5,
@@ -64,15 +64,16 @@ def benchmark(
     organism
         Which organism to use (e.g., "hg38", "mm10").
     grns
-        Either a single GRN DataFrame, or a dictionary mapping GRN names to DataFrames.
+        Dictionary mapping GRN names to per-dataset GRN DataFrames.
+        Structure: ``{grn_name: {dataset_name: DataFrame}}``.
     datasets
         Dataset(s) to evaluate against. Can be:
         - None: Use all datasets available in config for the organism.
-        - str: A single dataset name from config.
         - list: A list of dataset names from config.
+        - dict: A dictionary mapping dataset names to pre-loaded MuData/AnnData objects.
     terms
         Optional dictionary specifying filtering terms per dataset and metric.
-        Structure: {dataset_name: {db_name: [terms]}}.
+        Structure: ``{dataset_name: {db_name: [terms]}}``.
         If None, terms are auto-loaded from config for each dataset.
     metrics
         Metric(s) to evaluate. Can be category name, metric type, or database name.
@@ -93,59 +94,87 @@ def benchmark(
         import gretapy as gt
         import pandas as pd
 
-        # Single GRN
-        grn = pd.read_csv("grn.csv")
-        results = gt.tl.benchmark(
-            organism="hg38",
-            grns=grn,
-            datasets=["pbmc10k", "brain"],
-        )
-
-        # Multiple GRNs
+        # Dataset-specific GRNs
         grns = {
-            "method_a": pd.read_csv("grn_a.csv"),
-            "method_b": pd.read_csv("grn_b.csv"),
+            "method_a": {
+                "pbmc10k": pd.read_csv("grn_a_pbmc10k.csv"),
+                "brain": pd.read_csv("grn_a_brain.csv"),
+            },
+            "method_b": {
+                "pbmc10k": pd.read_csv("grn_b_pbmc10k.csv"),
+            },
         }
         results = gt.tl.benchmark(
             organism="hg38",
             grns=grns,
-            datasets=None,  # all datasets
+            datasets=None,  # all datasets from config
+        )
+
+        # With pre-loaded datasets
+        results = gt.tl.benchmark(
+            organism="hg38",
+            grns=grns,
+            datasets={"pbmc10k": mudata_obj, "brain": mudata_obj2},
         )
     """
     # Validate organism
     _check_organism(organism=organism)
-    # Normalize grns to dictionary
-    if isinstance(grns, pd.DataFrame):
-        grns_dict = {None: grns}
-    elif isinstance(grns, dict):
-        grns_dict = grns
-    else:
-        raise ValueError(f"grns must be pd.DataFrame or dict, got {type(grns)}")
+    # Validate grns: must be dict[str, dict[str, pd.DataFrame]]
+    if not isinstance(grns, dict):
+        raise ValueError(f"grns must be dict[str, dict[str, DataFrame]], got {type(grns)}")
+    for grn_name, grn_inner in grns.items():
+        if not isinstance(grn_inner, dict):
+            raise ValueError(
+                f"grns['{grn_name}'] must be a dict mapping dataset names to DataFrames, got {type(grn_inner)}"
+            )
+    grns_dict = grns
     # Validate and normalize datasets
-    datasets_list = _check_datasets(organism=organism, datasets=datasets)
+    datasets_objects = None
+    if datasets is None or isinstance(datasets, list):
+        datasets_list = _check_datasets(organism=organism, datasets=datasets)
+    elif isinstance(datasets, dict):
+        datasets_list = list(datasets.keys())
+        datasets_objects = datasets
+    else:
+        raise ValueError(f"datasets must be None, list, or dict, got {type(datasets)}")
     # Validate metrics
     _check_metrics(organism=organism, metrics=metrics)
     # Run benchmark
-    n_grns = len(grns_dict)
-    n_datasets = len(datasets_list)
+    n_pairs = sum(1 for inner in grns_dict.values() for ds in datasets_list if ds in inner)
     _log(_SEP, level="info", verbose=verbose)
-    _log(f"Starting benchmark: {n_grns} GRN(s) x {n_datasets} dataset(s)", level="info", verbose=verbose)
+    _log(
+        f"Starting benchmark: {len(grns_dict)} GRN(s), {len(datasets_list)} dataset(s), {n_pairs} pair(s)",
+        level="info",
+        verbose=verbose,
+    )
     _log(_SEP, level="info", verbose=verbose)
     t_start_bench = time.time()
     all_results = []
-    for grn_name, grn_df in grns_dict.items():
+    for grn_name, grn_inner in grns_dict.items():
         for dataset_name in datasets_list:
-            # Get terms for this dataset
-            dataset_terms = None
+            if dataset_name not in grn_inner:
+                continue  # skip silently
+            grn_df = grn_inner[dataset_name]
+            # Resolve dataset: string name or pre-loaded object
+            dataset_arg = datasets_objects[dataset_name] if datasets_objects else dataset_name
+            # Resolve terms before eval
             if terms is None:
-                dataset_terms = _check_terms(organism=organism, dataset=dataset_name, terms=terms)
+                dataset_terms = _check_terms(organism=organism, dataset=dataset_name, terms=None)
             else:
-                dataset_terms = terms[dataset_name]
+                dataset_terms = terms.get(dataset_name, {})
+            # Warn if no auto-loaded terms for pre-loaded datasets not in config
+            if terms is None and datasets_objects is not None and not dataset_terms:
+                _log(
+                    f"No terms auto-loaded for dataset '{dataset_name}' (not in config). "
+                    "Metrics requiring terms will run unfiltered.",
+                    level="warning",
+                    verbose=verbose,
+                )
             # Run evaluation
             result = eval_grn_dataset(
                 organism=organism,
                 grn=grn_df,
-                dataset=dataset_name,
+                dataset=dataset_arg,
                 terms=dataset_terms,
                 metrics=metrics,
                 min_edges=min_edges,
@@ -155,7 +184,7 @@ def benchmark(
             )
             # Add identifiers
             if not result.empty:
-                result.insert(0, "grn", grn_name if grn_name is not None else "grn")
+                result.insert(0, "grn", grn_name)
                 result.insert(1, "dataset", dataset_name)
                 all_results.append(result)
     elapsed = time.time() - t_start_bench
@@ -163,7 +192,7 @@ def benchmark(
     _log(f"Benchmark complete ({len(all_results)} result(s), {elapsed:.1f}s)", level="info", verbose=verbose)
     _log(_SEP, level="info", verbose=verbose)
     if not all_results:
-        return pd.DataFrame(columns=["grn", "dataset", "category", "metric", "db", "precision", "recall", "f01"])
+        return pd.DataFrame(columns=["grn", "dataset", "class", "task", "db", "precision", "recall", "f01"])
     return pd.concat(all_results, ignore_index=True)
 
 
@@ -226,7 +255,7 @@ def eval_grn_dataset(
             metrics=None,
         )
     """
-    result_cols = ["category", "metric", "db", "precision", "recall", "f01"]
+    result_cols = ["class", "task", "db", "precision", "recall", "f01"]
     # Validate inputs
     metrics_list = _check_metrics(organism=organism, metrics=metrics)
     grn = _check_grn(grn=grn)
