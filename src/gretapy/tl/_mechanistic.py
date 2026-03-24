@@ -153,7 +153,7 @@ def _sim(
     thr_deg_padj: float = 2.22e-16,
     thr_fisher_padj: float = 0.01,
     verbose: bool = True,
-    timeout: int = 3600,
+    timeout: int = 300,
 ) -> tuple:
     # Ensure uniqueness but keep score
     grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
