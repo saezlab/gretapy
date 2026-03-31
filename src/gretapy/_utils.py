@@ -114,6 +114,7 @@ def show_terms(organism: str | None = None) -> pd.DataFrame:
         assert organism in organisms, f"organism={organism} not available ({organisms})"
         df = df[df["organism"] == organism].drop(columns="organism")
     df = df.reset_index(drop=True)
+    df["db_name"] = df["db_name"].str.replace("Human Protein Atlas (HPA)", "HPA", regex=False)
     return df
 
 

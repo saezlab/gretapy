@@ -1,5 +1,7 @@
+import gzip
 import os
 import shutil
+import tempfile
 
 import anndata as ad
 import decoupler as dc
@@ -23,17 +25,22 @@ def _download_db(
     fname = DATA[organism]["dbs"][db_name]["fname"]
     path_fname = os.path.join(PATH_DATA, fname)
     if not os.path.isfile(path_fname):
-        if fname != "hg38_prt_knocktf.h5ad":
-            url = URL_STR + fname + URL_END
-            data = _download(url, verbose=verbose)
-            data.seek(0)  # Move pointer to beginning
+        url = URL_STR + fname + URL_END
+        data = _download(url, verbose=verbose)
+        data.seek(0)
+        if not '.h5ad' in fname:
             with open(path_fname, "wb") as f:
                 shutil.copyfileobj(data, f)
-            m = f"Database {db_name} saved in {path_fname}"
-            _log(m, level="info", verbose=verbose)
         else:
-            adata = dc.ds.knocktf(thr_fc=100_000, verbose=verbose)  # Do not filter here
+            with tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False) as tmp:
+                tmp_path = tmp.name
+                with gzip.GzipFile(fileobj=data) as gz:
+                    shutil.copyfileobj(gz, tmp)
+            adata = ad.read_h5ad(tmp_path)
             adata.write(path_fname)
+            os.remove(tmp_path)
+        m = f"Database {db_name} saved in {path_fname}"
+        _log(m, level="info", verbose=verbose)
     else:
         m = f"Database {db_name} found in {path_fname}"
         _log(m, level="info", verbose=verbose)

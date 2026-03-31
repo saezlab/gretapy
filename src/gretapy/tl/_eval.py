@@ -10,7 +10,6 @@ from gretapy.config import DATA, METRIC_CATS
 from gretapy.ds._db import read_db
 from gretapy.pp._check import (
     _check_dataset,
-    _check_datasets,
     _check_dts_grn,
     _check_grn,
     _check_metrics,
@@ -48,8 +47,8 @@ def _format_label(grn_name: str | None = None, dataset_name: str | None = None) 
 
 
 def benchmark(
-    organism: str,
     grns: dict,
+    organism: str | None = None,
     datasets: list | dict | None = None,
     terms: dict | None = None,
     metrics: str | list | None = None,
@@ -61,19 +60,20 @@ def benchmark(
 
     Parameters
     ----------
-    organism
-        Which organism to use (e.g., "hg38", "mm10").
     grns
-        Dictionary mapping GRN names to per-dataset GRN DataFrames.
-        Structure: ``{grn_name: {dataset_name: DataFrame}}``.
+        Dictionary mapping GRN names to per-organism per-dataset GRN DataFrames.
+        Structure: ``{grn_name: {organism: {dataset_name: DataFrame}}}``.
+    organism
+        Ignored when organism keys are present in ``grns``.  Kept for clarity
+        but organisms are inferred from the second level of ``grns``.
     datasets
         Dataset(s) to evaluate against. Can be:
-        - None: Use all datasets available in config for the organism.
-        - list: A list of dataset names from config.
-        - dict: A dictionary mapping dataset names to pre-loaded MuData/AnnData objects.
+        - None: Use all datasets present in the grns dict for each organism.
+        - list: A whitelist of dataset names (applied across all organisms).
+        - dict: A flat dictionary mapping dataset names to pre-loaded MuData/AnnData objects.
     terms
-        Optional dictionary specifying filtering terms per dataset and metric.
-        Structure: ``{dataset_name: {db_name: [terms]}}``.
+        Optional dictionary specifying filtering terms per organism, dataset, and metric.
+        Structure: ``{organism: {dataset_name: {db_name: [terms]}}}``.
         If None, terms are auto-loaded from config for each dataset.
     metrics
         Metric(s) to evaluate. Can be category name, metric type, or database name.
@@ -85,7 +85,7 @@ def benchmark(
 
     Returns
     -------
-    DataFrame with columns: grn, dataset, category, metric, db, precision, recall, f01.
+    DataFrame with columns: grn, organism, dataset, class, task, db, precision, recall, f01.
 
     Example
     -------
@@ -94,56 +94,74 @@ def benchmark(
         import gretapy as gt
         import pandas as pd
 
-        # Dataset-specific GRNs
+        # Multi-organism GRNs
         grns = {
             "method_a": {
-                "pbmc10k": pd.read_csv("grn_a_pbmc10k.csv"),
-                "brain": pd.read_csv("grn_a_brain.csv"),
+                "hg38": {
+                    "PBMC": pd.read_csv("grn_a_pbmc.csv"),
+                    "Lung": pd.read_csv("grn_a_lung.csv"),
+                },
+                "mm10": {
+                    "Palate": pd.read_csv("grn_a_palate.csv"),
+                },
             },
             "method_b": {
-                "pbmc10k": pd.read_csv("grn_b_pbmc10k.csv"),
+                "hg38": {
+                    "PBMC": pd.read_csv("grn_b_pbmc.csv"),
+                },
             },
         }
-        results = gt.tl.benchmark(
-            organism="hg38",
-            grns=grns,
-            datasets=None,  # all datasets from config
-        )
+        results = gt.tl.benchmark(grns=grns)
 
         # With pre-loaded datasets
         results = gt.tl.benchmark(
-            organism="hg38",
             grns=grns,
-            datasets={"pbmc10k": mudata_obj, "brain": mudata_obj2},
+            datasets={"PBMC": mudata_obj, "Lung": mudata_obj2},
         )
     """
-    # Validate organism
-    _check_organism(organism=organism)
-    # Validate grns: must be dict[str, dict[str, pd.DataFrame]]
+    # Validate grns: must be dict[str, dict[str, dict[str, pd.DataFrame]]]
     if not isinstance(grns, dict):
-        raise ValueError(f"grns must be dict[str, dict[str, DataFrame]], got {type(grns)}")
+        raise ValueError(f"grns must be dict[str, dict[str, dict[str, DataFrame]]], got {type(grns)}")
     for grn_name, grn_inner in grns.items():
         if not isinstance(grn_inner, dict):
             raise ValueError(
-                f"grns['{grn_name}'] must be a dict mapping dataset names to DataFrames, got {type(grn_inner)}"
+                f"grns['{grn_name}'] must be a dict mapping organism names to dicts, got {type(grn_inner)}"
             )
+        for org_key, org_inner in grn_inner.items():
+            if not isinstance(org_inner, dict):
+                raise ValueError(
+                    f"grns['{grn_name}']['{org_key}'] must be a dict mapping dataset names to DataFrames, "
+                    f"got {type(org_inner)}"
+                )
     grns_dict = grns
-    # Validate and normalize datasets
-    datasets_objects = None
-    if datasets is None or isinstance(datasets, list):
-        datasets_list = _check_datasets(organism=organism, datasets=datasets)
-    elif isinstance(datasets, dict):
-        datasets_list = list(datasets.keys())
-        datasets_objects = datasets
-    else:
+    # Extract and validate organisms from grns
+    organisms_in_grns = {org for inner in grns_dict.values() for org in inner}
+    if not organisms_in_grns:
+        raise ValueError("grns is empty or contains no organism keys. Provide at least one organism.")
+    if organism is not None:
+        _log(
+            f"'organism' parameter ('{organism}') is ignored when organisms are encoded in the grns dict. "
+            "Organisms are inferred from grns keys.",
+            level="warning",
+            verbose=verbose,
+        )
+    for org in organisms_in_grns:
+        _check_organism(organism=org)
+    # Validate datasets input type
+    if not (datasets is None or isinstance(datasets, (list, dict))):
         raise ValueError(f"datasets must be None, list, or dict, got {type(datasets)}")
-    # Validate metrics
-    _check_metrics(organism=organism, metrics=metrics)
-    # Run benchmark
-    n_pairs = sum(1 for inner in grns_dict.values() for ds in datasets_list if ds in inner)
+    datasets_objects = datasets if isinstance(datasets, dict) else None
+    # Count pairs for logging
+    n_pairs = sum(
+        1
+        for inner in grns_dict.values()
+        for org_inner in inner.values()
+        for ds in org_inner
+        if datasets is None or (isinstance(datasets, list) and ds in datasets) or (isinstance(datasets, dict) and ds in datasets)
+    )
     _log(_SEP, level="info", verbose=verbose)
     _log(
-        f"Starting benchmark: {len(grns_dict)} GRN(s), {len(datasets_list)} dataset(s), {n_pairs} pair(s)",
+        f"Starting benchmark: {len(grns_dict)} GRN(s), {len(organisms_in_grns)} organism(s), {n_pairs} pair(s)",
         level="info",
         verbose=verbose,
     )
@@ -151,48 +169,55 @@ def benchmark(
     t_start_bench = time.time()
     all_results = []
     for grn_name, grn_inner in grns_dict.items():
-        for dataset_name in datasets_list:
-            if dataset_name not in grn_inner:
-                continue  # skip silently
-            grn_df = grn_inner[dataset_name]
-            # Resolve dataset: string name or pre-loaded object
-            dataset_arg = datasets_objects[dataset_name] if datasets_objects else dataset_name
-            # Resolve terms before eval
-            if terms is None:
-                dataset_terms = _check_terms(organism=organism, dataset=dataset_name, terms=None)
+        for org, org_inner in grn_inner.items():
+            # Determine dataset list for this organism
+            if datasets is None:
+                ds_list = list(org_inner.keys())
             else:
-                dataset_terms = terms.get(dataset_name, {})
-            # Warn if no auto-loaded terms for pre-loaded datasets not in config
-            if terms is None and datasets_objects is not None and not dataset_terms:
-                _log(
-                    f"No terms auto-loaded for dataset '{dataset_name}' (not in config). "
-                    "Metrics requiring terms will run unfiltered.",
-                    level="warning",
+                ds_list = [d for d in (datasets if isinstance(datasets, list) else datasets.keys()) if d in org_inner]
+            # Validate metrics per organism
+            _check_metrics(organism=org, metrics=metrics)
+            for dataset_name in ds_list:
+                grn_df = org_inner[dataset_name]
+                # Resolve dataset: string name or pre-loaded object
+                dataset_arg = datasets_objects[dataset_name] if datasets_objects else dataset_name
+                # Resolve terms before eval (new 3-level structure)
+                if terms is None:
+                    dataset_terms = _check_terms(organism=org, dataset=dataset_name, terms=None)
+                else:
+                    dataset_terms = terms.get(org, {}).get(dataset_name, {})
+                # Warn if no auto-loaded terms for pre-loaded datasets not in config
+                if terms is None and datasets_objects is not None and not dataset_terms:
+                    _log(
+                        f"No terms auto-loaded for dataset '{dataset_name}' (not in config). "
+                        "Metrics requiring terms will run unfiltered.",
+                        level="warning",
+                        verbose=verbose,
+                    )
+                # Run evaluation
+                result = eval_grn_dataset(
+                    organism=org,
+                    grn=grn_df,
+                    dataset=dataset_arg,
+                    terms=dataset_terms,
+                    metrics=metrics,
+                    min_edges=min_edges,
+                    grn_name=grn_name,
+                    dataset_name=dataset_name,
                     verbose=verbose,
                 )
-            # Run evaluation
-            result = eval_grn_dataset(
-                organism=organism,
-                grn=grn_df,
-                dataset=dataset_arg,
-                terms=dataset_terms,
-                metrics=metrics,
-                min_edges=min_edges,
-                grn_name=grn_name,
-                dataset_name=dataset_name,
-                verbose=verbose,
-            )
-            # Add identifiers
-            if not result.empty:
-                result.insert(0, "grn", grn_name)
-                result.insert(1, "dataset", dataset_name)
-                all_results.append(result)
+                # Add identifiers
+                if not result.empty:
+                    result.insert(0, "grn", grn_name)
+                    result.insert(1, "organism", org)
+                    result.insert(2, "dataset", dataset_name)
+                    all_results.append(result)
     elapsed = time.time() - t_start_bench
     _log(_SEP, level="info", verbose=verbose)
     _log(f"Benchmark complete ({len(all_results)} result(s), {elapsed:.1f}s)", level="info", verbose=verbose)
     _log(_SEP, level="info", verbose=verbose)
     if not all_results:
-        return pd.DataFrame(columns=["grn", "dataset", "class", "task", "db", "precision", "recall", "f01"])
+        return pd.DataFrame(columns=["grn", "organism", "dataset", "class", "task", "db", "precision", "recall", "f01"])
     return pd.concat(all_results, ignore_index=True)
 
 

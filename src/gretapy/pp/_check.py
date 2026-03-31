@@ -261,6 +261,6 @@ def _check_terms(
         diff_terms = list(db_terms - og_db_terms)
         n_diff = len(diff_terms)
         assert n_diff == 0, (
-            f"{n_diff} terms do not exist in db={db}: {diff_terms[:5]} View available options: gretapy.show_terms()"
+            f"{n_diff} terms do not exist in organism={organism}, dataset={dataset}, db={db}:\n{diff_terms[:5]} View available options: gretapy.show_terms()"
         )
     return terms

@@ -112,11 +112,11 @@ DATA = {
             },
             # Mechanistic
             "KnockTF (scoring)": {
-                "fname": "hg38_prt_knocktf.h5ad",
+                "fname": "hg38_prt_knocktf.h5ad.gz",
                 "metric": "TF Scoring",
             },
             "KnockTF (forecasting)": {
-                "fname": "hg38_prt_knocktf.h5ad",
+                "fname": "hg38_prt_knocktf.h5ad.gz",
                 "metric": "Perturbation Forecasting",
             },
             "Boolean rules": {
@@ -2424,7 +2424,7 @@ DATA = {
                 "metric": None,
             },
             "DoRothEA": {
-                "fname": "hg38_gst_dorothea.csv.gz",
+                "fname": "mm10_gst_dorothea.csv.gz",
                 "metric": None,
             },
             # Literature
@@ -2446,19 +2446,19 @@ DATA = {
                 "metric": "TF Binding",
             },
             "ENCODE Blacklist": {
-                "fname": "hg38_cre_blacklist.bed.gz",
+                "fname": "mm10_cre_blacklist.bed.gz",
                 "metric": "CREs",
             },
             "ENCODE CREs": {
-                "fname": "hg38_cre_encode.bed.gz",
+                "fname": "mm10_cre_encode.bed.gz",
                 "metric": "CREs",
             },
             "phastCons": {
-                "fname": "hg38_cre_phastcons.bed.gz",
+                "fname": "mm10_cre_phastcons.bed.gz",
                 "metric": "CREs",
             },
             "Promoters": {
-                "fname": "hg38_cre_promoters.bed.gz",
+                "fname": "mm10_cre_promoters.bed.gz",
                 "metric": "CREs",
             },
             # Predictive
@@ -2488,11 +2488,11 @@ DATA = {
             },
             # Mechanistic
             "KnockTF (scoring)": {
-                "fname": "m10_prt_knocktf.h5ad.gz",
+                "fname": "mm10_prt_knocktf.h5ad.gz",
                 "metric": "TF Scoring",
             },
             "KnockTF (forecasting)": {
-                "fname": "m10_prt_knocktf.h5ad.gz",
+                "fname": "mm10_prt_knocktf.h5ad.gz",
                 "metric": "Perturbation Forecasting",
             },
             "Boolean rules": {

@@ -203,7 +203,7 @@ def _tfa(
     # Ensure uniqueness but keep score
     grn = grn.groupby(["source", "target"], as_index=False)["score"].mean()
     # Filter db
-    msk = (db.obs["source"].isin(adata.var_names)) & (db.obs["logFC"] < thr_pert_lfc)
+    msk = (db.obs["TF"].isin(adata.var_names)) & (db.obs["logFC"] < thr_pert_lfc)
     if cats is not None:
         msk = msk & db.obs["Tissue.Type"].isin(cats)
     db = db[msk, :].copy()
@@ -211,7 +211,7 @@ def _tfa(
     scores = []
     pvals = []
     for dataset in tqdm(db.obs.index, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
-        source = db.obs.loc[dataset, "source"]
+        source = db.obs.loc[dataset, "TF"]
         source_mat = db[[dataset], :].to_df()
         source_grn = grn[grn["source"] == source].rename(columns={"score": "weight"})
         if source_grn.shape[0] >= 3:
@@ -295,7 +295,7 @@ def _frc(
     g_universe = set(grn["source"]) | set(grn["target"])
     fdata = adata[:, adata.var_names.isin(g_universe)].copy()
     # Filter db
-    msk = (db.obs["source"].isin(adata.var_names)) & (db.obs["logFC"] < thr_pert_lfc)
+    msk = (db.obs["TF"].isin(adata.var_names)) & (db.obs["logFC"] < thr_pert_lfc)
     if cats is not None:
         msk = msk & db.obs["Tissue.Type"].isin(cats)
     g_universe = list(g_universe & set(db.var_names))
@@ -307,13 +307,13 @@ def _frc(
     # Generate seed gex profile
     profile = fdata.to_df().mean(0).to_frame().T
     # Count GRN source experiments for precision denominator
-    n_grn_tfs_in_prt = fdb.obs["source"].isin(grn_sources).sum()
+    n_grn_tfs_in_prt = fdb.obs["TF"].isin(grn_sources).sum()
     # Simulate perturbations per tf
     coefs = []
     pvals = []
     for dataset in tqdm(fdb.obs_names, disable=not verbose, bar_format="{l_bar}{bar:20}{r_bar}"):
         # Extract real lfc
-        tf = fdb.obs.loc[dataset, "source"]
+        tf = fdb.obs.loc[dataset, "TF"]
         if tf in valid_tfs:
             y = fdb[[dataset], :].to_df()
             y = y[y != 0].dropna(axis=1)
