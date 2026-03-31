@@ -20,7 +20,7 @@ DATA = {
                 "metric": None,
             },
             # Literature
-            "Human Protein Atlas (HPA)": {
+            "HPA": {
                 "fname": "hg38_tfm_hpa.tsv.gz",
                 "metric": "TF Markers",
             },
@@ -79,30 +79,30 @@ DATA = {
             },
             "eQTL Catalogue": {
                 "fname": "hg38_c2g_eqtlcatalogue.bed.gz",
-                "metric": "CRE to gene links",
+                "metric": "CRE to Gene",
             },
             # Predictive
             "Hallmarks": {
                 "fname": "hg38_gst_hall.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
             "KEGG": {
                 "fname": "hg38_gst_kegg.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
             "Reactome": {
                 "fname": "hg38_gst_reac.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
             "PROGENy": {
                 "fname": "hg38_gst_prog.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
-            "gene ~ TFs": {
+            "Gene ~ TFs": {
                 "fname": None,
                 "metric": "Omics",
             },
-            "gene ~ CREs": {
+            "Gene ~ CREs": {
                 "fname": None,
                 "metric": "Omics",
             },
@@ -121,7 +121,7 @@ DATA = {
             },
             "Boolean rules": {
                 "fname": None,
-                "metric": "Steady state simulation",
+                "metric": "Steady State Simulation",
             },
         },
         "dts": {
@@ -150,7 +150,7 @@ DATA = {
                         "Neuroblastoma cell",
                         "Brain carcinoma cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Astrocytes",
                         "Brain",
                         "Neurons",
@@ -367,7 +367,7 @@ DATA = {
                         "Macrophages cell",
                         "T cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Breast cancer",
                         "Breast glandular cells",
                         "Glandular & Luminal cells",
@@ -575,7 +575,7 @@ DATA = {
                         "Trophoblastic cell",
                         "Stem cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Placenta",
                         "Cytotrophoblasts",
                         "Syncytiotrophoblasts",
@@ -756,7 +756,7 @@ DATA = {
                         "Retinal cell",
                         "Cornea",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Retina",
                         "Retina & Testis",
                         "Photoreceptor cells",
@@ -897,7 +897,7 @@ DATA = {
                         "Fibroblast cell",
                         "Macrophage cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Kidney",
                         "Kidney & Intestine",
                         "Kidney cancer",
@@ -1057,7 +1057,7 @@ DATA = {
                         "B cell",
                         "Natural killer cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Alveolar cells",
                         "Respiratory epithelial cells",
                         "Ciliated cells",
@@ -1319,7 +1319,7 @@ DATA = {
                         "Endothelium",
                         "Fibroblast cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Cardiomyocytes",
                         "Heart muscle",
                         "Smooth muscle cells",
@@ -1517,7 +1517,7 @@ DATA = {
                         "Acute lymphoblastic leukemia cell",
                         "Chronic myeloid leukemia cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "B",
                         "T",
                         "NK",
@@ -1812,7 +1812,7 @@ DATA = {
                         "Macrophages cell",
                         "Gland cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Pituitary gland",
                         "Endocrine & Neural",
                         "Brain",
@@ -1974,7 +1974,7 @@ DATA = {
                         "Epidermis",
                         "Keratinocytes cell",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Fibroblasts",
                         "Connective tissue",
                         "Connective tissue cells",
@@ -2168,7 +2168,7 @@ DATA = {
                         "T cell",
                         "Immune",
                     ],
-                    "Human Protein Atlas (HPA)": [
+                    "HPA": [
                         "Skin",
                         "Skin cancer",
                         "Suprabasal keratinocytes",
@@ -2464,21 +2464,21 @@ DATA = {
             # Predictive
             "Hallmarks": {
                 "fname": "mm10_gst_hall.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
             "Reactome": {
                 "fname": "mm10_gst_reac.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
             "PROGENy": {
                 "fname": "mm10_gst_prog.csv.gz",
-                "metric": "Gene sets",
+                "metric": "Gene Sets",
             },
-            "gene ~ TFs": {
+            "Gene ~ TFs": {
                 "fname": None,
                 "metric": "Omics",
             },
-            "gene ~ CREs": {
+            "Gene ~ CREs": {
                 "fname": None,
                 "metric": "Omics",
             },
@@ -2497,7 +2497,7 @@ DATA = {
             },
             "Boolean rules": {
                 "fname": None,
-                "metric": "Steady state simulation",
+                "metric": "Steady State Simulation",
             },
         },
         "dts": {
@@ -2610,10 +2610,10 @@ METRIC_CATS = {
     "Reference GRN": "Literature",
     "TF Binding": "Genomic",
     "CREs": "Genomic",
-    "CRE to gene links": "Genomic",
-    "Gene sets": "Predictive",
+    "CRE to Gene": "Genomic",
+    "Gene Sets": "Predictive",
     "Omics": "Predictive",
     "TF Scoring": "Mechanistic",
     "Perturbation Forecasting": "Mechanistic",
-    "Steady state simulation": "Mechanistic",
+    "Steady State Simulation": "Mechanistic",
 }

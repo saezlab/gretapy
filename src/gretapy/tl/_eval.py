@@ -393,7 +393,7 @@ def _run_omics_metric(
     verbose: bool = True,
 ) -> tuple | None:
     """Run omics metric based on the specific type."""
-    if db_name == "gene ~ TFs":
+    if db_name == "Gene ~ TFs":
         return _omics(
             data=dataset,
             grn=grn,
@@ -403,7 +403,7 @@ def _run_omics_metric(
             mod_target="rna",
             verbose=verbose,
         )
-    elif db_name == "gene ~ CREs" and is_mudata and has_cre:
+    elif db_name == "Gene ~ CREs" and is_mudata and has_cre:
         return _omics(
             data=dataset,
             grn=grn,
@@ -423,7 +423,7 @@ def _run_omics_metric(
             mod_target="atac",
             verbose=verbose,
         )
-    elif db_name in {"gene ~ CREs", "CRE ~ TFs"}:
+    elif db_name in {"Gene ~ CREs", "CRE ~ TFs"}:
         _log(
             f"Skipping '{db_name}': requires MuData with ATAC and GRN with 'cre' column.",
             level="warning",
