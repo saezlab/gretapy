@@ -152,6 +152,9 @@ def _ora_overlap_fdr(features, pw_targets, n_bg=20000):
             _, pv = sts.fisher_exact([[a, b], [c, d]], alternative="greater")
             results.append([source, pv])
     df = pd.DataFrame(results, columns=["source", "pval"])
+    if df.empty:
+        df["padj"] = pd.Series(dtype=float)
+        return df
     df["padj"] = sts.false_discovery_control(df["pval"], method="bh")
     return df
 
