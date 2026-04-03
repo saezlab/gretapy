@@ -95,6 +95,9 @@ def show_terms(organism: str | None = None) -> pd.DataFrame:
         gt.show_terms(organism="hg38")
     """
     assert isinstance(organism, str) or organism is None
+    if organism:
+        organisms = show_organisms()
+        assert organism in organisms, f"organism={organism} not available ({organisms})"
     dfs = []
     for org in DATA:
         fname_terms = DATA[org]["terms"]
@@ -110,8 +113,6 @@ def show_terms(organism: str | None = None) -> pd.DataFrame:
         dfs.append(terms_df)
     df = pd.concat(dfs)
     if organism:
-        organisms = show_organisms()
-        assert organism in organisms, f"organism={organism} not available ({organisms})"
         df = df[df["organism"] == organism].drop(columns="organism")
     df = df.reset_index(drop=True)
     df["db_name"] = df["db_name"].str.replace("Human Protein Atlas (HPA)", "HPA", regex=False)
