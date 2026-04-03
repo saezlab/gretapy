@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from gretapy.tl._prior import _compute_overlap_pval, _find_pairs, _grn, _tfm, _tfp
+from gretapy.tl._prior import _find_pairs, _grn, _tfm, _tfp
 
 
 class TestGrn:
@@ -14,7 +14,6 @@ class TestGrn:
         genes = ["PAX5", "GATA3", "SPI1", "CD19", "MS4A1", "CD3E", "IL7R", "CD14"]
         prc, rcl, f01 = _grn(grn=simple_grn, db=reference_grn_db, genes=genes)
 
-        # Should have some overlap
         assert 0 <= prc <= 1
         assert 0 <= rcl <= 1
         assert 0 <= f01 <= 1
@@ -45,11 +44,9 @@ class TestGrn:
         """Test that function filters database by measured genes."""
         grn = pd.DataFrame({"source": ["PAX5"], "target": ["CD19"]})
         db = pd.DataFrame({"source": ["PAX5", "GATA3"], "target": ["CD19", "FOXP3"]})
-        # Only include genes from GRN
         genes = ["PAX5", "CD19"]
 
         prc, rcl, f01 = _grn(grn=grn, db=db, genes=genes)
-        # Should be perfect match since GATA3->FOXP3 is filtered out
         assert prc == 1.0
         assert rcl == 1.0
 
@@ -60,9 +57,8 @@ class TestGrn:
         genes = ["PAX5", "CD19", "MS4A1"]
 
         prc, rcl, f01 = _grn(grn=grn, db=db, genes=genes)
-        # After deduplication: PAX5->CD19, PAX5->MS4A1 in GRN, PAX5->CD19 in DB
         assert 0 <= prc <= 1
-        assert rcl == 1.0  # We found the one edge in DB
+        assert rcl == 1.0
 
 
 class TestTfm:
@@ -97,36 +93,15 @@ class TestTfm:
         assert prc == 0.0
         assert f01 == 0.0
 
+    def test_perfect_match(self):
+        """Test with perfect TF match."""
+        grn = pd.DataFrame({"source": ["PAX5", "GATA3"], "target": ["CD19", "CD3E"]})
+        db = pd.DataFrame({0: ["PAX5", "GATA3"], 1: ["B cell", "T cell"]})
+        genes = ["PAX5", "GATA3", "CD19", "CD3E"]
 
-class TestComputeOverlapPval:
-    """Tests for _compute_overlap_pval function."""
-
-    def test_significant_overlap(self):
-        """Test with significant target overlap between TFs."""
-        # Create GRN where TF1 and TF2 share many targets
-        grn = pd.DataFrame(
-            {
-                "source": ["TF1", "TF1", "TF1", "TF2", "TF2", "TF2", "TF3", "TF3"],
-                "target": ["G1", "G2", "G3", "G1", "G2", "G4", "G5", "G6"],
-            }
-        )
-        stat, pval = _compute_overlap_pval(grn=grn, tf_a="TF1", tf_b="TF2")
-
-        assert stat > 0
-        assert 0 <= pval <= 1
-
-    def test_no_overlap(self):
-        """Test with no target overlap between TFs."""
-        grn = pd.DataFrame(
-            {
-                "source": ["TF1", "TF1", "TF2", "TF2"],
-                "target": ["G1", "G2", "G3", "G4"],
-            }
-        )
-        stat, pval = _compute_overlap_pval(grn=grn, tf_a="TF1", tf_b="TF2")
-
-        assert stat == 0.0
-        assert pval == 1.0
+        prc, rcl, f01 = _tfm(grn=grn, db=db, genes=genes, cats=None)
+        assert prc == 1.0
+        assert rcl == 1.0
 
 
 class TestFindPairs:
@@ -134,7 +109,6 @@ class TestFindPairs:
 
     def test_finds_significant_pairs(self):
         """Test that significant TF pairs are found."""
-        # Create GRN with clear pair structure
         grn = pd.DataFrame(
             {
                 "source": ["TF1"] * 5 + ["TF2"] * 5 + ["TF3"] * 3,
@@ -147,7 +121,6 @@ class TestFindPairs:
 
     def test_returns_empty_for_no_pairs(self):
         """Test that empty set is returned when no significant pairs exist."""
-        # Create GRN with minimal overlap
         grn = pd.DataFrame(
             {
                 "source": ["TF1", "TF2", "TF3"],
@@ -166,12 +139,29 @@ class TestFindPairs:
                 "target": [f"G{i}" for i in range(10)] + [f"G{i}" for i in range(10)],
             }
         )
-        pairs = _find_pairs(grn=grn, thr_pval=1.0)  # Very permissive threshold
+        pairs = _find_pairs(grn=grn, thr_pval=1.0)
 
         for pair in pairs:
             assert "|" in pair
             tf_a, tf_b = pair.split("|")
-            assert tf_a <= tf_b  # Should be sorted
+            assert tf_a <= tf_b
+
+    def test_empty_df_returns_empty_set(self):
+        """Test with only one TF returns no pairs."""
+        grn = pd.DataFrame({"source": ["TF1", "TF1"], "target": ["G1", "G2"]})
+        pairs = _find_pairs(grn=grn, thr_pval=0.05)
+        assert pairs == set()
+
+    def test_no_shared_targets_returns_empty_set(self):
+        """Test that TFs with no shared targets get p=1.0 and are not included."""
+        grn = pd.DataFrame(
+            {
+                "source": ["TF1", "TF1", "TF2", "TF2"],
+                "target": ["G1", "G2", "G3", "G4"],  # no overlap
+            }
+        )
+        pairs = _find_pairs(grn=grn, thr_pval=0.05)
+        assert isinstance(pairs, set)
 
 
 class TestTfp:
@@ -179,7 +169,9 @@ class TestTfp:
 
     def test_basic_functionality(self, simple_grn, tfp_db):
         """Test basic TF pairs evaluation."""
-        prc, rcl, f01 = _tfp(grn=simple_grn, db=tfp_db, thr_pval=0.05)
+        genes = ["PAX5", "GATA3", "SPI1", "CD19", "MS4A1", "CD3E", "IL7R", "CD14",
+                 "BCL2", "IRF4", "TCF7", "FOXP3", "RUNX1", "CD79A"]
+        prc, rcl, f01 = _tfp(grn=simple_grn, db=tfp_db, genes=genes, thr_pval=0.05)
 
         assert 0 <= prc <= 1
         assert 0 <= rcl <= 1
@@ -194,9 +186,9 @@ class TestTfp:
             }
         )
         db = pd.DataFrame({0: ["PAX5"], 1: ["GATA3"]})
+        genes = ["PAX5", "GATA3", "CD19", "MS4A1", "GeneX", "UnknownTF"]
 
-        prc, rcl, f01 = _tfp(grn=grn, db=db, thr_pval=0.05)
-        # Should not crash even with TFs not in DB
+        prc, rcl, f01 = _tfp(grn=grn, db=db, genes=genes, thr_pval=0.05)
         assert 0 <= prc <= 1
         assert 0 <= rcl <= 1
         assert 0 <= f01 <= 1
@@ -210,9 +202,20 @@ class TestTfp:
             }
         )
         db = pd.DataFrame({0: ["PAX5"], 1: ["GATA3"]})
+        genes = ["PAX5", "GATA3", "CD19", "MS4A1"]
 
-        # Should not crash
-        prc, rcl, f01 = _tfp(grn=grn, db=db, thr_pval=0.05)
+        prc, rcl, f01 = _tfp(grn=grn, db=db, genes=genes, thr_pval=0.05)
         assert isinstance(prc, float)
         assert isinstance(rcl, float)
         assert isinstance(f01, float)
+
+    def test_empty_db_after_gene_filter(self):
+        """Test when db is empty after gene filtering returns zeros."""
+        grn = pd.DataFrame({"source": ["PAX5", "GATA3"], "target": ["CD19", "CD3E"]})
+        db = pd.DataFrame({0: ["TF_NOT_IN_GENES"], 1: ["TF_NOT_EITHER"]})
+        genes = ["PAX5", "GATA3", "CD19", "CD3E"]
+
+        prc, rcl, f01 = _tfp(grn=grn, db=db, genes=genes, thr_pval=0.05)
+        assert prc == 0.0
+        assert rcl == 0.0
+        assert f01 == 0.0

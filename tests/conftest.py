@@ -48,7 +48,9 @@ def simple_grn(toy_data):
 @pytest.fixture
 def adata(mudata_with_celltype):
     """Basic AnnData object extracted from MuData RNA modality."""
-    return mudata_with_celltype.mod["rna"].copy()
+    rna = mudata_with_celltype.mod["rna"].copy()
+    rna.obs["celltype"] = mudata_with_celltype.obs["celltype"].values
+    return rna
 
 
 @pytest.fixture
@@ -251,7 +253,7 @@ def knocktf_db():
     adata = ad.AnnData(X=X)
     adata.var_names = all_genes
     adata.obs_names = exp_names
-    adata.obs["source"] = ["PAX5", "GATA3", "PAX5", "SPI1", "GATA3"]
+    adata.obs["TF"] = ["PAX5", "GATA3", "PAX5", "SPI1", "GATA3"]
     adata.obs["logFC"] = [-1.0, -0.8, -1.2, -0.6, -0.9]
     adata.obs["Tissue.Type"] = ["Blood", "Blood", "Brain", "Blood", "Brain"]
 

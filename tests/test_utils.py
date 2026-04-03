@@ -1,6 +1,9 @@
 """Tests for gretapy._utils module (shared utility functions)."""
 
+from unittest.mock import MagicMock, mock_open, patch
+
 import pandas as pd
+import pyranges as pr
 import pytest
 
 import gretapy as gt
@@ -44,10 +47,28 @@ class TestShowDatasets:
 class TestShowTerms:
     """Tests for show_terms function."""
 
-    def test_returns_dataframe(self):
-        """Test that show_terms returns a DataFrame."""
+    @patch("gretapy._utils.os.path.isfile", return_value=True)
+    @patch("gretapy._utils.pd.read_csv")
+    def test_returns_dataframe(self, mock_read_csv, mock_isfile):
+        """Test that show_terms returns a DataFrame (file already cached)."""
+        # Use side_effect so each call returns a fresh DataFrame (avoids "organism already exists")
+        mock_read_csv.side_effect = lambda *a, **kw: pd.DataFrame({"db_name": ["HPA"], "term": ["B cell"]})
         result = gt.show_terms(organism="hg38")
         assert isinstance(result, pd.DataFrame)
+
+    @patch("gretapy._utils.pd.read_csv")
+    @patch("gretapy._utils.shutil.copyfileobj")
+    @patch("gretapy._utils._download")
+    @patch("gretapy._utils.os.path.isfile", return_value=False)
+    def test_downloads_when_file_missing(self, mock_isfile, mock_download, mock_copy, mock_read_csv):
+        """Test that show_terms downloads when file is not cached."""
+        mock_data = MagicMock()
+        mock_download.return_value = mock_data
+        mock_read_csv.side_effect = lambda *a, **kw: pd.DataFrame({"db_name": ["HPA"], "term": ["B cell"]})
+        with patch("builtins.open", mock_open()):
+            result = gt.show_terms(organism="hg38")
+        assert isinstance(result, pd.DataFrame)
+        assert mock_download.called
 
     def test_invalid_organism_raises(self):
         """Test that invalid organism raises assertion error."""
@@ -58,12 +79,27 @@ class TestShowTerms:
 class TestShowGenomeAnnotation:
     """Tests for show_genome_annotation function."""
 
-    def test_returns_pyranges(self):
-        """Test that show_genome_annotation returns a PyRanges object."""
-        import pyranges as pr
-
+    @patch("gretapy._utils.os.path.isfile", return_value=True)
+    @patch("gretapy._utils.pr.read_bed")
+    def test_returns_pyranges(self, mock_read_bed, mock_isfile):
+        """Test that show_genome_annotation returns a PyRanges object (file cached)."""
+        mock_read_bed.return_value = pr.PyRanges()
         result = gt.show_genome_annotation(organism="hg38")
         assert isinstance(result, pr.PyRanges)
+
+    @patch("gretapy._utils.pr.read_bed")
+    @patch("gretapy._utils.shutil.copyfileobj")
+    @patch("gretapy._utils._download")
+    @patch("gretapy._utils.os.path.isfile", return_value=False)
+    def test_downloads_when_file_missing(self, mock_isfile, mock_download, mock_copy, mock_read_bed):
+        """Test that show_genome_annotation downloads when file is not cached."""
+        mock_data = MagicMock()
+        mock_download.return_value = mock_data
+        mock_read_bed.return_value = pr.PyRanges()
+        with patch("builtins.open", mock_open()):
+            result = gt.show_genome_annotation(organism="hg38")
+        assert isinstance(result, pr.PyRanges)
+        assert mock_download.called
 
     def test_invalid_organism_raises(self):
         """Test that invalid organism raises assertion error."""
@@ -109,5 +145,5 @@ class TestShowMetrics:
         """Test that result contains expected metric categories."""
         result = gt.show_metrics()
         categories = result["category"].unique()
-        expected_categories = {"Prior Knowledge", "Genomic", "Predictive", "Mechanistic"}
+        expected_categories = {"Literature", "Genomic", "Predictive", "Mechanistic"}
         assert expected_categories.issubset(set(categories))

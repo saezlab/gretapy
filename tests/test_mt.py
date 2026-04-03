@@ -308,16 +308,16 @@ class TestLitGrn:
 
     @patch("gretapy.mt._lit_grn.read_db")
     def test_dorothea_string_input(self, mock_read_db, mudata_for_mt, mock_collectri_grn, mock_promoters_db):
-        """Test that DoRoTHeA string input works."""
+        """Test that DoRothEA string input works."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_collectri_grn if db_name == "DoRoTHeA" else mock_promoters_db
+            mock_collectri_grn if db_name == "DoRothEA" else mock_promoters_db
         )
 
-        result = lit_grn(mdata=mudata_for_mt, grn="DoRoTHeA", organism="hg38", min_targets=1)
+        result = lit_grn(mdata=mudata_for_mt, grn="DoRothEA", organism="hg38", min_targets=1)
 
         assert isinstance(result, pd.DataFrame)
-        # Verify read_db was called with DoRoTHeA
-        mock_read_db.assert_any_call(organism="hg38", db_name="DoRoTHeA", verbose=False)
+        # Verify read_db was called with DoRothEA
+        mock_read_db.assert_any_call(organism="hg38", db_name="DoRothEA", verbose=False)
 
     @patch("gretapy.mt._lit_grn.read_db")
     def test_custom_dataframe_input(self, mock_read_db, mudata_for_mt, mock_promoters_db):
@@ -495,6 +495,26 @@ class TestCorrelation:
         if len(result) > 0:
             assert "NONEXISTENT_TF" not in result["source"].values
 
+    @patch("gretapy.mt._correlation.read_db")
+    def test_tfs_none_loads_lambert_tfs(self, mock_read_db, mudata_for_mt, mock_promoters_db, mock_lambert_tfs):
+        """Test that tfs=None triggers Lambert TFs download (lines 58-59)."""
+        # First call returns Lambert TFs list, second returns Promoters db
+        mock_read_db.side_effect = lambda **kw: (
+            mock_lambert_tfs if kw.get("db_name") == "Lambert TFs" else mock_promoters_db
+        )
+
+        result = correlation(
+            mdata=mudata_for_mt,
+            tfs=None,  # triggers read_db for Lambert TFs
+            organism="hg38",
+            thr_r=0.0,
+            min_targets=1,
+        )
+
+        assert isinstance(result, pd.DataFrame)
+        # Verify Lambert TFs was loaded (no verbose arg in call)
+        mock_read_db.assert_any_call(organism="hg38", db_name="Lambert TFs")
+
 
 # ============================================================================
 # random function tests
@@ -633,33 +653,15 @@ class TestRandom:
             assert all(result["score"] == 1.0)
 
     @patch("gretapy.mt._random.read_db")
-    def test_empty_result_when_no_overlaps(self, mock_read_db):
-        """Test that empty DataFrame is returned when no peak-gene overlaps."""
-        # Create MuData with peaks on different chromosomes than promoters
-        rna = ad.AnnData(X=np.random.rand(10, 5))
-        rna.var_names = ["GENE1", "GENE2", "GENE3", "GENE4", "GENE5"]
-        atac = ad.AnnData(X=np.random.rand(10, 3))
-        atac.var_names = ["chr99-100-200", "chr99-300-400", "chr99-500-600"]
-        mdata = mu.MuData({"rna": rna, "atac": atac})
-
-        # Mock promoters on chr1
-        mock_promoters = pr.PyRanges(
-            pd.DataFrame(
-                {
-                    "Chromosome": ["chr1"] * 5,
-                    "Start": [1000, 2000, 3000, 4000, 5000],
-                    "End": [1500, 2500, 3500, 4500, 5500],
-                    "Name": ["GENE1", "GENE2", "GENE3", "GENE4", "GENE5"],
-                }
-            )
-        )
-        mock_tfs = ["GENE1", "GENE2"]
-
+    def test_empty_result_when_min_targets_too_high(
+        self, mock_read_db, mudata_for_mt, mock_lambert_tfs, mock_promoters_db
+    ):
+        """Test that empty DataFrame with correct columns is returned when min_targets is too high."""
         mock_read_db.side_effect = lambda organism, db_name, verbose: (
-            mock_tfs if db_name == "Lambert TFs" else mock_promoters
+            mock_lambert_tfs if db_name == "Lambert TFs" else mock_promoters_db
         )
 
-        result = random(mdata=mdata, organism="hg38", min_targets=1, seed=42)
+        result = random(mdata=mudata_for_mt, organism="hg38", min_targets=100000, seed=42)
 
         assert isinstance(result, pd.DataFrame)
         assert len(result) == 0

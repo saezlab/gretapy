@@ -24,7 +24,7 @@ class TestGrnToPr:
         result = _grn_to_pr(grn=simple_grn, column="source")
 
         assert "Name" in result.df.columns
-        assert set(result.df["Name"]) == {"PAX5", "GATA3", "SPI1"}
+        assert set(result.df["Name"]) == {"PAX5", "EBF1", "GATA3", "TCF7", "SPI1", "CEBPA"}
 
     def test_empty_grn(self):
         """Test with empty GRN returns None."""

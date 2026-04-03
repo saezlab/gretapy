@@ -647,3 +647,174 @@ class TestLinks:
 
         assert isinstance(result, plt.Figure)
         plt.close(result)
+
+    def test_sample_col_triggers_pseudobulk_aggregation(self, grn_single, gannot_pyranges):
+        """Test that sample_col in mdata.obs triggers pseudobulk aggregation (lines 288-291)."""
+        import anndata as ad
+        import mudata as mu
+
+        np.random.seed(42)
+        n_cells = 12
+
+        rna_X = np.abs(np.random.rand(n_cells, 3)).astype(np.float32)
+        rna = ad.AnnData(X=rna_X)
+        rna.var_names = ["GENE_A", "GENE_B", "GENE_C"]
+        rna.obs_names = [f"Cell{i}" for i in range(n_cells)]
+
+        atac_X = np.abs(np.random.rand(n_cells, 5)).astype(np.float32)
+        atac = ad.AnnData(X=atac_X)
+        atac.var_names = [
+            "chr1-950000-960000",
+            "chr1-1020000-1030000",
+            "chr1-1100000-1110000",
+            "chr1-1180000-1190000",
+            "chr1-1350000-1360000",
+        ]
+        atac.obs_names = [f"Cell{i}" for i in range(n_cells)]
+
+        mdata = mu.MuData({"rna": rna, "atac": atac})
+        # Add celltype column to mdata.obs so sample_col is in mdata.obs.columns
+        celltypes = ["CellType_A"] * 4 + ["CellType_B"] * 4 + ["CellType_C"] * 4
+        mdata.obs["celltype"] = celltypes
+
+        result = links(
+            mdata,
+            grn_single,
+            target="GENE_A",
+            tfs=["TF1"],
+            gannot=gannot_pyranges,
+            w_size=500000,
+            sample_col="celltype",
+            return_fig=True,
+        )
+
+        assert isinstance(result, plt.Figure)
+        plt.close(result)
+
+    def test_gannot_as_string_loads_annotation(self, mdata_pseudobulk, grn_single):
+        """Test that gannot as string triggers show_genome_annotation call (line 295)."""
+        from unittest.mock import patch
+
+        mock_gannot = pr.PyRanges(
+            pd.DataFrame(
+                {
+                    "Chromosome": ["chr1", "chr1", "chr1"],
+                    "Start": [1000000, 1200000, 1400000],
+                    "End": [1050000, 1250000, 1450000],
+                    "Name": ["GENE_A", "GENE_B", "GENE_C"],
+                    "Score": [0, 0, 0],
+                    "Strand": ["+", "-", "+"],
+                }
+            )
+        )
+
+        with patch("gretapy.pl._links.gt.show_genome_annotation", return_value=mock_gannot) as mock_show:
+            result = links(
+                mdata_pseudobulk,
+                grn_single,
+                target="GENE_A",
+                tfs=["TF1"],
+                gannot="hg38",  # string triggers show_genome_annotation
+                w_size=500000,
+                return_fig=True,
+            )
+
+        mock_show.assert_called_once_with(organism="hg38")
+        assert isinstance(result, plt.Figure)
+        plt.close(result)
+
+    def test_plot_links_with_empty_grn_for_one_grn(self, mdata_pseudobulk, gannot_pyranges):
+        """Test _plot_links when one GRN has no TF1 links (line 80 - is_empty append True).
+
+        Both GRNs must have links to the target (so they appear in links_df),
+        but one GRN has no TF1 links → empty when filtered by TF in _plot_links.
+        """
+        # GRN1: TF1 links to GENE_A (appears in links_df for target=GENE_A)
+        grn_with_tf1 = pd.DataFrame(
+            {
+                "source": ["TF1"],
+                "target": ["GENE_A"],
+                "cre": ["chr1-1020000-1030000"],
+                "score": [0.9],
+            }
+        )
+        # GRN2: Only TF2 links to GENE_A (no TF1 links, but appears in links_df)
+        grn_tf2_only = pd.DataFrame(
+            {
+                "source": ["TF2"],
+                "target": ["GENE_A"],
+                "cre": ["chr1-1100000-1110000"],
+                "score": [0.5],
+            }
+        )
+        # Plot with TF1 only: GRN2 (grn_tf2_only) has no TF1 links → is_empty.append(True)
+        grn_dict_mixed = {"GRN_With_TF1": grn_with_tf1, "GRN_TF2_Only": grn_tf2_only}
+
+        result = links(
+            mdata_pseudobulk,
+            grn_dict_mixed,
+            target="GENE_A",
+            tfs=["TF1"],
+            gannot=gannot_pyranges,
+            w_size=500000,
+            return_fig=True,
+        )
+
+        assert isinstance(result, plt.Figure)
+        plt.close(result)
+
+    def test_plot_links_cre_overlapping_tss(self, mdata_pseudobulk, gannot_pyranges):
+        """Test arc computation when CRE overlaps TSS (lines 95-97: cre_start < tss < cre_end)."""
+        # GENE_A is + strand, TSS at 1000000
+        # CRE that overlaps TSS: start < 1000000 < end
+        grn_overlapping = pd.DataFrame(
+            {
+                "source": ["TF1"],
+                "target": ["GENE_A"],
+                "cre": ["chr1-990000-1010000"],  # overlaps TSS at 1000000
+                "score": [0.8],
+            }
+        )
+
+        result = links(
+            mdata_pseudobulk,
+            grn_overlapping,
+            target="GENE_A",
+            tfs=["TF1"],
+            gannot=gannot_pyranges,
+            w_size=500000,
+            return_fig=True,
+        )
+
+        assert isinstance(result, plt.Figure)
+        plt.close(result)
+
+    def test_plot_links_minus_strand_cre_positions(self, mdata_pseudobulk, gannot_pyranges):
+        """Test arc computation for minus-strand gene (lines 99-107)."""
+        # GENE_B is - strand, TSS at End=1250000
+        # Test different CRE positions relative to TSS
+        grn_minus = pd.DataFrame(
+            {
+                "source": ["TF1", "TF1", "TF1"],
+                "target": ["GENE_B", "GENE_B", "GENE_B"],
+                "cre": [
+                    "chr1-1100000-1200000",   # cre_end < tss (1250000)
+                    "chr1-1300000-1400000",   # cre_start > tss (1250000)
+                    "chr1-1200000-1300000",   # cre_start < tss < cre_end
+                ],
+                "score": [0.9, 0.8, 0.7],
+            }
+        )
+
+        result = links(
+            mdata_pseudobulk,
+            grn_minus,
+            target="GENE_B",
+            tfs=["TF1"],
+            gannot=gannot_pyranges,
+            w_size=500000,
+            return_fig=True,
+        )
+
+        assert isinstance(result, plt.Figure)
+        plt.close(result)
