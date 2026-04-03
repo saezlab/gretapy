@@ -257,6 +257,15 @@ class TestHeatmap:
         assert isinstance(result, plt.Figure)
         plt.close(result)
 
+    def test_save_writes_file(self, ocoeff_df, tmp_path):
+        """Test that save parameter writes a file."""
+        out = tmp_path / "heatmap.png"
+        result = heatmap(ocoeff_df, save=str(out))
+
+        assert result is None
+        assert out.exists()
+        plt.close("all")
+
 
 # ============================================================================
 # Fixtures for links tests
@@ -788,6 +797,23 @@ class TestLinks:
 
         assert isinstance(result, plt.Figure)
         plt.close(result)
+
+    def test_save_writes_file(self, mdata_pseudobulk, grn_single, gannot_pyranges, tmp_path):
+        """Test that save parameter writes a file."""
+        out = tmp_path / "links.png"
+        result = links(
+            mdata_pseudobulk,
+            grn_single,
+            target="GENE_A",
+            tfs=["TF1"],
+            gannot=gannot_pyranges,
+            w_size=500000,
+            save=str(out),
+        )
+
+        assert result is None
+        assert out.exists()
+        plt.close("all")
 
     def test_plot_links_minus_strand_cre_positions(self, mdata_pseudobulk, gannot_pyranges):
         """Test arc computation for minus-strand gene (lines 99-107)."""

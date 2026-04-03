@@ -3,6 +3,7 @@ import textwrap
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from decoupler._Plotter import Plotter
 from matplotlib.gridspec import GridSpec
 from scipy.stats import rankdata
 
@@ -33,12 +34,9 @@ PALETTE = {
 CLASS_ORDER = ["Predictive", "Genomic", "Literature", "Mechanistic"]
 
 
-EXCLUDE_DATASETS = {"Synthetic Pituitary", "Unpaired Pituitary"}
-
-
 def _compute_aggregations(df):
     """Compute hierarchical mean F0.1 at class and overall level."""
-    s = df.groupby(["name", "class", "task", "db", "dts"])["f01"].mean()
+    s = df.groupby(["name", "class", "task", "db", "dataset"])["f01"].mean()
     s = s.groupby(["name", "class", "task", "db"]).mean()
     s = s.groupby(["name", "class", "task"]).mean()
     class_mean = s.groupby(["name", "class"]).mean().unstack()
@@ -338,8 +336,7 @@ def ranking(
     df,
     level="class",
     palette=None,
-    figsize=None,
-    return_fig=False,
+    **kwargs,
 ):
     """
     Plot a ranking figure with a barplot of mean F0.1 and a heatmap of rankings.
@@ -347,16 +344,16 @@ def ranking(
     Parameters
     ----------
     df : pd.DataFrame
-        Metrics dataframe with columns: class, task, db, dts, name, f01.
+        Metrics dataframe with columns: class, task, db, dataset, name, f01.
     level : str
         ``'class'`` for summary heatmap at class level (Predictive, Genomic, etc.),
         ``'task'`` for the fine-grained (db, task) heatmap with hierarchical headers.
     palette : dict or None
         Method name -> color mapping. Uses default palette if None.
-    figsize : tuple or None
-        Figure size. Auto-computed if None.
-    return_fig : bool
-        If True, return the figure instead of calling plt.show().
+    **kwargs
+        Additional arguments passed to ``decoupler.Plotter`` (e.g. ``figsize``,
+        ``dpi``, ``return_fig``, ``save``). ``figsize`` defaults to auto-computed
+        based on data dimensions. ``dpi`` defaults to ``100``.
 
     Returns
     -------
@@ -365,23 +362,31 @@ def ranking(
     if palette is None:
         palette = PALETTE
 
-    # Filter excluded datasets
-    if "dts" in df.columns:
-        df = df[~df["dts"].isin(EXCLUDE_DATASETS)].copy()
-
     # Compute overall mean and class-level aggregation (needed for method ordering)
     overall_mean, class_mean = _compute_aggregations(df)
     method_order = overall_mean.sort_values(ascending=False).index.tolist()
     overall_mean = overall_mean.loc[method_order]
     n_methods = len(method_order)
 
+    # Extract user-provided figsize before Plotter (sub-functions auto-calc when None)
+    user_figsize = kwargs.get("figsize", None)
+    kwargs.setdefault("figsize", (4, 3))
+    kwargs.setdefault("dpi", 100)
+    kwargs["ax"] = None
+    bp = Plotter(**kwargs)
+    bp.fig.delaxes(bp.ax)
+    plt.close(bp.fig)
+
     if level == "class":
-        fig = _ranking_class(df, overall_mean, class_mean, method_order, n_methods, palette, figsize)
+        fig = _ranking_class(df, overall_mean, class_mean, method_order, n_methods, palette, user_figsize)
     elif level == "task":
-        fig = _ranking_task(df, method_order, n_methods, figsize)
+        fig = _ranking_task(df, method_order, n_methods, user_figsize)
     else:
         raise ValueError(f"level must be 'class' or 'task', got '{level}'")
 
-    if return_fig:
-        return fig
-    plt.show()
+    bp.fig = fig
+    if user_figsize is not None:
+        bp.fig.set_figwidth(bp.figsize[0])
+        bp.fig.set_figheight(bp.figsize[1])
+    bp.fig.set_dpi(bp.dpi)
+    return bp._return()

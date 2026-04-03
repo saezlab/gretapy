@@ -3,6 +3,7 @@ import marsilea.plotter as mp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from decoupler._Plotter import Plotter
 
 
 def _make_sim_mat(df: pd.DataFrame, col: str) -> pd.DataFrame:
@@ -24,7 +25,7 @@ def heatmap(
     vmax: float = 1,
     width: float = 2,
     height: float = 2,
-    return_fig: bool = False,
+    **kwargs,
 ) -> plt.Figure | None:
     """
     Plot overlap coefficient heatmap.
@@ -46,16 +47,17 @@ def heatmap(
     vmax
         Maximum value for colormap. Default is 1.
     width
-        Width of the heatmap. Default is 2.
+        Width of the heatmap in marsilea units. Default is 2.
     height
-        Height of the heatmap. Default is 2.
-    return_fig
-        Whether to return the figure. Default is False.
+        Height of the heatmap in marsilea units. Default is 2.
+    **kwargs
+        Additional arguments passed to ``decoupler.Plotter`` (e.g. ``figsize``,
+        ``dpi``, ``return_fig``, ``save``).
 
     Returns
     -------
     plt.Figure or None
-        Figure if return_fig is True.
+        Figure if ``return_fig=True``.
     """
     if level not in {"source", "cre", "target", "edge"}:
         raise ValueError(f'level must be "source", "cre", "target", or "edge", got {level}')
@@ -70,6 +72,11 @@ def heatmap(
     if title is None:
         title = level.capitalize()
 
+    kwargs["ax"] = None
+    bp = Plotter(**kwargs)
+    bp.fig.delaxes(bp.ax)
+    plt.close(bp.fig)
+
     h = ma.Heatmap(mat, cmap=cmap, width=width, height=height, label="Overlap\nCoefficient", vmin=vmin, vmax=vmax)
     h.add_bottom(mp.Labels(mat.columns))
     h.add_left(mp.Labels(mat.index))
@@ -77,7 +84,8 @@ def heatmap(
     h.add_legends()
     h.render()
 
-    if return_fig:
-        fig = h.figure
-        plt.close()
-        return fig
+    bp.fig = h.figure
+    bp.fig.set_figwidth(bp.figsize[0])
+    bp.fig.set_figheight(bp.figsize[1])
+    bp.fig.set_dpi(bp.dpi)
+    return bp._return()

@@ -33,25 +33,25 @@ def sample_ranking_df():
     methods = ["MethodA", "MethodB", "MethodC"]
     rows = [
         # Literature - 2 different tasks (triggers line 83 in _build_task_list)
-        {"name": m, "class": "Literature", "task": "TF Markers", "db": "HPA", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Literature", "task": "TF Markers", "db": "HPA", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ] + [
-        {"name": m, "class": "Literature", "task": "TF Pairs", "db": "Europe PMC", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Literature", "task": "TF Pairs", "db": "Europe PMC", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ] + [
         # Genomic - 2 different tasks (triggers line 259 in _ranking_task span update)
-        {"name": m, "class": "Genomic", "task": "TF Binding", "db": "ChIP-Atlas", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Genomic", "task": "TF Binding", "db": "ChIP-Atlas", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ] + [
-        {"name": m, "class": "Genomic", "task": "CREs", "db": "ENCODE CREs", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Genomic", "task": "CREs", "db": "ENCODE CREs", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ] + [
         # Predictive
-        {"name": m, "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ] + [
         # Mechanistic
-        {"name": m, "class": "Mechanistic", "task": "TF Scoring", "db": "KnockTF", "dts": "DatasetX", "f01": np.random.uniform(0, 1)}
+        {"name": m, "class": "Mechanistic", "task": "TF Scoring", "db": "KnockTF", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
         for m in methods
     ]
     return pd.DataFrame(rows)
@@ -63,10 +63,10 @@ def sample_ranking_df_with_nan():
     methods = ["MethodA", "MethodB"]
     rows = [
         # MethodA has both Predictive and Literature data
-        {"name": "MethodA", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dts": "DatasetX", "f01": 0.5},
-        {"name": "MethodA", "class": "Literature", "task": "TF Markers", "db": "HPA", "dts": "DatasetX", "f01": 0.6},
+        {"name": "MethodA", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": 0.5},
+        {"name": "MethodA", "class": "Literature", "task": "TF Markers", "db": "HPA", "dataset": "DatasetX", "f01": 0.6},
         # MethodB only has Predictive data → NaN for Literature class
-        {"name": "MethodB", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dts": "DatasetX", "f01": 0.4},
+        {"name": "MethodB", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": 0.4},
     ]
     return pd.DataFrame(rows)
 
@@ -381,3 +381,12 @@ class TestRanking:
         fig = ranking(sample_ranking_df, level="task", return_fig=True)
         assert isinstance(fig, plt.Figure)
         plt.close(fig)
+
+    def test_save_writes_file(self, sample_ranking_df, tmp_path):
+        """Test that save parameter writes a file."""
+        out = tmp_path / "ranking.png"
+        result = ranking(sample_ranking_df, level="class", save=str(out))
+
+        assert result is None
+        assert out.exists()
+        plt.close("all")

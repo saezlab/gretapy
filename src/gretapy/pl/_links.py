@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyranges as pr
+from decoupler._Plotter import Plotter
 
 import gretapy as gt
 
@@ -212,9 +213,7 @@ def links(
     agg_mode: str = "mean",
     palette: dict[str, str] | None = None,
     expr_cmap: None | str | list[str] = None,
-    figsize: tuple[float, float] | None = None,
-    dpi: int = 125,
-    return_fig: bool = False,
+    **kwargs,
 ) -> plt.Figure | None:
     """
     Plot CRE-to-gene links for TFs in a genomic region.
@@ -256,17 +255,15 @@ def links(
         Color palette mapping GRN names to colors. If None, uses default colors.
     expr_cmap
         Colormap for expression heatmap. Default is white to purple.
-    figsize
-        Figure size (width, height). If None, auto-calculated.
-    dpi
-        Figure DPI. Default is 150.
-    return_fig
-        Whether to return the figure. Default is False.
+    **kwargs
+        Additional arguments passed to ``decoupler.Plotter`` (e.g. ``figsize``,
+        ``dpi``, ``return_fig``, ``save``). ``figsize`` defaults to
+        ``(3, auto)`` and ``dpi`` defaults to ``125``.
 
     Returns
     -------
     plt.Figure or None
-        Figure if return_fig is True.
+        Figure if ``return_fig=True``.
 
     Examples
     --------
@@ -334,11 +331,16 @@ def links(
     gannot_height = max(n_genes * 0.3, 1.0)
 
     # Set up figure with dynamic sizing
-    if figsize is None:
-        fig_height = n_tfs * 1.0 + omic_height + gannot_height
-        figsize = (3, fig_height)
+    fig_height = n_tfs * 1.0 + omic_height + gannot_height
+    kwargs.setdefault("figsize", (3, fig_height))
+    kwargs.setdefault("dpi", 125)
+    kwargs["ax"] = None
+    bp = Plotter(**kwargs)
+    bp.fig.delaxes(bp.ax)
+    plt.close(bp.fig)
+
     height_ratios = [1] * n_tfs + [omic_height, gannot_height]
-    fig, axes = plt.subplots(2 + n_tfs, 1, figsize=figsize, dpi=dpi, sharex=True, height_ratios=height_ratios)
+    fig, axes = plt.subplots(2 + n_tfs, 1, figsize=bp.figsize, dpi=bp.dpi, sharex=True, height_ratios=height_ratios)
     axes = axes.ravel()
 
     # Expression colormap
@@ -366,6 +368,5 @@ def links(
 
     fig.subplots_adjust(wspace=0, hspace=0.0)
 
-    if return_fig:
-        plt.close()
-        return fig
+    bp.fig = fig
+    return bp._return()
