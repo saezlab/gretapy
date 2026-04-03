@@ -1,5 +1,5 @@
 # gretapy - Evaluation and analysis of Gene Regulatory Networks (GRNs)
-<img src="https://drive.google.com/uc?id=1DFGeAuSp8w1kDlMaS4zyeXfepKVW14Ym" align="right" width="120" class="no-scaled-link" alt='GRETA logo' />
+<img src="https://raw.githubusercontent.com/saezlab/gretapy/refs/heads/main/docs/_static/images/logo.png" align="right" width="120" class="no-scaled-link" alt='GRETA logo' />
 
 [![Tests][badge-tests]][tests]
 [![Documentation][badge-docs]][documentation]
@@ -27,6 +27,8 @@
 [badge-stars]: https://img.shields.io/github/stars/saezlab/gretapy?style=flat&logo=github&color=yellow
 
 `gretapy` is a comprehensive framework for benchmarking and evaluating gene regulatory networks (GRNs) inferred from single-cell multiome (RNA+ATAC) data. It provides a systematic evaluation across four complementary dimensions: prior knowledge validation (TF markers, known TF-TF interactions, reference networks), genomic annotations (TF binding sites, cis-regulatory elements, chromatin-gene links), predictive performance (pathway enrichment, expression correlation), and mechanistic validation (perturbation forecasting, Boolean network simulations). The package includes built-in GRN inference methods, curated benchmark datasets, and visualization tools to facilitate rigorous comparison of network inference approaches.
+
+<img src="https://raw.githubusercontent.com/saezlab/gretapy/refs/heads/main/docs/_static/images/gabstract" align="center" width="120" alt='GRETA graphical abstract' />
 
 ## Getting started
 
