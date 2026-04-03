@@ -43,13 +43,15 @@ class TestReadMetrics:
         """Test that source columns are renamed correctly."""
         mock_read_csv.return_value = _make_metrics_df()
         result = read_metrics()
-        assert "grn" in result.columns
+        assert "name" in result.columns
         assert "organism" in result.columns
         assert "dataset" in result.columns
         assert "precision" in result.columns
         assert "recall" in result.columns
-        assert "name" not in result.columns
         assert "org" not in result.columns
+        assert "dts" not in result.columns
+        assert "prc" not in result.columns
+        assert "rcl" not in result.columns
 
     @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
     @patch("gretapy.ds._db.pd.read_csv")
