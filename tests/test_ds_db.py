@@ -8,8 +8,93 @@ import pandas as pd
 import pyranges as pr
 import pytest
 
-from gretapy.ds._db import _download_db, read_db
+from gretapy.ds._db import _download_db, read_db, read_metrics
 from gretapy.ds._dts import _download_dts, read_dts
+
+
+def _make_metrics_df(extra_rows=None):
+    """Helper to build a minimal metrics DataFrame as returned by the CSV."""
+    rows = [
+        {"name": "grn1", "org": "hg38", "dts": "Brain", "task": "TF Scoring", "db": "KnockTF", "prc": 0.8, "rcl": 0.7},
+        {"name": "grn2", "org": "hg38", "dts": "Brain", "task": "Perturbation Forecasting", "db": "KnockTF", "prc": 0.6, "rcl": 0.5},
+        {"name": "grn3", "org": "hg38", "dts": "Brain", "task": "TF Scoring", "db": "ChIP-Atlas", "prc": 0.9, "rcl": 0.85},
+        {"name": "grn4", "org": "hg38", "dts": "Synthetic Pituitary", "task": "TF Scoring", "db": "ChIP-Atlas", "prc": 0.5, "rcl": 0.4},
+        {"name": "grn5", "org": "hg38", "dts": "Unpaired Pituitary", "task": "TF Scoring", "db": "ChIP-Atlas", "prc": 0.4, "rcl": 0.3},
+    ]
+    if extra_rows:
+        rows.extend(extra_rows)
+    return pd.DataFrame(rows)
+
+
+class TestReadMetrics:
+    """Tests for read_metrics function."""
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_returns_dataframe(self, mock_read_csv, mock_download):
+        """Test that read_metrics returns a DataFrame."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics()
+        assert isinstance(result, pd.DataFrame)
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_columns_renamed(self, mock_read_csv, mock_download):
+        """Test that source columns are renamed correctly."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics()
+        assert "grn" in result.columns
+        assert "organism" in result.columns
+        assert "dataset" in result.columns
+        assert "precision" in result.columns
+        assert "recall" in result.columns
+        assert "name" not in result.columns
+        assert "org" not in result.columns
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_remove_paired_true(self, mock_read_csv, mock_download):
+        """Test that paired datasets are removed when remove_paired=True."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics(remove_paired=True)
+        assert "Synthetic Pituitary" not in result["dataset"].values
+        assert "Unpaired Pituitary" not in result["dataset"].values
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_remove_paired_false(self, mock_read_csv, mock_download):
+        """Test that paired datasets are kept when remove_paired=False."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics(remove_paired=False)
+        assert "Synthetic Pituitary" in result["dataset"].values
+        assert "Unpaired Pituitary" in result["dataset"].values
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_knocktf_scoring_renamed(self, mock_read_csv, mock_download):
+        """Test that KnockTF TF Scoring rows are renamed to 'KnockTF (scoring)'."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics(remove_paired=False)
+        knocktf_rows = result[result["db"] == "KnockTF (scoring)"]
+        assert len(knocktf_rows) == 1
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_knocktf_forecasting_renamed(self, mock_read_csv, mock_download):
+        """Test that KnockTF Perturbation Forecasting rows are renamed to 'KnockTF (forecasting)'."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics(remove_paired=False)
+        knocktf_rows = result[result["db"] == "KnockTF (forecasting)"]
+        assert len(knocktf_rows) == 1
+
+    @patch("gretapy.ds._db._download_metrics", return_value="/fake/metrics.csv.gz")
+    @patch("gretapy.ds._db.pd.read_csv")
+    def test_non_knocktf_db_unchanged(self, mock_read_csv, mock_download):
+        """Test that non-KnockTF db values are not modified."""
+        mock_read_csv.return_value = _make_metrics_df()
+        result = read_metrics(remove_paired=False)
+        assert "ChIP-Atlas" in result["db"].values
+        assert "KnockTF" not in result["db"].values
 
 
 class TestDownloadDb:

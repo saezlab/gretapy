@@ -11,6 +11,67 @@ from decoupler._download import _download, _log
 
 from gretapy.config import DATA, PATH_DATA, URL_END, URL_STR
 
+def _download_metrics(
+    verbose: bool = False,
+):
+    fname = 'metrics.csv.gz'
+    path_fname = os.path.join(PATH_DATA, fname)
+    if not os.path.isfile(path_fname): 
+        url = URL_STR + fname + URL_END
+        data = _download(url, verbose=verbose)
+        data.seek(0)
+        with open(path_fname, "wb") as f:
+            shutil.copyfileobj(data, f)
+        m = f"Metrics saved in {path_fname}"
+        _log(m, level="info", verbose=verbose)
+    else:
+        m = f"Metrics found in {path_fname}"
+        _log(m, level="info", verbose=verbose)
+    return path_fname
+
+
+def read_metrics(
+    remove_paired: bool = True,
+    verbose: bool = False,
+) -> pd.DataFrame:
+    """
+    Read the GRN benchmark metrics table.
+
+    Downloads the metrics file if not already cached locally, then loads and
+    preprocesses it. Column names are standardized,
+    and optionally paired datasets are removed.
+
+    Parameters
+    ----------
+    remove_paired : bool
+        Whether to remove paired datasets ('Synthetic Pituitary' and
+        'Unpaired Pituitary') from the results. Default is True.
+    verbose : bool
+        Whether to print progress messages. Default is False.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame with columns: name, organism, dataset, task, db, precision,
+        recall, and any other columns present in the source file.
+    """
+    path_fname = _download_metrics(verbose=verbose)
+    df = pd.read_csv(path_fname, compression="gzip").dropna()
+    df = df.rename(columns={'org': 'organism', 'dts': 'dataset', 'prc': 'precision', 'rcl': 'recall'})
+    if remove_paired:
+        df = df[~df['dataset'].isin(['Synthetic Pituitary', 'Unpaired Pituitary'])]
+    col = []
+    for t, d in zip(df['task'], df['db']):
+        if d == 'KnockTF':
+            if t == 'Perturbation Forecasting':
+                col.append('KnockTF (forecasting)')
+            elif t == 'TF Scoring':
+                col.append('KnockTF (scoring)')
+        else:
+            col.append(d)
+    df['db'] = col
+    return df.reset_index(drop=True)
+    
 
 def _download_db(
     organism: str,
