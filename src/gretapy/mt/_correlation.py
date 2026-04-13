@@ -5,9 +5,9 @@ import pyranges as pr
 import scipy.stats as sts
 from decoupler._download import _log
 
-from gretapy.ds._db import read_db
-from gretapy.mt._utils import _trim_grn
-from gretapy.pp._check import _check_organism
+from ..ds._db import read_db
+from ..mt._utils import _trim_grn
+from ..pp._check import _check_organism
 
 
 def correlation(
@@ -65,24 +65,6 @@ def correlation(
     tfs = np.array(list(set(genes) & set(tfs)))
     _log(f"Found {len(tfs)} TFs in dataset", level="info", verbose=verbose)
 
-    # Compute correlation
-    _log(f"Computing {method} correlation...", level="info", verbose=verbose)
-    x = mdata.mod["rna"][:, tfs].X
-    y = mdata.mod["rna"].X
-
-    if method == "spearman":
-        x = sts.rankdata(x, axis=0)
-        y = sts.rankdata(y, axis=0)
-
-    corr = np.corrcoef(x=x, y=y, rowvar=False)
-    grn = pd.DataFrame(corr[: tfs.size, tfs.size :], index=tfs, columns=genes)
-    grn = grn.reset_index(names="source").melt(id_vars="source", var_name="target", value_name="score")
-
-    # Filter by threshold and remove self-regulation
-    grn = grn[grn["score"].abs() > thr_r]
-    grn = grn[grn["source"] != grn["target"]]
-    _log(f"GRN edges after correlation filtering: {len(grn)}", level="info", verbose=verbose)
-
     # Transform peaks to PyRanges
     peaks_df = pd.DataFrame(peaks, columns=["cre"])
     peaks_df[["Chromosome", "Start", "End"]] = peaks_df["cre"].str.split("-", n=2, expand=True)
@@ -104,6 +86,28 @@ def correlation(
         proms_df["Chromosome"].astype(str) + "-" + proms_df["Start_b"].astype(str) + "-" + proms_df["End_b"].astype(str)
     )
     proms_df = proms_df[["cre", "Name"]].rename(columns={"Name": "target"}).drop_duplicates()
+
+    # Restrict correlation to genes with a promoter-peak overlap
+    genes_with_peaks = np.array(list(set(genes) & set(proms_df["target"].astype("U"))))
+    _log(f"Genes with promoter-peak overlap: {len(genes_with_peaks)}", level="info", verbose=verbose)
+
+    # Compute correlation
+    _log(f"Computing {method} correlation...", level="info", verbose=verbose)
+    x = mdata.mod["rna"][:, tfs].X
+    y = mdata.mod["rna"][:, genes_with_peaks].X
+
+    if method == "spearman":
+        x = sts.rankdata(x, axis=0)
+        y = sts.rankdata(y, axis=0)
+
+    corr = np.corrcoef(x=x, y=y, rowvar=False)
+    grn = pd.DataFrame(corr[: tfs.size, tfs.size :], index=tfs, columns=genes_with_peaks)
+    grn = grn.reset_index(names="source").melt(id_vars="source", var_name="target", value_name="score")
+
+    # Filter by threshold and remove self-regulation
+    grn = grn[grn["score"].abs() > thr_r]
+    grn = grn[grn["source"] != grn["target"]]
+    _log(f"GRN edges after correlation filtering: {len(grn)}", level="info", verbose=verbose)
 
     # Merge GRN with promoter-peak mappings
     grn = pd.merge(grn, proms_df, how="inner")[["source", "cre", "target", "score"]]
