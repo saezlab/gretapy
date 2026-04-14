@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-04-14
+
+### Added
+
+- `tl.cre_to_tss_distance`: computes the distance from each CRE in a GRN to the promoter window of its target gene, using the Promoters database. Accepts a single GRN DataFrame or a dictionary of GRNs.
+
+## [0.0.1] - First release
+
 ### Added
 
 - Basic tool, preprocessing and plotting functions

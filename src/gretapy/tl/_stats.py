@@ -85,6 +85,65 @@ def ocoeff(
     return pd.DataFrame(rows, columns=["grn_a", "grn_b", "source", "cre", "target", "edge"])
 
 
+def cre_to_tss_distance(
+    grns: pd.DataFrame | dict,
+    organism: str = "hg38",
+) -> pd.DataFrame:
+    """
+    Compute the distance from each CRE to the TSS of its target gene.
+
+    Parameters
+    ----------
+    grns
+        Single GRN DataFrame or dictionary of GRNs with names as keys.
+        Each DataFrame must have at least ``cre`` and ``target`` columns,
+        with CREs formatted as ``"chrX-start-end"``.
+    organism
+        Organism identifier (e.g., ``"hg38"``). Used to load the Promoters
+        database via :func:`gretapy.ds.read_db`.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns ``grn``, ``cre``, ``target``, and ``distance``.
+        One row per unique (grn, cre, target) combination whose target gene is
+        present in the Promoters database.
+        Distance is the absolute number of base pairs between the closest CRE
+        edge and the nearest edge of the 2000 bp promoter window. CREs that
+        overlap the promoter window have distance 0.
+    """
+    from gretapy.ds._db import read_db
+
+    if isinstance(grns, pd.DataFrame):
+        grns = {"grn": grns}
+
+    # Load Promoters DB once (2000 bp windows, Name = gene)
+    promoters = read_db(organism=organism, db_name="Promoters")
+    prom_lookup = promoters.df.drop_duplicates("Name").set_index("Name")[["Start", "End"]]
+
+    results = []
+    for grn_name, grn in grns.items():
+        pairs = grn[["cre", "target"]].drop_duplicates().copy()
+        cre_split = pairs["cre"].str.split("-", expand=True)
+        pairs["cre_start"] = cre_split[1].astype(int)
+        pairs["cre_end"] = cre_split[2].astype(int)
+
+        # Merge with promoter window positions (genes absent from DB are dropped)
+        merged = pairs.merge(prom_lookup, left_on="target", right_index=True, how="inner")
+
+        # Vectorized distance: gap to nearest promoter window edge, 0 if overlap
+        merged["distance"] = np.where(
+            merged["cre_end"] <= merged["Start"], merged["Start"] - merged["cre_end"],
+            np.where(merged["cre_start"] >= merged["End"], merged["cre_start"] - merged["End"], 0),
+        )
+        merged["grn"] = grn_name
+        results.append(merged[["grn", "cre", "target", "distance"]])
+
+    if not results:
+        return pd.DataFrame(columns=["grn", "cre", "target", "distance"])
+    return pd.concat(results, ignore_index=True)
+
+
 def _get_grn_stats(grn: pd.DataFrame) -> tuple:
     n_s = grn["source"].nunique()
     n_c = grn["cre"].nunique() if "cre" in grn.columns else 0
