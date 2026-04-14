@@ -354,15 +354,18 @@ def links(
     # Plot TF links
     for i, tf in enumerate(tfs):
         ax = axes[i]
+        ax.grid(False)
         _plot_links(links_df, tf, tss, strand, palette, ax, show_legend=show_legend)
 
     # Plot omics data
     ax = axes[-2]
+    ax.grid(False)
     _plot_omic(rna, gs_gr, x_min, x_max, cmap, "heatmap", ax)
     _plot_omic(atac, cres_gr, x_min, x_max, cmap, "peaks", ax)
 
     # Plot gene annotations
     ax = axes[-1]
+    ax.grid(False)
     _plot_gannot(gs_gr, x_min, x_max, target, ax)
     ax.set_xlabel(chromosome)
 
