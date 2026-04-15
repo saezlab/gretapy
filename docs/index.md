@@ -8,6 +8,7 @@
 
 notebooks/index
 api/index
+faq
 changelog
 references
 ```
