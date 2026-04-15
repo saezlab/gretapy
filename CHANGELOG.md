@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning][].
 - `tl.cre_to_tss_distance`: computes the distance from each CRE in a GRN to the promoter window of its target gene, using the Promoters database. Accepts a single GRN DataFrame or a dictionary of GRNs.
 - `pl.cre_to_tss_distance`: plots CRE-to-TSS distance distributions as horizontal boxplots, with an optional vertical threshold line (default 250,000 bp).
 
+### Changed
+
+- `pl.links`: legend is now displayed once on the middle TF panel (with multi-column layout for many GRNs) instead of being repeated on every subplot.
+
 ## 0.0.1
 
 ### Added

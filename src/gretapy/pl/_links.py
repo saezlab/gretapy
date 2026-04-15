@@ -68,19 +68,13 @@ def _plot_links(
     strand: str,
     palette: dict,
     ax: plt.Axes,
-    show_legend: bool = True,
 ) -> None:
     """Plot arcs connecting CREs to TSS for a given TF."""
     grns = links["grn"].sort_values().unique()
     links = links.copy()
     links = links[links["tf"] == tf]
-    is_empty = []
     for grn in grns:
         link = links[links["grn"] == grn]
-        if link.shape[0] == 0:
-            is_empty.append(True)
-        else:
-            is_empty.append(False)
         for _, row in link.iterrows():
             cre, score = row["cre"], row["score"]
             if score > 0.00:
@@ -112,13 +106,6 @@ def _plot_links(
                 )
                 ax.add_patch(arc)
     ax.set_ylim(0, 1.05)
-    if show_legend:
-        handles = [
-            plt.Line2D([0], [0], marker="o", color="w", label=grn, markerfacecolor=palette[grn], markersize=10)
-            for grn in grns
-        ]
-        handles = [h for i, h in enumerate(handles) if not is_empty[i]]
-        ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5), title="", frameon=False)
     ax.set_ylabel(tf)
     yticks = np.arange(0.25, 1, 0.25)
     ax.set_yticks(yticks)
@@ -314,9 +301,6 @@ def links(
         grn_names = sorted(grn_dict.keys())
         palette = {name: default_colors[i % len(default_colors)] for i, name in enumerate(grn_names)}
 
-    # Determine if legend should be shown (only for multiple GRNs)
-    show_legend = len(grn_dict) > 1
-
     # Extract genomic annotation data (before figure creation to know counts)
     x_min, x_max, gs_gr, tss, chromosome, strand, cres_gr = _get_gannot_data(gannot, target, w_size, atac.var_names)
 
@@ -355,7 +339,16 @@ def links(
     for i, tf in enumerate(tfs):
         ax = axes[i]
         ax.grid(False)
-        _plot_links(links_df, tf, tss, strand, palette, ax, show_legend=show_legend)
+        _plot_links(links_df, tf, tss, strand, palette, ax)
+
+    # Shared legend on the middle TF panel, to the right
+    mid_ax = axes[n_tfs // 2]
+    handles = [
+        plt.Line2D([0], [0], marker="o", color="w", label=grn_name, markerfacecolor=palette[grn_name], markersize=10)
+        for grn_name in grn_dict.keys()
+    ]
+    n_cols = (len(handles) + 2) // 3
+    mid_ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1, 0.5), title="", frameon=False, ncol=n_cols)
 
     # Plot omics data
     ax = axes[-2]
