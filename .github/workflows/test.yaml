@@ -56,6 +56,9 @@ jobs:
     name: ${{ matrix.env.label }}
     runs-on: ${{ matrix.os }}
 
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v5
         with:
@@ -81,6 +84,9 @@ jobs:
           uvx hatch run ${{ matrix.env.name }}:coverage xml # create report for upload
       - name: Upload coverage
         uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          fail_ci_if_error: true
 
   # Check that all tests defined above pass. This makes it easy to set a single "required" test in branch
   # protection instead of having to update it frequently. See https://github.com/re-actors/alls-green#why.
