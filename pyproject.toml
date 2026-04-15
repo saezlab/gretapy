@@ -24,12 +24,13 @@ classifiers = [
 ]
 dependencies = [
   "anndata",
-  "decoupler[full]>=2.1.4",
+  "decoupler>=2.1.4",
   "llvmlite>=0.39",
   "mudata",
   "numba>=0.57",
   "pyboolnet",
   "pyranges",
+  "scanpy",
   # for debug logging (referenced from the issue template)
   "session-info2",
 ]
