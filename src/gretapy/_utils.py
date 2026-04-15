@@ -73,6 +73,34 @@ def show_datasets(organism: str | None = None) -> pd.DataFrame:
     return df
 
 
+def get_terms(dataset: str) -> dict:
+    """
+    Get terms for a dataset.
+
+    Parameters
+    ----------
+    dataset
+        Name of the dataset (e.g., "PBMC").
+
+    Returns
+    -------
+    Dictionary mapping evaluation database names to lists of terms.
+
+    Example
+    -------
+    .. code-block:: python
+
+        import gretapy as gt
+
+        gt.get_terms("PBMC")
+    """
+    df = show_datasets()
+    names = df["name"].tolist()
+    assert dataset in names, f"dataset={dataset} not available ({names})"
+    organism = df.loc[df["name"] == dataset, "organism"].iloc[0]
+    return DATA[organism]["dts"][dataset]["terms"]
+
+
 def show_terms(organism: str | None = None) -> pd.DataFrame:
     """
     Show all available terms for filtering databases.
