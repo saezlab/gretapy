@@ -259,7 +259,7 @@ _GRN = pd.DataFrame(
             0.69,  # CEBPA->PIM1
         ],
     }
-)
+)[['source', 'cre', 'target', 'score']]
 
 # TF-celltype mapping for expression patterns
 _TF_CELLTYPE = {

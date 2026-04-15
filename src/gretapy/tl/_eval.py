@@ -294,8 +294,8 @@ def eval_grn_dataset(
     # Resolve dataset_name for logging
     if dataset_name is None and isinstance(dataset, str):
         dataset_name = dataset
-    dataset = _check_dataset(organism=organism, dataset=dataset, verbose=verbose)
     terms = _check_terms(organism=organism, dataset=dataset, terms=terms)
+    dataset = _check_dataset(organism=organism, dataset=dataset, verbose=verbose)
     _check_dts_grn(dataset=dataset, grn=grn)
     # Check capabilities
     has_cre = "cre" in grn.columns
