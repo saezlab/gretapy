@@ -5,6 +5,7 @@ import tempfile
 
 import anndata as ad
 import decoupler as dc
+import numpy as np
 import pandas as pd
 import pyranges as pr
 from decoupler._download import _download, _log
@@ -72,6 +73,47 @@ def read_metrics(
     df['db'] = col
     return df.reset_index(drop=True)
     
+
+def read_imaginary_metrics(
+    seed=None,
+    remove_paired: bool = True,
+    verbose: bool = False,
+) -> pd.DataFrame:
+    """
+    Read benchmark metrics for an imaginary method.
+
+    Calls :func:`read_metrics` and samples one row per unique benchmark
+    configuration (class, task, db, organism, dataset), then sets the method
+    name to ``'ImaginaryMethod'``. Useful for baseline comparisons or testing
+    visualizations.
+
+    Parameters
+    ----------
+    seed : int or None
+        Seed for :func:`numpy.random.default_rng`. Default is None
+        (non-deterministic).
+    remove_paired : bool
+        Passed to :func:`read_metrics`. Default is True.
+    verbose : bool
+        Passed to :func:`read_metrics`. Default is False.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame with the same columns as :func:`read_metrics`, with one
+        row per unique benchmark configuration and ``name`` set to
+        ``'ImaginaryMethod'``.
+    """
+    rng = np.random.default_rng(seed)
+    df = read_metrics(remove_paired=remove_paired, verbose=verbose)
+    rows = []
+    for _, group in df.groupby(['class', 'task', 'db', 'organism', 'dataset'], sort=False):
+        idx = rng.integers(0, len(group))
+        rows.append(group.iloc[idx])
+    result = pd.DataFrame(rows)
+    result['name'] = 'ImaginaryMethod'
+    return result.reset_index(drop=True)
+
 
 def _download_db(
     organism: str,

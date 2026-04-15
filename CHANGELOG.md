@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning][].
 
 ### Added
 
+- `ds.read_imaginary_metrics`: samples one row per unique benchmark configuration from the metrics table and relabels it as `'ImaginaryMethod'`, useful for baseline comparisons or testing visualizations.
 - `get_terms`: retrieves the filtering terms for a given dataset as a dictionary mapping evaluation database names to lists of terms.
 - `tl.cre_to_tss_distance`: computes the distance from each CRE in a GRN to the promoter window of its target gene, using the Promoters database. Accepts a single GRN DataFrame or a dictionary of GRNs.
 - `pl.cre_to_tss_distance`: plots CRE-to-TSS distance distributions as horizontal boxplots, with an optional vertical threshold line (default 250,000 bp).
