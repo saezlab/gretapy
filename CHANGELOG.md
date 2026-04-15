@@ -16,12 +16,13 @@ and this project adheres to [Semantic Versioning][].
 - `get_terms`: retrieves the filtering terms for a given dataset as a dictionary mapping evaluation database names to lists of terms.
 - `tl.cre_to_tss_distance`: computes the distance from each CRE in a GRN to the promoter window of its target gene, using the Promoters database. Accepts a single GRN DataFrame or a dictionary of GRNs.
 - `pl.cre_to_tss_distance`: plots CRE-to-TSS distance distributions as horizontal boxplots, with an optional vertical threshold line (default 250,000 bp).
-- Usage tutorial notebook added to the documentation under a new Tutorials section (`docs/notebooks/usage.ipynb`).
+- Tutorial notebooks.
 - Added `scanpy` and `xgboost` as explicit dependencies; removed the `[full]` extra from `decoupler`.
 
 ### Changed
 
 - `pl.links`: legend is now displayed once on the middle TF panel (with multi-column layout for many GRNs) instead of being repeated on every subplot.
+- `mt.correlation` now filters for promoters first and then computes correlations, reducing the number of compute.
 
 ## 0.0.1
 
