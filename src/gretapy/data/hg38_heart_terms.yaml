@@ -1,0 +1,169 @@
+TF-Marker:
+  - Heart
+  - Myocardium
+  - Cardiovascular
+  - Atrial
+  - Ventricular
+  - Artery
+  - Artery cell
+  - Smooth muscle cell
+  - Endothelial cell
+  - Endothelium
+  - Fibroblast cell
+HPA:
+  - Cardiomyocytes
+  - Heart muscle
+  - Smooth muscle cells
+  - Smooth muscle tissue
+  - Fibroblasts
+  - Adipocytes & Endothelial cells
+  - Lymphatic endothelial cells
+ChIP-Atlas:
+  - Cardiac
+  - Cardiovascular
+  - Cardiac fibroblasts
+  - Left ventricle
+  - Right ventricle
+  - Right atrium auricular region
+  - Aorta
+  - Aortic smooth muscle cells
+  - Coronary artery cells
+  - Coronary artery smooth muscle
+  - Vascular smooth muscle cells
+  - Myocytes
+  - Endothelial Cells
+  - Primary endothelial cells
+  - iPSC derived endothelial cells
+  - Fibroblasts
+  - Myofibroblasts
+  - hESC derived cardiac cells
+  - iPSC derived cardiac cells
+  - AC16
+ReMap 2022:
+  - artery
+  - endothelial cell
+  - fibroblast
+UniBind:
+  - heart left ventricle
+  - right atrium auricular region
+  - human cardiac myocytes
+  - iPSC derived cardiomyocytes
+  - ac16 tnfa
+  - ascending aorta
+  - thoracic aorta
+  - coronary artery
+  - artery smooth muscle
+  - smooth muscle cell
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+  - huvec
+  - huvec hypox
+  - huvec tnf
+  - huvec vegf 12h
+  - huvec vegf 1h
+  - huvec vegf 4h
+  - fibroblasts
+GWAS Catalog:
+  - heart failure
+  - heart rate
+  - heart rate variability measurement
+  - heart rate response to exercise
+  - heart rate response to recovery post exercise
+  - resting heart rate
+  - heart function measurement
+  - heart measurement
+  - heart valve disease
+  - heart septal defect
+  - heart relative wall thickness
+  - heart amyloid deposition measurement
+  - congenital heart disease
+  - congenital heart malformation
+  - congenital left-sided heart lesions
+  - congenital right-sided heart lesions
+  - congestive heart failure
+  - conotruncal heart malformations
+  - rheumatic heart disease
+  - myocardial infarction
+  - acute myocardial infarction
+  - post-operative myocardial infarction
+  - Myocardial Ischemia
+  - myocarditis
+  - cardiomyopathy
+  - dilated cardiomyopathy
+  - hypertrophic cardiomyopathy
+  - idiopathic dilated cardiomyopathy
+  - ischemic cardiomyopathy
+  - Chagas cardiomyopathy
+  - Takotsubo cardiomyopathy
+  - atrial fibrillation
+  - post-operative atrial fibrillation
+  - Premature atrial contractions
+  - cardiac arrhythmia
+  - Ventricular arrhythmia
+  - sudden cardiac arrest
+  - cardiac hypertrophy
+  - cardiac troponin I measurement
+  - cardiac troponin T measurement
+  - cardioembolic stroke
+  - cardiac embolism
+  - cardiotoxicity
+  - cardiovascular disease
+  - cardiovascular measurement
+  - cardiovascular event measurement
+  - major adverse cardiovascular event measurement
+  - coronary artery disease
+  - coronary artery calcification
+  - coronary atherosclerosis
+  - acute coronary syndrome
+  - non-obstructive coronary artery disease
+  - coronary stenosis
+  - coronary thrombosis
+  - Coronary Restenosis
+  - Coronary Vasospasm
+  - spontaneous coronary artery dissection
+  - aortic aneurysm
+  - Abdominal Aortic Aneurysm
+  - thoracic aortic aneurysm
+  - aortic stenosis
+  - aortic valve calcification
+  - Bicuspid aortic valve
+  - aortic root size
+  - ascending aortic diameter
+  - descending aortic diameter
+  - left ventricular function
+  - left ventricular ejection fraction measurement
+  - left ventricular mass
+  - left ventricular hypertrophy
+  - left atrial function
+  - left atrial volume measurement
+  - right ventricular function
+  - right ventricular ejection fraction measurement
+  - interventricular septum thickness
+  - hypertension
+  - essential hypertension
+  - blood pressure
+  - systolic blood pressure
+  - diastolic blood pressure
+  - QT interval
+  - familial long QT syndrome
+  - QRS duration
+  - QRS complex
+  - PR interval
+  - electrocardiography
+eQTL Catalogue:
+  - heart (atrial appendage)
+  - heart (left ventricle)
+  - artery (aorta)
+  - artery (coronary)
+  - artery (tibial)
+  - fibroblast
+KnockTF (scoring):
+  - Aorta
+  - Muscle
+  - Endothelium
+  - Fibroblasts
+KnockTF (forecasting):
+  - Aorta
+  - Muscle
+  - Endothelium
+  - Fibroblasts

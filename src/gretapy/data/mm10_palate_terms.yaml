@@ -1,0 +1,87 @@
+ChIP-Atlas:
+  - Palate
+  - Embryonic face
+  - Frontonasal prominences
+  - Mandibular prominences
+  - Maxillary arch
+  - Maxillary prominences
+  - Embryonic head
+  - Neural Crest
+  - Mesenchymal
+  - Mesenchymal stem cells
+  - Dental mesenchyme
+  - Fibroblasts
+  - Embryonic fibroblast
+  - MEF
+  - NIH/3T3
+  - 3T3 fibroblasts
+  - Brain endothelial cells
+  - Heart endothelial cells
+  - mESC derived haemogenic endothelium
+  - Dental epithelium
+  - Olfactory epithelium
+  - Epidermal cells
+  - Keratinocytes
+  - Astrocytes
+  - Microglia
+  - Oligodendrocytes
+  - Oligodendrocyte precursor cells
+  - mESC derived glial cells
+  - BV-2
+  - Neural progenitor cells
+  - Neural tube
+  - Embryo
+  - ES cells
+  - mESCs
+  - Embryoid Bodies
+  - Oral squamous cell carcinoma
+ReMap 2022:
+  - palate
+  - limb-palate
+  - maxillary-arch
+  - head
+  - fibroblast
+  - primary-fibroblast
+  - MEF
+  - NIH3T3
+  - MSC
+  - hemogenic-endothelium
+  - keratinocyte
+  - astrocyte
+  - microglia
+  - oligodendrocyte
+  - glial-progenitor-cell
+  - neural-progenitor
+  - neural-tube
+  - mESC
+  - EpiSC
+  - EBs
+UniBind:
+  - E11.5 maxillary arch
+  - limb mesenchyme
+  - mesenchymal stem cells
+  - fibroblasts
+  - embryonic fibroblasts
+  - E13.5 embryonic fibroblasts
+  - 3T3  embryonic fibroblasts
+  - NIH 3T3  embryonic fibroblasts
+  - MEF  mouse embryonic fibroblasts
+  - hemogenic endothelium
+  - embryonic stem cell derived hemogenic endothelium
+  - astrocytes
+  - microglia
+  - BV 2  brain microglial cells
+  - primary cortical oligodendrocyte progenitors
+  - neural progenitors
+  - neural stem cells
+  - embryonic stem cell derived neural progenitors
+  - neural tube
+  - embryonic stem cells
+  - mESCs  mouse embryonic stem cells
+  - ES E14  E14  embryonic stem cells
+  - embryoid body
+  - epiblast stem cells
+KnockTF (scoring):
+  - Embryo
+KnockTF (forecasting):
+  - Embryo

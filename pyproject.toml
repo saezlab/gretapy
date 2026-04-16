@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
   "anndata",
   "decoupler>=2.1.4",
+  "pyyaml",
   "llvmlite>=0.39",
   "mudata",
   "numba>=0.57",

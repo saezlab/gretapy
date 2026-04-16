@@ -1,0 +1,131 @@
+TF-Marker:
+  - Kidney
+  - Kidney cell
+  - Kidney carcinoma cell
+  - Renal cell
+  - Renal cell carcinoma cell
+  - Renal epithelial neoplasms cell
+  - Renal neoplasms cell
+  - Clear cell renal cell carcinoma cell
+  - Glomerular mesangial cell
+  - Renal glomerulus
+  - Embryonic kidney cell
+  - Endothelial cell
+  - Epithelial cell
+  - Fibroblast cell
+  - Macrophage cell
+HPA:
+  - Kidney
+  - Kidney & Intestine
+  - Kidney cancer
+  - Proximal tubular cells
+  - Fibroblasts
+  - Macrophages
+ChIP-Atlas:
+  - Kidney
+  - Kidney Cortex
+  - Kidney organoids
+  - Nephrons
+  - Podocytes
+  - Renal cell carcinoma
+  - Renal tubular cells
+  - Endothelial Cells
+  - Primary endothelial cells
+  - Fibroblasts
+  - Macrophages
+  - 786-O
+  - A498
+  - ACHN
+  - HK-2
+  - RCC4
+  - RPTEC
+  - OS-RC-2
+ReMap 2022:
+  - kidney
+  - embryonic kidney cell line
+  - endothelial cell
+  - epithelial cell
+  - fibroblast
+  - macrophage
+UniBind:
+  - kidney
+  - embryonic kidney
+  - fetal kidney 16w
+  - fetal kidney 17w
+  - renal tubular cells
+  - 786 O  renal carcinoma
+  - RCC4  kidney cancer cell line
+  - HKC8  kidney proximal tubule cell line
+  - A498
+  - UO31
+  - G401  rhabdoid tumor of the kidney
+  - TTC 1240  Rhabdoid tumor of the kidney
+  - HEK293  embryonic kidney
+  - HEK293T  embryonic kidney
+  - HEK293 FT  human embryonic kidney  female transformed
+  - HEK293 A
+  - hek293
+  - hek293t
+  - fibroblasts
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+  - MDM monocyte derived macrophages
+GWAS Catalog:
+  - kidney disease
+  - kidney cancer
+  - kidney injury
+  - kidney volume
+  - kidney amyloid deposition measurement
+  - kidney injury molecule 1 measurement
+  - chronic kidney disease
+  - stage 5 chronic kidney disease
+  - Acute kidney injury
+  - post-operative acute kidney injury
+  - rapid kidney function decline
+  - renal cell carcinoma
+  - renal carcinoma
+  - clear cell renal carcinoma
+  - papillary renal cell carcinoma
+  - renal agenesis
+  - renal system measurement
+  - renal sinus adipose tissue measurement
+  - renal transplant outcome measurement
+  - renal overload-type gout
+  - glomerular filtration rate
+  - glomerulonephritis
+  - membranous glomerulonephritis
+  - IGA glomerulonephritis
+  - focal segmental glomerulosclerosis
+  - diabetic nephropathy
+  - hypertensive nephropathy
+  - nephrotic syndrome
+  - nephrolithiasis
+  - Nephroblastoma
+  - Acute tubulointerstitial nephritis
+  - Proteinuria
+  - albuminuria
+  - Moderate albuminuria
+  - creatinine measurement
+  - creatinine clearance measurement
+  - blood urea nitrogen measurement
+  - serum urea measurement
+  - urea measurement
+  - uric acid measurement
+  - hyperuricemia
+  - urinary albumin to creatinine ratio
+  - urinary albumin excretion rate
+  - urinary microalbumin measurement
+  - urinary uric acid to creatinine ratio
+  - urinary metabolite measurement
+  - urinary bladder cancer
+  - urinary bladder carcinoma
+  - urine volume measurement
+  - response to peritoneal dialysis
+eQTL Catalogue:
+  - kidney (cortex)
+KnockTF (scoring):
+  - Kidney
+  - Embryo_kidney
+KnockTF (forecasting):
+  - Kidney
+  - Embryo_kidney

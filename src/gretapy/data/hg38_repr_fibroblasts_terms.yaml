@@ -1,0 +1,163 @@
+TF-Marker:
+  - Fibroblast cell
+  - Stem cell
+  - Embryonic cell
+  - Mesenchymal cell
+  - Mesenchymal
+  - Skin
+  - Foreskin
+  - Epidermis
+  - Keratinocytes cell
+HPA:
+  - Fibroblasts
+  - Connective tissue
+  - Connective tissue cells
+  - Skin
+ChIP-Atlas:
+  - Fibroblasts
+  - Skin fibroblasts
+  - Dermal fibroblast
+  - Lung fibroblasts
+  - Cardiac fibroblasts
+  - Myofibroblasts
+  - Foreskin
+  - BJ
+  - BJ-5ta
+  - WI-38
+  - MRC-5
+  - Pluripotent stem cell
+  - Mesenchymal stem cells
+  - Mesenchymal Stromal Cells
+  - Adipose-Derived Mesenchymal Stem Cells
+  - hESC H1
+  - hESC H9
+  - hESC HUES64
+  - hESC HUES8
+  - hESC RUES1
+  - hESC Cyt49
+  - hESC UCLA1
+  - hESC UCLA2
+  - hESC WA09
+  - hESC WIBR2
+  - hESC WIBR3
+  - T HESCs
+  - hESC derived ectodermal cells
+  - hESC derived endodermal cells
+  - hESC derived mesodermal cells
+  - hESC derived mesendodermal cells
+  - iPSC derived cells
+  - iPSC derived cardiac cells
+  - iPSC derived neural cells
+  - iPSC derived astrocytes
+  - iPSC derived endothelial cells
+  - iPSC derived hepatocytes
+  - Keratinocytes
+  - Differentiated keratinocytes
+  - Epidermis
+ReMap 2022:
+  - fibroblast
+  - mesenchymal cell
+  - embryonic kidney cell line
+  - fetal cell line
+  - keratinocyte
+UniBind:
+  - fibroblasts
+  - BJ  fibroblasts
+  - dermal fibroblasts
+  - NHDF Ad  adult dermal fibroblasts
+  - foreskin fibroblast
+  - primary foreskin fibroblasts
+  - IMR90  lung fibroblasts
+  - MRC 5  fetal lung fibroblasts
+  - NHLF  lung fibroblasts
+  - normal lung fibroblasts
+  - FB8470  fibroblasts
+  - FB0167P  progeria fibroblasts
+  - embryonic stem cells
+  - H1 hESC
+  - H9
+  - WA01  H1  human embryonic stem cells
+  - WA09  embryonic stem cells
+  - BGO3  embryonic stem cells
+  - HUES64  embryonic stem cells
+  - HUES8  Embryonic stem cell  blastocyst stage
+  - UCLA1 hESCs
+  - hesc
+  - esc
+  - esc h1
+  - esc h9
+  - esc naive
+  - esc primed
+  - hiPSC
+  - iPSC  induced pluripotent stem cells
+  - induced pluripotent stem cells
+  - ipsc
+  - ipsc inhi
+  - iPSC derived cardiomyocytes
+  - mesenchymal
+  - mesenchymal stem cells derived adipocytes
+  - hMADS 3  adipose derived stem cells
+  - keratinocyte
+  - keratinocytes
+  - foreskin keratinocyte
+  - epidermal keratinocytes
+  - human keratinocytes
+  - HaCaT  keratinocytes
+  - HNEK  epidermal keratinocytes
+GWAS Catalog:
+  - aging
+  - longevity
+  - parental longevity
+  - telomere length
+  - autoimmune disease
+  - systemic scleroderma
+  - diffuse scleroderma
+  - limited scleroderma
+  - anti-centromere-antibody-positive systemic scleroderma
+  - anti-topoisomerase-I-antibody-positive systemic scleroderma
+  - idiopathic pulmonary fibrosis
+  - pulmonary fibrosis
+  - Hepatic fibrosis
+  - liver fibrosis measurement
+  - Keloid
+  - postburn hypertrophic scarring severity measurement
+  - dermatomyositis
+  - clinically amyopathic dermatomyositis
+  - juvenile dermatomyositis
+  - psoriasis
+  - psoriasis vulgaris
+  - cutaneous psoriasis measurement
+  - atopic eczema
+  - Eczematoid dermatitis
+  - Vitiligo
+  - alopecia
+  - alopecia areata
+  - androgenetic alopecia
+  - non-melanoma skin carcinoma
+  - cutaneous melanoma
+  - melanoma
+  - collagen alpha-1(I) chain measurement
+  - connective tissue growth factor measurement
+  - fibroblast growth factor 2 measurement
+  - fibroblast growth factor 21 measurement
+eQTL Catalogue:
+  - fibroblast
+  - iPSC
+  - skin
+  - skin (suprapubic)
+  - adipose
+  - adipose (visceral)
+KnockTF (scoring):
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Lung_fibroblast
+  - Foreskin
+  - Skin
+  - Embryonic
+KnockTF (forecasting):
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Lung_fibroblast
+  - Foreskin
+  - Skin
+  - Embryonic

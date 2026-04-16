@@ -1,0 +1,152 @@
+TF-Marker:
+  - Pituitary
+  - Pituitary adenoma cell
+  - Endocrine cell
+  - Neuroendocrine neoplasia cell
+  - Brain
+  - Brain cell
+  - Neuroblast cell
+  - Stem cell
+  - Stromal cell
+  - Endothelial cell
+  - Endothelium
+  - Fibroblast cell
+  - Macrophage cell
+  - Macrophages cell
+  - Gland cell
+HPA:
+  - Pituitary gland
+  - Endocrine & Neural
+  - Brain
+  - Neurons
+  - Neuronal
+  - Adrenal gland
+  - Thyroid gland
+  - Parathyroid gland
+  - Fibroblasts
+  - Macrophages
+  - Adipocytes & Endothelial cells
+  - Connective tissue cells
+ChIP-Atlas:
+  - Brain
+  - Neural
+  - Neural Stem Cells
+  - Neural progenitor cells
+  - Neurons
+  - Adrenal Glands
+  - Thyroid Gland
+  - Gonad
+  - hESC derived endocrine progenitor cells
+  - hESC derived neural cells
+  - hESC H1
+  - hESC H9
+  - iPSC derived neural cells
+  - Pluripotent stem cell
+  - Mesenchymal stem cells
+  - Endothelial Cells
+  - Primary endothelial cells
+  - Fibroblasts
+  - Macrophages
+ReMap 2022:
+  - embryonic kidney cell line
+  - fetal cell line
+  - astrocyte
+  - endothelial cell
+  - fibroblast
+  - macrophage
+  - mesenchymal cell
+UniBind:
+  - adrenal gland
+  - H295R  adrenal cortex carcinoma
+  - thyroid gland
+  - neural progenitor
+  - neural progenitors
+  - astrocyte
+  - NA A  astrocytes
+  - embryonic stem cells
+  - H1 hESC
+  - H9
+  - WA01  H1  human embryonic stem cells
+  - hesc
+  - esc
+  - esc h1
+  - esc h9
+  - iPSC  induced pluripotent stem cells
+  - induced pluripotent stem cells
+  - mesenchymal
+  - fibroblasts
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+GWAS Catalog:
+  - Pituitary Gland Adenoma
+  - pituitary adenylate cyclase-activating polypeptide 38 measurement
+  - prolactin receptor measurement
+  - prolactin-releasing peptide measurement
+  - corticotropin measurement
+  - corticotropin-releasing factor-binding protein measurement
+  - growth hormone receptor measurement
+  - response to growth hormone
+  - IGF-1 measurement
+  - IGFBP-1 measurement
+  - IGFBP-3 measurement
+  - insulin-like growth factor I measurement
+  - insulin-like growth factor 1 receptor measurement
+  - thyroid stimulating hormone measurement
+  - thyroid function
+  - hypothyroidism
+  - hyperthyroidism
+  - autoimmune thyroid disease
+  - follicle stimulating hormone measurement
+  - luteinizing hormone measurement
+  - human Chorionic Gonadotropin measurement
+  - testosterone measurement
+  - estrogen measurement
+  - cortisol measurement
+  - cortisol secretion measurement
+  - body height
+  - height growth measurement
+  - puberty
+  - puberty onset measurement
+  - Central precocious puberty
+  - age at menarche
+  - age at menopause
+  - amenorrhea
+  - female infertility
+  - polycystic ovary syndrome
+  - primary ovarian insufficiency
+  - erectile dysfunction
+  - bone mineral content measurement
+  - osteoporosis
+  - body mass index
+  - obesity
+  - metabolic syndrome
+  - diabetes mellitus
+  - insulin resistance
+  - glucose homeostasis measurement
+eQTL Catalogue:
+  - pituitary
+  - brain (hypothalamus)
+  - brain (cortex)
+  - brain (DLPFC)
+  - adrenal gland
+  - thyroid
+  - ovary
+  - testis
+  - fibroblast
+  - macrophage
+KnockTF (scoring):
+  - Adrenal_gland
+  - Brain
+  - Central_nervous_system
+  - Neuroepithelium
+  - Embryonic
+  - Endothelium
+  - Fibroblasts
+KnockTF (forecasting):
+  - Adrenal_gland
+  - Brain
+  - Central_nervous_system
+  - Neuroepithelium
+  - Embryonic
+  - Endothelium
+  - Fibroblasts

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning][].
 
 ### Changed
 
+- Dataset filtering terms moved from inline Python dicts in `config.py` into bundled YAML files (`src/gretapy/data/`), loaded at import time. This reduces `config.py` from ~2,600 lines to ~260 lines with no change to the public API.
 - `pl.links`: legend is now displayed once on the middle TF panel (with multi-column layout for many GRNs) instead of being repeated on every subplot.
 - `mt.correlation` now filters for promoters first and then computes correlations, reducing the number of compute.
 

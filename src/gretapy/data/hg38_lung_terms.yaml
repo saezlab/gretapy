@@ -1,0 +1,263 @@
+TF-Marker:
+  - Lung
+  - Lung Cancer Cell
+  - Lung Carcinoma cell
+  - Lung adenoCarcinoma cell
+  - Lung adenocarcinoma
+  - Lung cancer cell
+  - Lung carcinoma cell
+  - Adenocarcinoma of lung cell
+  - Epithelial lung tumours cell
+  - Metastatic small cell lung carcinoma cell
+  - Small lung cell
+  - Pulmonary epithelial cell and Thyroid cancer cell
+  - Respiratory tract
+  - Endothelial cell
+  - Endothelium
+  - Artery
+  - Artery cell
+  - Cardiovascular
+  - Smooth muscle cell
+  - Epithelial cell
+  - Basal cell
+  - Fibroblast cell
+  - Macrophage cell
+  - Macrophages cell
+  - Dendritic cell
+  - T cell
+  - B cell
+  - Natural killer cell
+HPA:
+  - Alveolar cells
+  - Respiratory epithelial cells
+  - Ciliated cells
+  - Smooth muscle cells
+  - Smooth muscle tissue
+  - Fibroblasts
+  - Macrophages
+  - Monocytes
+  - Dendritic cells
+  - Lymphatic endothelial cells
+  - Adipocytes & Endothelial cells
+  - Squamous epithelial cells
+ChIP-Atlas:
+  - Lung
+  - Lung adenocarcinoma
+  - Lung cancer
+  - Lung cancer cell line
+  - Lung fibroblasts
+  - Non-small cell lung cancer
+  - Small cell lung cancer
+  - Bronchial epithelial cells
+  - Bronchial tracheal epithelial cells
+  - Tracheal epithelial cells
+  - hESC derived lung cells
+  - Pulmonary artery endothelial cells
+  - Endothelial Cells
+  - Primary endothelial cells
+  - iPSC derived endothelial cells
+  - Coronary artery cells
+  - Coronary artery smooth muscle
+  - Aortic smooth muscle cells
+  - Vascular smooth muscle cells
+  - Mesothelial cells
+  - AT1
+  - Fibroblasts
+  - Myofibroblasts
+  - Macrophages
+  - Monocytes
+  - Monocytes-CD14+
+  - Dendritic Cells
+  - T cells
+  - CD4+ T cells
+  - CD8+ T cells
+  - Memory T cells
+  - B cells
+  - Naive B cells
+  - Memory B cells
+  - Natural killer cells
+  - Natural Killer T-Cells
+  - Cardiovascular
+  - A549
+  - BEAS-2B
+  - Calu-1
+  - Calu-3
+  - HCC827
+  - PC-9
+  - NCI-H23
+  - NCI-H69
+  - NCI-H82
+  - NCI-H128
+  - NCI-H209
+  - NCI-H211
+  - NCI-H358
+  - NCI-H441
+  - NCI-H446
+  - NCI-H460
+  - NCI-H520
+  - NCI-H524
+  - NCI-H526
+  - NCI-H838
+  - NCI-H889
+  - NCI-H1048
+  - NCI-H1299
+  - NCI-H1437
+  - NCI-H1703
+  - NCI-H1836
+  - NCI-H1963
+  - NCI-H1975
+  - NCI-H1993
+  - NCI-H2087
+  - NCI-H2107
+  - NCI-H2126
+  - NCI-H2171
+  - NCI-H3122
+ReMap 2022:
+  - lung
+  - artery
+  - epithelial cell
+  - endothelial cell
+  - fibroblast
+  - macrophage
+  - monocyte
+  - monocyte-derived dendritic cell
+  - BEAS-2B cell
+  - Calu-1 cell
+  - NCI-H128 cell
+  - NCI-H1703 cell
+  - NCI-H1975 cell
+  - NCI-H441 cell
+  - NCI-H460 cell
+  - NCI-H520 cell
+  - NCI-H82 cell
+  - NCI-H889 cell
+  - PC-9 cell
+UniBind:
+  - lung
+  - upper lobe of left lung
+  - bronchial epithelial cells
+  - A549
+  - A549  lung carcinoma
+  - BEAS 2B  bronchial epithelium
+  - Calu 3  lung adenocarcinoma
+  - calu3
+  - PC9  lung adenocarcinoma
+  - NCI H358  human nnon small cell lung cancer cell line
+  - NCI H460  Large cell lung carcinoma
+  - NCI H2171  small cell lung carcinoma
+  - HCC95  squamous cell lung carcinoma
+  - sclc asclp
+  - sclc asclp ne
+  - IMR90  lung fibroblasts
+  - MRC 5  fetal lung fibroblasts
+  - NHLF  lung fibroblasts
+  - normal lung fibroblasts
+  - HASM2  Human airway smooth muscle 2
+  - artery smooth muscle
+  - smooth muscle cell
+  - coronary artery
+  - tibial artery
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+  - fibroblasts
+  - BJ  fibroblasts
+  - macrophages
+  - MDM monocyte derived macrophages
+  - monocyte derived macrophages
+  - B cells
+  - T cells
+  - CD4  T cells
+  - CD4  CD25  T cells
+GWAS Catalog:
+  - lung cancer
+  - lung carcinoma
+  - lung adenocarcinoma
+  - non-small cell lung carcinoma
+  - small cell lung carcinoma
+  - squamous cell lung carcinoma
+  - family history of lung cancer
+  - lung disease severity measurement
+  - lung volume
+  - chronic obstructive pulmonary disease
+  - idiopathic pulmonary fibrosis
+  - interstitial lung disease
+  - pulmonary fibrosis
+  - pulmonary function measurement
+  - pulmonary arterial hypertension
+  - pulmonary artery enlargement
+  - pulmonary embolism
+  - pulmonary alveolar proteinosis
+  - pulmonary neuroendocrine tumor
+  - pulmonary non-tuberculous mycobacterial infection
+  - pulmonary tuberculosis
+  - pulmonary surfactant-associated protein C measurement
+  - pulmonary surfactant-associated protein d measurement
+  - bronchiectasis
+  - bronchitis
+  - chronic bronchitis
+  - bronchopulmonary dysplasia
+  - diffusing capacity of the lung for carbon monoxide
+  - asthma
+  - adult onset asthma
+  - age of onset of asthma
+  - age of onset of childhood onset asthma
+  - atopic asthma
+  - childhood onset asthma
+  - Aspirin-induced asthma
+  - Chronic Obstructive Asthma
+  - asthma exacerbation measurement
+  - asthma symptoms measurement
+  - FEV/FVC ratio
+  - FEV change measurement
+  - FVC change measurement
+  - emphysema
+  - emphysema imaging measurement
+  - emphysema pattern measurement
+  - airway hyperresponsiveness
+  - airway imaging measurement
+  - airway responsiveness measurement
+  - airway wall thickness measurement
+  - Cough
+  - wheezing
+  - acute respiratory distress syndrome
+  - respiratory failure
+  - respiratory symptom measurement
+  - respiratory symptom change measurement
+  - respiratory system disease
+  - respiratory tract infectious disorder
+  - upper respiratory tract disorder
+  - pneumonia
+  - susceptibility to pneumonia measurement
+  - pneumothorax
+  - pneumoconiosis
+  - severe acute respiratory syndrome
+  - mesothelin measurement
+eQTL Catalogue:
+  - lung
+  - fibroblast
+  - macrophage
+  - monocyte
+  - CD16+ monocyte
+  - T cell
+  - CD4+ T cell
+  - CD4+ memory T cell
+  - CD8+ T cell
+  - B cell
+  - memory B cell
+  - NK cell
+  - CD56+ NK cell
+  - artery (aorta)
+  - artery (coronary)
+  - artery (tibial)
+KnockTF (scoring):
+  - Lung
+  - Lung_fibroblast
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Endothelium
+KnockTF (forecasting):
+  - Lung
+  - Lung_fibroblast
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Endothelium

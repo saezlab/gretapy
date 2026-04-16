@@ -1,0 +1,260 @@
+TF-Marker:
+  - Skin
+  - Skin carcinoma cell
+  - Epidermis
+  - Keratinocytes cell
+  - Melanocytes cell
+  - Benign melanocytic nevus cell
+  - Uveal melanoma cell
+  - Cutaneous neuroendocrine carcinoma cell
+  - Cutaneous squamous cell carcinoma cell
+  - Squamous cell
+  - Basal cell
+  - Hair follicle
+  - Sebaceous gland
+  - Sebaceous gland cancer cell
+  - Foreskin
+  - Foreskin carcinoma cell
+  - Fibroblast cell
+  - Endothelial cell
+  - Endothelium
+  - Macrophage cell
+  - Macrophages cell
+  - Dendritic cell
+  - T cell
+  - Immune
+HPA:
+  - Skin
+  - Skin cancer
+  - Suprabasal keratinocytes
+  - Squamous epithelial cells
+  - Squamous epithelium
+  - Schwann cells & Melanocytes
+  - Langerhans cells
+  - Fibroblasts
+  - Connective tissue
+  - Connective tissue cells
+  - Adipose tissue
+  - Macrophages
+  - Dendritic cells
+ChIP-Atlas:
+  - Leg skin
+  - Suprapubic skin
+  - Epidermis
+  - Keratinocytes
+  - Differentiated keratinocytes
+  - hESC derived epidermal cells
+  - Melanocytes
+  - Melanoma
+  - Melanoma cell line
+  - Uveal melanoma
+  - SK-MEL-5
+  - SK-MEL-28
+  - SK-MEL-147
+  - COLO 800
+  - COLO 829
+  - WM262
+  - WM451
+  - WM853
+  - HaCaT
+  - Foreskin
+  - Fibroblasts
+  - Skin fibroblasts
+  - Dermal fibroblast
+  - Myofibroblasts
+  - BJ
+  - BJ-5ta
+  - WI-38
+  - Adipose Tissue
+  - Adipose stem cells
+  - Adipose stromal cell
+  - Adipose-Derived Mesenchymal Stem Cells
+  - Subcutaneous adipose tissue
+  - White adipose tissue
+  - Endothelial Cells
+  - Primary endothelial cells
+  - Macrophages
+  - Dendritic Cells
+  - Mast Cells
+  - T cells
+  - CD4+ T cells
+  - CD8+ T cells
+  - Memory T cells
+ReMap 2022:
+  - keratinocyte
+  - melanocyte
+  - HaCaT cell
+  - fibroblast
+  - WI-38 cell
+  - endothelial cell
+  - macrophage
+  - monocyte-derived dendritic cell
+UniBind:
+  - lower leg skin
+  - suprapubic skin
+  - keratinocyte
+  - keratinocytes
+  - keratinocyte diff
+  - keratinocyte d0
+  - keratinocyte d2
+  - keratinocyte d4
+  - keratinocyte d7
+  - keratinocytes lacz
+  - keratinocytes lacz diff
+  - keratinocytes shctr
+  - keratinocytes shsnai2
+  - keratinocytes snai2
+  - keratinocytes snai2 diff
+  - neonatal keratinocytes
+  - epidermal keratinocytes
+  - epidermal keratinocytes prolif
+  - epidermal keratinocyte kdpaf
+  - normal epidermal keratinocytes
+  - human keratinocytes
+  - foreskin keratinocyte
+  - HaCaT  keratinocytes
+  - hacat lacz not
+  - hacat lacz tgfb
+  - hacat caras tgfb
+  - hacat dnras tgfb
+  - HNEK  epidermal keratinocytes
+  - melanocytes
+  - melanocyte ctr
+  - melanocyte brafv600e
+  - A375  malignant melanoma
+  - a375 dmso
+  - a375 a771726
+  - COLO800  human melanoma cells
+  - COLO 829  melanoma
+  - MKL 1  Merkel cell carcinoma
+  - fibroblasts
+  - BJ  fibroblasts
+  - BJ
+  - bj induced
+  - dermal fibroblasts
+  - NHDF Ad  adult dermal fibroblasts
+  - foreskin fibroblast
+  - primary foreskin fibroblasts
+  - FB8470  fibroblasts
+  - FB0167P  progeria fibroblasts
+  - subcutaneous adipose tissue
+  - subcutaneous white adipose tissue
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+  - macrophages
+  - MDM monocyte derived macrophages
+  - monocyte derived macrophages
+  - T cells
+  - CD4  T cells
+  - CD4  CD25  T cells
+  - CD4  CD25  CD45RA  T cells
+GWAS Catalog:
+  - skin disease
+  - skin neoplasm
+  - skin carcinoma in situ
+  - non-melanoma skin carcinoma
+  - skin pigmentation
+  - skin pigmentation measurement
+  - skin aging measurement
+  - skin sensitivity to sun
+  - skin barrier function measurement
+  - skin hydration measurement
+  - skin roughness measurement
+  - skin conductance level
+  - skin conductance response amplitude
+  - skin conductance response frequency
+  - skin fluorescence measurement
+  - skin microbiome measurement
+  - skin and soft tissue Staphylococcus aureus infection
+  - Dry skin
+  - disturbance of skin sensation
+  - Telangiectasia of the skin
+  - sunburn
+  - melanoma
+  - cutaneous melanoma
+  - choroidal melanoma
+  - Uveal Melanoma
+  - uveal melanoma disease severity
+  - Epithelioid Cell Uveal Melanoma
+  - basal cell carcinoma
+  - squamous cell carcinoma
+  - cutaneous squamous cell carcinoma
+  - keratinocyte carcinoma
+  - multiple keratinocyte carcinoma susceptibility measurement
+  - psoriasis
+  - psoriasis vulgaris
+  - psoriasis 14
+  - psoriatic arthritis
+  - cutaneous psoriasis measurement
+  - atopic eczema
+  - Eczematoid dermatitis
+  - recalcitrant atopic dermatitis
+  - Vitiligo
+  - alopecia
+  - alopecia areata
+  - androgenetic alopecia
+  - frontal fibrosing alopecia
+  - chemotherapy-induced alopecia
+  - acne
+  - rosacea severity measurement
+  - dermatomyositis
+  - clinically amyopathic dermatomyositis
+  - juvenile dermatomyositis
+  - systemic scleroderma
+  - diffuse scleroderma
+  - limited scleroderma
+  - anti-centromere-antibody-positive systemic scleroderma
+  - anti-topoisomerase-I-antibody-positive systemic scleroderma
+  - systemic lupus erythematosus
+  - cutaneous lupus erythematosus
+  - neonatal systemic lupus erythematosus
+  - pemphigus
+  - pemphigus vulgaris
+  - pemphigus foliaceus
+  - bullous pemphigoid
+  - lichen planus
+  - oral lichen planus
+  - urticaria
+  - angioedema
+  - Erythema nodosum
+  - Keloid
+  - postburn hypertrophic scarring severity measurement
+  - nevus
+  - nevus count
+  - hair color
+  - hair colour measurement
+  - eye color
+  - eye colour measurement
+  - dermatological toxicity
+  - severe cutaneous adverse reaction
+  - toxic epidermal necrolysis
+  - subcutaneous adipose tissue measurement
+  - aging
+  - allergic disease
+  - autoimmune disease
+eQTL Catalogue:
+  - skin
+  - skin (suprapubic)
+  - fibroblast
+  - adipose
+  - adipose (visceral)
+  - macrophage
+  - dendritic cell
+  - T cell
+  - CD4+ T cell
+  - CD4+ memory T cell
+  - CD8+ T cell
+KnockTF (scoring):
+  - Skin
+  - Foreskin
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Immortalized_keratinocyte
+  - Endothelium
+KnockTF (forecasting):
+  - Skin
+  - Foreskin
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Immortalized_keratinocyte
+  - Endothelium

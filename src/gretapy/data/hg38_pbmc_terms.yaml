@@ -1,0 +1,288 @@
+TF-Marker:
+  - B cell
+  - T cell
+  - Natural killer cell
+  - Dendritic cell
+  - Macrophage cell
+  - Neutrophil cell
+  - Plasma cell
+  - Thymocyte cell
+  - Hematopoietic cell
+  - Lymphoid cell
+  - Erythroid cell
+  - Blood
+  - Blood cell
+  - Peripheral blood
+  - Peripheral blood cell
+  - Bone marrow
+  - Bone marrow cell
+  - Cord blood
+  - Thymus
+  - Lymph
+  - Immune
+  - Leukemia cell
+  - Acute lymphoblastic leukemia cell
+  - Chronic myeloid leukemia cell
+HPA:
+  - B
+  - T
+  - NK
+  - Monocytes
+  - Macrophages
+  - Dendritic cells
+  - Neutrophils
+  - Granulocytes
+  - Plasma cells
+  - Erythroid cells
+  - Bone marrow
+  - Lymphoid tissue
+  - Lymphoid tissue & Bone marrow
+  - Spleen
+  - Thymus
+  - Leukemia
+  - Myeloid leukemia
+  - Lymphoma
+  - Myeloma
+ChIP-Atlas:
+  - PBMC
+  - Peripheral blood mononuclear cells
+  - Blood
+  - B-Cell
+  - B-cell (CD19+)
+  - B cells
+  - Naive B cells
+  - Memory B cells
+  - T cells
+  - CD4+ T cells
+  - CD8+ T cells
+  - Memory T cells
+  - CAR-T cells
+  - Natural killer cells
+  - Natural Killer T-Cells
+  - NK-92
+  - Monocytes
+  - Monocytes-CD14+
+  - Macrophages
+  - Dendritic Cells
+  - Neutrophils
+  - Mast Cells
+  - Plasma Cells
+  - Plasmablasts
+  - Hematopoietic cells
+  - Hematopoietic Stem Cells
+  - CD34+
+  - CD34+ cells
+  - CD34 Hematopoietic stem cells
+  - Erythroblasts
+  - Erythroid Cells
+  - Erythroid progenitors
+  - Bone Marrow Cells
+  - Bone marrow mononuclear cells
+  - Cord blood mononuclear
+  - Peripheral blood stem cells
+  - Lymphoblastoid cells
+  - Lymphoblastoid cell line
+  - Lymphoblasts
+  - Spleen
+  - Thymus
+  - Lymph Nodes
+  - Myeloid
+  - Leukemia
+  - Leukemia cell line
+  - Acute lymphoid leukemia
+  - Acute myeloid leukemia
+  - Acute promyelocytic leukemia
+  - Chronic myeloid leukemia
+  - Pre-B ALL
+  - Pre-B cell leukemia
+  - Pre-B cells
+  - B-ALL
+  - T-ALL
+  - Multiple Myeloma
+  - Lymphoma
+  - Burkitt Lymphoma
+  - Anaplastic large cell lymphoma
+  - Hodgkins lymphoma cell line
+  - Jurkat
+  - Jurkat (Clone E6-1)
+  - K-562
+  - HL-60
+  - THP-1
+  - U-937
+  - MOLT-4
+  - MOLT-14
+  - NALM-6
+  - REH
+  - SEM
+  - RS4-11
+  - RAJI
+  - ALL-SIL
+  - HPB-ALL
+  - TALL-1
+  - OCI-AML3
+ReMap 2022:
+  - monocyte
+  - lymphocyte
+  - macrophage
+  - monocyte-derived dendritic cell
+  - erythroblast
+  - erythroid cell
+  - K-562 cell
+  - HL-60 cell
+  - THP-6 cell
+  - REH cell
+  - ALL-SIL cell
+  - BJAB cell
+UniBind:
+  - B cells
+  - T cells
+  - CD4  T cells
+  - CD4  CD25  T cells
+  - CD4  CD25  CD45RA  T cells
+  - monocytes blood
+  - monocytes of peripheral blood
+  - peripheral blood mononuclear cells
+  - macrophage
+  - macrophages
+  - macrophages ifng
+  - macrophages il4
+  - MDM monocyte derived macrophages
+  - monocyte derived macrophages
+  - neutrophils
+  - thymocyte
+  - lymphocyte blood
+  - lymphoblastoid
+  - lymphoblastoid cells
+  - germinal center B cells
+  - erythroblast
+  - erythroid
+  - erythroid progenitors
+  - primary erythroblasts
+  - megakaryocytes
+  - CD34  hematopoietic stem cells
+  - CD34  bone marrow cell derived erythroid progenitors
+  - CD34 CD133  hematopoietic progenitors
+  - cord blood CD34 cells
+  - bone marrow
+  - spleen
+  - jurkat
+  - Jurkat  T cells
+  - Jurkat E6.1  T cells
+  - k562
+  - K562
+  - K562  myelogenous leukemia
+  - HL 60
+  - HL 60  acute myeloid leukemia
+  - thp1
+  - THP 1  acute monocytic leukemia
+  - u937
+  - U937  adult acute monocytic leukemia
+  - nalm6
+  - NALM 6  adult B acute lymphoblastic leukemia
+  - sem
+  - Raji  Burkitt lymphoma
+  - Namalwa  Burkitt lymphoma
+  - Reh  ATCC CRL 8286
+  - acute myeloblastic leukemia
+  - acute promyelocytic leukemia blasts
+  - NB4  acute promyelocytic leukemia
+  - Kasumi 1  acute myeloblastic leukemia
+  - OCI AML3
+  - DND41  acute lymphoblastic leukemia
+  - DOHH2  diffuse large B cell lymphoma
+  - OCI LY1  diffuse large B cell lymphoma
+  - OCI LY7  diffuse large B cell lymphoma
+  - SU DHL 10  diffuse large B cell lymphoma
+  - TMD8  diffuse large B cell lymphoma
+  - HBL1  diffuse large B cell lymphoma
+  - L428  Hodgkin lymphoma
+  - MM1.S  plasma cell myeloma
+  - H929  plasma cell myeloma
+  - U266  plasma cell myeloma
+  - GM12878  female B cells
+  - GM12878  female B cells lymphoblastoid cell line
+GWAS Catalog:
+  - leukocyte count
+  - lymphocyte count
+  - monocyte count
+  - neutrophil count
+  - basophil count
+  - eosinophil count
+  - platelet count
+  - lymphocyte percentage of leukocytes
+  - monocyte percentage of leukocytes
+  - neutrophil percentage of leukocytes
+  - lymphocyte:monocyte ratio
+  - neutrophil-to-lymphocyte ratio
+  - acute lymphoblastic leukemia
+  - acute myeloid leukemia
+  - chronic lymphocytic leukemia
+  - chronic myelogenous leukemia
+  - B-cell acute lymphoblastic leukemia
+  - childhood acute lymphoblastic leukemia
+  - lymphoid leukemia
+  - lymphoma
+  - Hodgkins lymphoma
+  - non-Hodgkins lymphoma
+  - diffuse large B-cell lymphoma
+  - follicular lymphoma
+  - multiple myeloma
+  - autoimmune disease
+  - rheumatoid arthritis
+  - systemic lupus erythematosus
+  - multiple sclerosis
+  - type 1 diabetes mellitus
+  - inflammatory bowel disease
+  - Crohn's disease
+  - ulcerative colitis
+  - celiac disease
+  - psoriasis
+  - Graves disease
+  - Hashimoto's thyroiditis
+  - Sjogren syndrome
+  - ankylosing spondylitis
+  - sarcoidosis
+  - vasculitis
+eQTL Catalogue:
+  - blood
+  - B cell
+  - memory B cell
+  - T cell
+  - CD4+ T cell
+  - CD4+ memory T cell
+  - CD8+ T cell
+  - dnT cell
+  - gdT cell
+  - MAIT cell
+  - NK cell
+  - CD56+ NK cell
+  - monocyte
+  - CD16+ monocyte
+  - macrophage
+  - dendritic cell
+  - plasmacytoid dendritic cell
+  - neutrophil
+  - plasmablast
+  - hematopoietic precursor cell
+  - LCL
+  - spleen
+KnockTF (scoring):
+  - Blood
+  - Peripheral_blood
+  - Haematopoietic_and_lymphoid_tissue
+  - Haematopoietic_and_lymphoid_tissue_Blood
+  - Bone_marrow
+  - Lymph
+  - Cord_blood
+  - Cord_Blood
+  - Umbilical_cord_blood
+KnockTF (forecasting):
+  - Blood
+  - Peripheral_blood
+  - Haematopoietic_and_lymphoid_tissue
+  - Haematopoietic_and_lymphoid_tissue_Blood
+  - Bone_marrow
+  - Lymph
+  - Cord_blood
+  - Cord_Blood
+  - Umbilical_cord_blood

@@ -1,0 +1,204 @@
+TF-Marker:
+  - Astrocyte cell
+  - Brain
+  - Brain cell
+  - Glial cell
+  - Nerve
+  - Nerve cell
+  - Neuroblast cell
+  - Oligodendrocyte cell
+  - Endothelial cell
+  - Endothelium
+  - T cell
+  - Cerebellar granule neuron progenitors cell
+  - Glioblastoma cell
+  - Human Brain Glioma cell
+  - Malignant astrocytic gliomas cell
+  - Malignant brain cell
+  - Neuroblastoma cell
+  - Brain carcinoma cell
+HPA:
+  - Astrocytes
+  - Brain
+  - Neurons
+  - Neuronal
+  - Oligodendrocytes
+  - Oligodendrocyte precursor
+  - Cerebellum
+  - Neuroblastoma
+ChIP-Atlas:
+  - Astrocytes
+  - Brain
+  - Neurons
+  - Excitatory neuron
+  - Microglia
+  - Neural
+  - Neural Stem Cells
+  - Neural progenitor cells
+  - Endothelial Cells
+  - Primary endothelial cells
+  - T cells
+  - CD4+ T cells
+  - CD8+ T cells
+  - Fetal astrocytes
+  - Fetal neural cells
+  - Fetal neural progenitor cells
+  - Frontal cortex
+  - Prefrontal Cortex
+  - Dorsal lateral prefrontal cortex
+  - Anterior temporal cortex
+  - Hippocampus
+  - hESC derived glial cells
+  - hESC derived neural cells
+  - iPSC derived astrocytes
+  - iPSC derived neural cells
+  - iPSC derived hippocampal cells
+  - iPSC derived endothelial cells
+  - Glioblastoma
+  - Glioblastoma stem cells
+  - Glioma
+  - Glioma stem cells
+  - Neuroblastoma
+  - SH-SY5Y
+  - SK-N-SH
+  - SK-N-AS
+  - SK-N-BE(2)
+  - SK-N-MC
+  - SK-N-MM
+  - IMR-32
+  - KELLY
+  - NGP
+  - NB-1643
+  - BE(2)-C
+  - CHP-134
+  - SH-EP
+  - LUHMES
+  - NTERA-2
+  - U-87 MG
+ReMap 2022:
+  - astrocyte
+  - endothelial cell
+  - neuroblastoma cell
+  - glioma cell
+  - SH-SY5Y cell
+UniBind:
+  - astrocyte
+  - NA A  astrocytes
+  - bipolar neuron
+  - IPSC derived bipolar neuron
+  - neural progenitor
+  - neural progenitors
+  - H9 derived neural crest cells
+  - cranial neural crest cells
+  - SH SY5Y
+  - SH SY5Y  neuroblastoma
+  - SK N SH
+  - SK N SH  neuroblastoma
+  - SK N AS  neuroblastoma
+  - IMR 5  Neuroblastoma
+  - Kelly  neuroblastoma
+  - NGP  neuroblastoma
+  - NB 1643  neuroblastoma
+  - NB69  neuroblastoma
+  - CLB Ga  neuroblastoma
+  - Tet21N  neuroblastoma
+  - MYCN3  neuroblastoma cell line with inducible MYCN expression
+  - U87  glioblastoma
+  - u87mg
+  - BT168  glioblastoma stem cells
+  - D54  glioblastoma
+  - G523NS  glioblastoma
+  - glioblastoma cells
+  - SF268  astrocytoma
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+GWAS Catalog:
+  - Parkinson disease
+  - Parkinson's disease symptom measurement
+  - age of onset of Parkinson disease
+  - Alzheimer disease
+  - Alzheimer's disease biomarker measurement
+  - Alzheimer's disease neuropathologic change
+  - late-onset Alzheimers disease
+  - age of onset of Alzheimer disease
+  - Huntington disease
+  - amyotrophic lateral sclerosis
+  - multiple sclerosis
+  - multiple sclerosis symptom measurement
+  - age of onset of multiple sclerosis
+  - dementia
+  - Lewy body dementia
+  - frontotemporal dementia
+  - epilepsy
+  - generalised epilepsy
+  - childhood absence epilepsy
+  - Rolandic epilepsy
+  - juvenile myoclonic epilepsy
+  - Ischemic stroke
+  - hemorrhagic stroke
+  - large artery stroke
+  - cardioembolic stroke
+  - intracerebral hemorrhage
+  - glioma
+  - glioblastoma multiforme
+  - malignant glioma
+  - neuroblastoma
+  - central nervous system cancer
+  - brain neoplasm
+  - brain aneurysm
+  - brain volume measurement
+  - brain cortex volume measurement
+  - hippocampal volume
+  - hippocampal atrophy
+  - grey matter volume measurement
+  - cerebral small vessel disease
+  - cerebral microbleeds
+  - cerebral amyloid angiopathy
+  - schizophrenia
+  - bipolar disorder
+  - bipolar I disorder
+  - bipolar II disorder
+  - autism spectrum disorder
+  - autism
+  - attention deficit hyperactivity disorder
+  - anxiety disorder
+  - cognitive function measurement
+  - memory performance
+  - glial fibrillary acidic protein measurement
+  - neurofilament light chain measurement
+  - microglial activation measurement
+eQTL Catalogue:
+  - brain (DLPFC)
+  - brain (amygdala)
+  - brain (anterior cingulate cortex)
+  - brain (caudate)
+  - brain (cerebellum)
+  - brain (cortex)
+  - brain (hippocampus)
+  - brain (hypothalamus)
+  - brain (nucleus accumbens)
+  - brain (putamen)
+  - brain (spinal cord)
+  - brain (substantia nigra)
+  - neocortex
+  - astrocyte
+  - microglia
+  - neuron
+  - dopaminergic neuron
+  - serotonergic neuron
+  - sensory neuron
+  - neural progenitor
+  - neuroblast
+  - T cell
+  - CD4+ T cell
+  - CD8+ T cell
+KnockTF (scoring):
+  - Brain
+  - Neuroblastoma
+  - Neuroepithelium
+  - Endothelium
+KnockTF (forecasting):
+  - Brain
+  - Neuroblastoma
+  - Neuroepithelium
+  - Endothelium

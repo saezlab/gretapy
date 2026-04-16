@@ -1,0 +1,114 @@
+TF-Marker:
+  - Eye
+  - Retina
+  - Retinal cell
+  - Cornea
+HPA:
+  - Retina
+  - Retina & Testis
+  - Photoreceptor cells
+  - Bipolar cells
+  - Horizontal & Bipolar cells
+  - Muller glia cells
+ChIP-Atlas:
+  - Retina
+  - RPE
+  - HRPEpiC
+  - hTERT RPE-1
+  - Corneal
+  - Astrocytes
+  - Microglia
+  - hESC derived retinal cells
+  - iPSC derived retinal cells
+  - hESC derived glial cells
+  - iPSC derived astrocytes
+  - WERI-Rb-1
+  - Y79
+ReMap 2022:
+  - astrocyte
+UniBind:
+  - retinal pigment
+  - E14 retina
+  - E16 retina
+  - E18 retina
+  - E23 retina
+  - hTERT RPE1
+  - WERI Rb 1
+  - astrocyte
+  - NA A  astrocytes
+  - bipolar neuron
+  - IPSC derived bipolar neuron
+GWAS Catalog:
+  - eye disease
+  - eye color
+  - eye colour measurement
+  - eye measurement
+  - eye morphology measurement
+  - eye movement measurement
+  - exploratory eye movement measurement
+  - Abnormality of the eye
+  - diabetic eye disease
+  - eyelid sagging measurement
+  - retinal detachment
+  - retinal break
+  - retinal drusen
+  - retinal layer thickness measurement
+  - retinal nerve fibre layer thickness measurement
+  - retinal vasculature measurement
+  - rhegmatogenous retinal detachment
+  - photoreceptor cell layer thickness measurement
+  - ganglion cell inner plexiform layer thickness measurement
+  - macular degeneration
+  - age-related macular degeneration
+  - atrophic macular degeneration
+  - wet macular degeneration
+  - diabetic macular edema
+  - macular telangiectasia type 2
+  - macula measurement
+  - glaucoma
+  - open-angle glaucoma
+  - primary angle closure glaucoma
+  - low tension glaucoma
+  - pigmentary glaucoma
+  - ocular hypertension
+  - ocular sarcoidosis
+  - intraocular pressure measurement
+  - intraocular pressure change measurement
+  - corneal endothelial cell measurement
+  - central corneal thickness
+  - corneal hysteresis
+  - corneal resistance factor
+  - corneal topography
+  - Corneal astigmatism
+  - Fuchs endothelial corneal dystrophy
+  - cataract
+  - Age-related cataract
+  - Age-related nuclear cataract
+  - Myopia
+  - pathological myopia
+  - optic atrophy
+  - optic cup area measurement
+  - optic disc area measurement
+  - optic disc measurement
+  - optic disc size measurement
+  - neuromyelitis optica
+  - AQP4-IgG-positive neuromyelitis optica
+  - dry eye syndrome
+  - vision disorder
+  - color vision disorder
+  - retinitis pigmentosa
+  - retinopathy
+  - diabetic retinopathy
+  - proliferative diabetic retinopathy
+  - central serous retinopathy
+  - chronic central serous retinopathy
+  - birdshot chorioretinopathy
+eQTL Catalogue:
+  - astrocyte
+  - microglia
+KnockTF (scoring):
+  - Eye
+  - Corneal_epithelial
+KnockTF (forecasting):
+  - Eye
+  - Corneal_epithelial

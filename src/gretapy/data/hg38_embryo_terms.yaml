@@ -1,0 +1,170 @@
+TF-Marker:
+  - Embryo
+  - Embryonic cell
+  - Embryonic kidney cell
+  - Embryonal carcinoma cell
+  - Cytotrophoblast cell
+  - Syncytiotrophoblast cell
+  - Trophoblast cell
+  - Trophoblastic cell
+  - Stem cell
+HPA:
+  - Placenta
+  - Cytotrophoblasts
+  - Syncytiotrophoblasts
+  - Extravillous trophoblasts
+ChIP-Atlas:
+  - Embryo
+  - Pluripotent stem cell
+  - Cytotrophoblast
+  - Trophoblast stem cells
+  - Mesenchymal Stromal Cells
+  - Mesenchymal stem cells
+  - hESC H1
+  - hESC H9
+  - hESC Cyt49
+  - hESC HUES64
+  - hESC HUES8
+  - hESC RUES1
+  - hESC UCLA1
+  - hESC UCLA2
+  - hESC VAL-3
+  - hESC WA09
+  - hESC WIBR2
+  - hESC WIBR3
+  - T HESCs
+  - hESC derived ectodermal cells
+  - hESC derived endodermal cells
+  - hESC derived mesodermal cells
+  - hESC derived mesendodermal cells
+  - hESC derived neuromesodermal cells
+  - hESC derived trophoblast cells
+  - hESC derived cardiac cells
+  - hESC derived epidermal cells
+  - hESC derived glial cells
+  - hESC derived gut tube
+  - hESC derived hemogenic cells
+  - hESC derived hepatic progenitor
+  - hESC derived hepatoblasts
+  - hESC derived lung cells
+  - hESC derived neural cells
+  - hESC derived neural crests
+  - hESC derived osteoblasts
+  - hESC derived pancreatic cells
+  - hESC derived retinal cells
+  - hESC derived endocrine progenitor cells
+  - iPSC derived cells
+  - iPSC derived cardiac cells
+  - iPSC derived neural cells
+  - iPSC derived neural crests
+  - iPSC derived astrocytes
+  - iPSC derived chondrocytes
+  - iPSC derived endothelial cells
+  - iPSC derived hepatocytes
+  - iPSC derived hippocampal cells
+  - iPSC derived pancreatic cells
+  - iPSC derived retinal cells
+  - Adipose-Derived Mesenchymal Stem Cells
+ReMap 2022:
+  - embryonic kidney cell line
+  - fetal cell line
+UniBind:
+  - embryonic stem cells
+  - embryonic kidney
+  - H1 hESC
+  - H9
+  - WA01  H1  human embryonic stem cells
+  - WA09  embryonic stem cells
+  - BGO3  embryonic stem cells
+  - HUES64  embryonic stem cells
+  - HUES8  Embryonic stem cell  blastocyst stage
+  - UCLA1 hESCs
+  - hesc
+  - esc
+  - esc h1
+  - esc h9
+  - esc naive
+  - esc primed
+  - esc damaged
+  - esc wnt3a
+  - hES PRE
+  - h1 emb
+  - h1 mesen
+  - h1 mesen stem
+  - h1 neur
+  - h1 trop
+  - hes endoderm
+  - hes mesoderm
+  - endoderm
+  - definitive endoderm dEN  ES derived
+  - definitive endoderm from HUES8
+  - naive endoderm
+  - surface ectoderm cells
+  - mesenchymal
+  - mesenchymal stem cells derived adipocytes
+  - HEK293  embryonic kidney
+  - HEK293T  embryonic kidney
+  - HEK293 FT  human embryonic kidney  female transformed
+  - hiPSC
+  - iPSC  induced pluripotent stem cells
+  - induced pluripotent stem cells
+  - ipsc
+  - ipsc inhi
+  - ipsc kdp53 inhi
+  - iPSC derived cardiomyocytes
+  - H9 derived neural crest cells
+  - CyT49 derived endodermal cells
+  - MRC 5  fetal lung fibroblasts
+  - cd34 fetal
+  - fetal kidney 16w
+  - fetal kidney 17w
+GWAS Catalog:
+  - pregnancy disorder
+  - pregnancy induced alloimmunization
+  - pregnancy-induced
+  - gestational age
+  - gestational diabetes
+  - gestational blood glucose measurement
+  - gestational serum measurement
+  - fetal genotype effect measurement
+  - fetal hemoglobin measurement
+  - birth weight
+  - birth measurement
+  - birth rate
+  - body height at birth
+  - age at first birth measurement
+  - premature birth
+  - preterm premature rupture of the membranes
+  - spontaneous preterm birth
+  - Small for gestational age
+  - post term pregnancy
+  - number of pregnancies measurement
+  - multiple births measurement
+  - nausea and vomiting of pregnancy severity measurement
+  - Intrahepatic cholestasis of pregnancy
+  - Ectopic pregnancy
+  - Abruptio Placentae
+  - placenta growth factor measurement
+  - congenital heart disease
+  - congenital heart malformation
+  - congenital left-sided heart lesions
+  - congenital right-sided heart lesions
+  - Congenital hypothyroidism due to developmental anomaly
+  - developmental dysplasia of the hip
+  - mental development measurement
+  - motor development measurement
+  - Zika virus congenital syndrome
+eQTL Catalogue:
+  - placenta
+KnockTF (scoring):
+  - Embryo
+  - Embryo_kidney
+  - Embryonic
+  - Fetal_liver
+  - Fetal_spinal_cord
+KnockTF (forecasting):
+  - Embryo
+  - Embryo_kidney
+  - Embryonic
+  - Fetal_liver
+  - Fetal_spinal_cord

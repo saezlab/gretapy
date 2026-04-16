@@ -1,0 +1,198 @@
+TF-Marker:
+  - Breast
+  - Breast cancer
+  - Breast Cancer cell
+  - Breast cancer cell
+  - Breast carcinoma cell
+  - Triple negative breast cancer cell
+  - Epithelial cell
+  - epithelial cell
+  - Basal cell
+  - Fibroblast cell
+  - Endothelial cell
+  - Endothelium
+  - Macrophage cell
+  - Macrophages cell
+  - T cell
+HPA:
+  - Breast cancer
+  - Breast glandular cells
+  - Glandular & Luminal cells
+  - Fibroblasts
+  - Macrophages
+  - Adipocytes & Endothelial cells
+  - Lymphatic endothelial cells
+  - Squamous epithelial cells
+ChIP-Atlas:
+  - Breast
+  - Breast cancer
+  - Breast cancer cell line
+  - Breast cancer cells
+  - Breast cells
+  - Breast epithelium
+  - Breast luminal cells
+  - Breast organoids
+  - Mammary epithelial cells
+  - Mammary glands
+  - Mammary gland ductal carcinoma
+  - Fibroblasts
+  - Dermal fibroblast
+  - Cardiac fibroblasts
+  - Myofibroblasts
+  - Endothelial Cells
+  - Primary endothelial cells
+  - Macrophages
+  - T cells
+  - CD4+ T cells
+  - CD8+ T cells
+  - Memory T cells
+  - MCF 10A
+  - MCF-7
+  - MCF-7-LTED
+  - MCF-12A
+  - MCF10CA1a
+  - MCF10DCIS.com
+  - MDA-MB-134-VI
+  - MDA-MB-157
+  - MDA-MB-175-VII
+  - MDA-MB-231
+  - MDA-MB-361
+  - MDA-MB-435
+  - MDA-MB-436
+  - MDA-MB-453
+  - MDA-MB-468
+  - BT-20
+  - BT-474
+  - BT-549
+  - T-47D
+  - ZR-75-1
+  - HCC1143
+  - HCC1187
+  - HCC1428-LTED
+  - HCC1599
+  - HCC1819
+  - HCC1937
+  - HCC1954
+  - HCC1955
+  - SUM 149PT
+  - SUM 159PT
+  - SUM 185PE
+  - SUM 229PE
+  - SUM 44PE
+  - CAMA-1
+ReMap 2022:
+  - breast
+  - epithelial cell
+  - fibroblast
+  - endothelial cell
+  - macrophage
+  - MCF-7 cell
+  - MCF-10A cell
+  - MDA-MB-435 cell
+  - MDA-MB-468 cell
+  - BT-549 cell
+UniBind:
+  - breast epithelial cells
+  - breast cancer goodOutcome
+  - breast tumor
+  - breast tumor xenograft
+  - breast tumour metastasis
+  - breast glyc
+  - 226LDM  normal breast luminal cells
+  - HMEC  human mammary epithelial cells
+  - A1 2  breast cancer cells
+  - A1A3 breast cancer cells
+  - H3396  breast carcinoma
+  - HMLE Twist ER  breast cancer
+  - LTED  breast cancer
+  - MCF 7
+  - MCF10A  breast epithelial cells
+  - MCF10A ER Src
+  - MCF10AT1  breast premetastatic epithelial cells
+  - MCF10CA1a  breast metastatic epithelial cells
+  - MCF7  Invasive ductal breast carcinoma
+  - MCF 7 C4 12  invasive breast ductal carcinoma
+  - MCF 7L  invasive ductal carcinoma
+  - MCF7 TamR  invasive ductal breast carcinoma
+  - MCF7 TamR  invasive ductal breast carcinoma Tamoxifen resistant
+  - MCF7L P immortalized breast epithelial cell line
+  - MCF7L TamR immortalized breast epithelial  tamoxifen resistant cell line
+  - MCF7 WS8 cells
+  - MDA MB 134  invasive lobular breast carcinoma
+  - MDA MB 157  breast carcinoma
+  - MDA MB 157  triple negative breast carcinoma
+  - MDA MB 231  breast adenocarcinoma
+  - MDA MB 231ERb triple negative breast cancer
+  - MDA MB 231p27CK DD  breast cancer cells  phosphimimetic p27 cell line
+  - MDA MB 468  breast adenocarcinoma
+  - MDA231 LM2 4175  breast adenocarcinoma
+  - BT 474  breast invasive ductal carcinoma
+  - bt20
+  - bt474
+  - bt474 egf
+  - bt549
+  - bt549 tnf
+  - HCC1954  ductal breast carcinoma
+  - HCC70  ductal breast carcinoma
+  - SUM159PT  pleiomorphic breast carcinoma
+  - fibroblasts
+  - BJ  fibroblasts
+  - dermal fibroblasts
+  - NHDF Ad  adult dermal fibroblasts
+  - HAEC  human aortic endothelial cells
+  - HUVEC C  HUVEC  umbilical vein endothelial cells
+  - MDM monocyte derived macrophages
+  - T cells
+  - CD4  T cells
+  - CD4  CD25  T cells
+  - CD4  CD25  CD45RA  T cells
+GWAS Catalog:
+  - breast cancer
+  - breast carcinoma
+  - breast neoplasm
+  - breast density
+  - breast size
+  - breast cyst
+  - breast fibrocystic disease
+  - family history of breast cancer
+  - BRCA1 mutation carier status
+  - BRCA2 mutation carier statu
+  - BRCAX breast cancer
+  - estrogen-receptor positive breast cancer
+  - estrogen-receptor negative breast cancer
+  - progesterone-receptor negative breast cancer
+  - HER2 Positive Breast Carcinoma
+  - HER2 negative breast carcinoma
+  - HER2 status
+  - luminal A breast carcinoma
+  - luminal B breast carcinoma
+  - invasive lobular carcinoma
+  - male breast carcinoma
+  - estrogen receptor status
+  - estrogen receptor measurement
+  - estrogen measurement
+  - progesterone measurement
+  - breastfeeding duration
+  - breast milk measurement
+  - hormone replacement therapy
+eQTL Catalogue:
+  - breast
+  - fibroblast
+  - macrophage
+  - adipose
+  - adipose (visceral)
+  - T cell
+  - CD4+ T cell
+  - CD4+ memory T cell
+  - CD8+ T cell
+  - NK cell
+KnockTF (scoring):
+  - Mammary_gland
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Endothelium
+KnockTF (forecasting):
+  - Mammary_gland
+  - Fibroblasts
+  - Dermal_fibroblasts
+  - Endothelium
