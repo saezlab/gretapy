@@ -5,7 +5,7 @@ from decoupler._Plotter import Plotter
 
 
 def cre_to_tss_distance(
-    df: pd.DataFrame,
+    df: pandas.DataFrame,
     order: list | None = None,
     palette: str | None = None,
     thr_distance: int | None = 250_000,

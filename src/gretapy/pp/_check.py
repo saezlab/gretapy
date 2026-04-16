@@ -117,8 +117,8 @@ def _check_metrics(
 
 
 def _check_grn(
-    grn: pd.DataFrame,
-) -> pd.DataFrame:
+    grn: pandas.DataFrame,
+) -> pandas.DataFrame:
     """
     Validate GRN DataFrame structure.
 
@@ -131,7 +131,7 @@ def _check_grn(
     -------
     Validated and deduplicated GRN DataFrame.
     """
-    assert isinstance(grn, pd.DataFrame), f"grn must be pd.DataFrame, got {type(grn)}"
+    assert isinstance(grn, pandas.DataFrame), f"grn must be pandas.DataFrame, got {type(grn)}"
     assert {"source", "target"}.issubset(grn.columns), (
         f'grn must contain "source" and "target" column names, got {grn.columns}'
     )
@@ -187,7 +187,7 @@ def _check_dataset(
 
 def _check_dts_grn(
     dataset: mu.MuData | ad.AnnData,
-    grn: pd.DataFrame,
+    grn: pandas.DataFrame,
 ) -> None:
     """
     Validate gene overlap between dataset and GRN.

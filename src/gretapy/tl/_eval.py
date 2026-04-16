@@ -54,7 +54,7 @@ def benchmark(
     metrics: str | list | None = None,
     min_edges: int = 5,
     verbose: bool = True,
-) -> pd.DataFrame:
+) -> pandas.DataFrame:
     """
     Run the benchmark for one or multiple GRNs across one or multiple datasets.
 
@@ -119,7 +119,7 @@ def benchmark(
             datasets={"PBMC": mudata_obj, "Lung": mudata_obj2},
         )
     """
-    # Validate grns: must be dict[str, dict[str, dict[str, pd.DataFrame]]]
+    # Validate grns: must be dict[str, dict[str, dict[str, pandas.DataFrame]]]
     if not isinstance(grns, dict):
         raise ValueError(f"grns must be dict[str, dict[str, dict[str, DataFrame]]], got {type(grns)}")
     for grn_name, grn_inner in grns.items():
@@ -217,13 +217,13 @@ def benchmark(
     _log(f"Benchmark complete ({len(all_results)} result(s), {elapsed:.1f}s)", level="info", verbose=verbose)
     _log(_SEP, level="info", verbose=verbose)
     if not all_results:
-        return pd.DataFrame(columns=["grn", "organism", "dataset", "class", "task", "db", "precision", "recall", "f01"])
+        return pandas.DataFrame(columns=["grn", "organism", "dataset", "class", "task", "db", "precision", "recall", "f01"])
     return pd.concat(all_results, ignore_index=True)
 
 
 def eval_grn_dataset(
     organism: str,
-    grn: pd.DataFrame,
+    grn: pandas.DataFrame,
     dataset: str | mu.MuData | ad.AnnData,
     terms: dict | None,
     metrics: str | list | None = None,
@@ -231,7 +231,7 @@ def eval_grn_dataset(
     grn_name: str | None = None,
     dataset_name: str | None = None,
     verbose: bool = True,
-) -> pd.DataFrame:
+) -> pandas.DataFrame:
     """
     Evaluate a GRN against a dataset using multiple metrics.
 
@@ -290,7 +290,7 @@ def eval_grn_dataset(
             level="warning",
             verbose=verbose,
         )
-        return pd.DataFrame(columns=result_cols)
+        return pandas.DataFrame(columns=result_cols)
     # Resolve dataset_name for logging
     if dataset_name is None and isinstance(dataset, str):
         dataset_name = dataset
@@ -355,14 +355,14 @@ def eval_grn_dataset(
     _log(_SEP, level="info", verbose=verbose)
     _log(f"Evaluation complete{label_suffix} ({len(results)} metrics, {elapsed:.1f}s)", level="info", verbose=verbose)
     _log(_SEP, level="info", verbose=verbose)
-    return pd.DataFrame(results, columns=result_cols)
+    return pandas.DataFrame(results, columns=result_cols)
 
 
 def _run_metric(
     metric_type: str,
     db_name: str,
-    grn: pd.DataFrame,
-    db: pd.DataFrame | pr.PyRanges | ad.AnnData,
+    grn: pandas.DataFrame,
+    db: pandas.DataFrame | pr.PyRanges | ad.AnnData,
     genes: list,
     peaks: list,
     cats: list | None,
@@ -395,7 +395,7 @@ def _run_fileless_metric(
     metric_type: str,
     db_name: str,
     dataset: mu.MuData | ad.AnnData,
-    grn: pd.DataFrame,
+    grn: pandas.DataFrame,
     adata: ad.AnnData,
     is_mudata: bool,
     has_cre: bool,
@@ -412,7 +412,7 @@ def _run_fileless_metric(
 def _run_omics_metric(
     db_name: str,
     dataset: mu.MuData | ad.AnnData,
-    grn: pd.DataFrame,
+    grn: pandas.DataFrame,
     is_mudata: bool,
     has_cre: bool,
     verbose: bool = True,

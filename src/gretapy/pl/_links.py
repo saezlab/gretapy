@@ -35,7 +35,7 @@ def _get_tss_window(gannot: pr.PyRanges, gene: str, w_size: int) -> pr.PyRanges:
     return tss_window
 
 
-def _get_gannot_data(gannot: pr.PyRanges, target: str, w_size: int, atac_var_names: pd.Index):
+def _get_gannot_data(gannot: pr.PyRanges, target: str, w_size: int, atac_var_names: pandas.Index):
     """Extract genomic annotation data for plotting."""
     target_gr = gannot[gannot.df["Name"] == target]
     wind = _get_tss_window(gannot, target, w_size)
@@ -56,13 +56,13 @@ def _get_gannot_data(gannot: pr.PyRanges, target: str, w_size: int, atac_var_nam
         cre_chr, cre_start, cre_end = cre.split("-")
         if cre_chr == chromosome:
             cres_gr.append([cre_chr, cre_start, cre_end, cre])
-    cres_gr = pr.PyRanges(pd.DataFrame(cres_gr, columns=["Chromosome", "Start", "End", "Name"]))
+    cres_gr = pr.PyRanges(pandas.DataFrame(cres_gr, columns=["Chromosome", "Start", "End", "Name"]))
 
     return x_min, x_max, gs_gr, tss, chromosome, strand, cres_gr
 
 
 def _plot_links(
-    links: pd.DataFrame,
+    links: pandas.DataFrame,
     tf: str,
     tss: int,
     strand: str,
@@ -191,7 +191,7 @@ def _plot_omic(
 
 def links(
     mdata,
-    grn: pd.DataFrame | dict[str, pd.DataFrame],
+    grn: pandas.DataFrame | dict[str, pandas.DataFrame],
     target: str,
     tfs: list[str],
     gannot: pr.PyRanges | str = "hg38",
@@ -279,7 +279,7 @@ def links(
         gannot = gt.show_genome_annotation(organism=gannot)
 
     # Normalize GRN input to dict
-    if isinstance(grn, pd.DataFrame):
+    if isinstance(grn, pandas.DataFrame):
         grn_dict = {"grn": grn}
     else:
         grn_dict = grn
