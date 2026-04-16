@@ -11,4 +11,7 @@ Plotting functions for visualizing GRN analysis results.
 
     heatmap
     links
+    ranking
+    stats
+    cre_to_tss_distance
 ```

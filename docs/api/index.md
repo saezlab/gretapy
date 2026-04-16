@@ -19,6 +19,8 @@ import gretapy as gt
     show_datasets
     show_metrics
     show_terms
+    show_genome_annotation
+    get_terms
 ```
 
 ## Modules

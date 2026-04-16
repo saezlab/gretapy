@@ -11,4 +11,7 @@ Functions for downloading and reading datasets and databases.
 
     read_db
     read_dts
+    read_metrics
+    read_imaginary_metrics
+    toy
 ```
