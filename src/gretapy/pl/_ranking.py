@@ -343,7 +343,7 @@ def ranking(
 
     Parameters
     ----------
-    df : pd.DataFrame
+    df : pandas.DataFrame
         Metrics dataframe with columns: class, task, db, dataset, name, f01.
     level : str
         ``'class'`` for summary heatmap at class level (Predictive, Genomic, etc.),
