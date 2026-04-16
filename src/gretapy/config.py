@@ -1,7 +1,7 @@
 import os
 
 PATH_DATA = os.path.join(".", "gretapy_data")
-ID_ZENODO = 19116312
+ID_ZENODO = 19600656
 URL_STR = f"https://zenodo.org/records/{ID_ZENODO}/files/"
 URL_END = "?download=1"
 
