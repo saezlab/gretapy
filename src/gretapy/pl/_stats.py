@@ -14,7 +14,7 @@ _CNAME_DICT = {
 
 
 def stats(
-    df: pandas.DataFrame,
+    df: pd.DataFrame,
     order: list | None = None,
     palette: str | None = None,
     **kwargs,
