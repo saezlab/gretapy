@@ -7,6 +7,9 @@ from decoupler._Plotter import Plotter
 from matplotlib.gridspec import GridSpec
 from scipy.stats import rankdata
 
+from gretapy.tl._ranking import CLASS_ORDER, _class_mean
+from gretapy.tl._ranking import ranking as _tl_ranking
+
 # Default color palette
 PALETTE = {
     "CellOracle": "#1e76b4",
@@ -30,18 +33,6 @@ PALETTE = {
     "scGPT": "#7e7e7e",
     "Random": "black",
 }
-
-CLASS_ORDER = ["Predictive", "Genomic", "Literature", "Mechanistic"]
-
-
-def _compute_aggregations(df):
-    """Compute hierarchical mean F0.1 at class and overall level."""
-    s = df.groupby(["name", "class", "task", "db", "dataset"])["f01"].mean()
-    s = s.groupby(["name", "class", "task", "db"]).mean()
-    s = s.groupby(["name", "class", "task"]).mean()
-    class_mean = s.groupby(["name", "class"]).mean().unstack()
-    overall_mean = class_mean.mean(axis=1)
-    return overall_mean, class_mean
 
 
 def _compute_db_aggregation(df):
@@ -336,6 +327,7 @@ def ranking(
     df,
     level="class",
     palette=None,
+    metric_weights=None,
     **kwargs,
 ):
     """
@@ -350,6 +342,16 @@ def ranking(
         ``'task'`` for the fine-grained (db, task) heatmap with hierarchical headers.
     palette : dict or None
         Method name -> color mapping. Uses default palette if None.
+    metric_weights : dict or None
+        Weight for each metric class when computing the final mean F0.1 that
+        determines the row ordering. Keys are class names (``predictive``,
+        ``genomic``, ``literature``, ``mechanistic``); all must be non-negative.
+        Any metric class missing from the dictionary is treated as having a
+        weight of 0 (i.e. excluded from the ranking).
+        Defaults to ``dict(predictive=1, genomic=1, literature=1, mechanistic=1)``.
+        The overall score is the weighted mean across classes, i.e. the sum of
+        ``weight * value`` divided by the total of the weights of the classes
+        present for that method.
     **kwargs
         Additional arguments passed to ``decoupler.Plotter`` (e.g. ``figsize``,
         ``dpi``, ``return_fig``, ``save``). ``figsize`` defaults to auto-computed
@@ -362,10 +364,10 @@ def ranking(
     if palette is None:
         palette = PALETTE
 
-    # Compute overall mean and class-level aggregation (needed for method ordering)
-    overall_mean, class_mean = _compute_aggregations(df)
-    method_order = overall_mean.sort_values(ascending=False).index.tolist()
-    overall_mean = overall_mean.loc[method_order]
+    # Weighted overall mean (validates metric_weights, sorted descending) drives ordering
+    overall_mean = _tl_ranking(df, metric_weights)["mean_f01"]
+    method_order = overall_mean.index.tolist()
+    class_mean = _class_mean(df).loc[method_order]
     n_methods = len(method_order)
 
     # Extract user-provided figsize before Plotter (sub-functions auto-calc when None)

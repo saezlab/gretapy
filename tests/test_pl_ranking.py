@@ -9,9 +9,7 @@ import pytest
 matplotlib.use("Agg")
 
 from gretapy.pl._ranking import (
-    CLASS_ORDER,
     _build_task_list,
-    _compute_aggregations,
     _compute_db_aggregation,
     _compute_ranks,
     _draw_barplot,
@@ -21,6 +19,13 @@ from gretapy.pl._ranking import (
     _ranking_task,
     ranking,
 )
+from gretapy.tl._ranking import _class_mean
+from gretapy.tl._ranking import ranking as tl_ranking
+
+
+def _agg(df):
+    """Helper mirroring the old _compute_aggregations: (overall_mean, class_mean)."""
+    return tl_ranking(df)["mean_f01"], _class_mean(df)
 
 
 @pytest.fixture
@@ -31,42 +36,111 @@ def sample_ranking_df():
     """
     np.random.seed(42)
     methods = ["MethodA", "MethodB", "MethodC"]
-    rows = [
-        # Literature - 2 different tasks (triggers line 83 in _build_task_list)
-        {"name": m, "class": "Literature", "task": "TF Markers", "db": "HPA", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ] + [
-        {"name": m, "class": "Literature", "task": "TF Pairs", "db": "Europe PMC", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ] + [
-        # Genomic - 2 different tasks (triggers line 259 in _ranking_task span update)
-        {"name": m, "class": "Genomic", "task": "TF Binding", "db": "ChIP-Atlas", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ] + [
-        {"name": m, "class": "Genomic", "task": "CREs", "db": "ENCODE CREs", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ] + [
-        # Predictive
-        {"name": m, "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ] + [
-        # Mechanistic
-        {"name": m, "class": "Mechanistic", "task": "TF Scoring", "db": "KnockTF", "dataset": "DatasetX", "f01": np.random.uniform(0, 1)}
-        for m in methods
-    ]
+    rows = (
+        [
+            # Literature - 2 different tasks (triggers line 83 in _build_task_list)
+            {
+                "name": m,
+                "class": "Literature",
+                "task": "TF Markers",
+                "db": "HPA",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+        + [
+            {
+                "name": m,
+                "class": "Literature",
+                "task": "TF Pairs",
+                "db": "Europe PMC",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+        + [
+            # Genomic - 2 different tasks (triggers line 259 in _ranking_task span update)
+            {
+                "name": m,
+                "class": "Genomic",
+                "task": "TF Binding",
+                "db": "ChIP-Atlas",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+        + [
+            {
+                "name": m,
+                "class": "Genomic",
+                "task": "CREs",
+                "db": "ENCODE CREs",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+        + [
+            # Predictive
+            {
+                "name": m,
+                "class": "Predictive",
+                "task": "Gene Sets",
+                "db": "Hallmarks",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+        + [
+            # Mechanistic
+            {
+                "name": m,
+                "class": "Mechanistic",
+                "task": "TF Scoring",
+                "db": "KnockTF",
+                "dataset": "DatasetX",
+                "f01": np.random.uniform(0, 1),
+            }
+            for m in methods
+        ]
+    )
     return pd.DataFrame(rows)
 
 
 @pytest.fixture
 def sample_ranking_df_with_nan():
     """DataFrame where one method has no data for a class → NaN in class_mean."""
-    methods = ["MethodA", "MethodB"]
     rows = [
         # MethodA has both Predictive and Literature data
-        {"name": "MethodA", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": 0.5},
-        {"name": "MethodA", "class": "Literature", "task": "TF Markers", "db": "HPA", "dataset": "DatasetX", "f01": 0.6},
+        {
+            "name": "MethodA",
+            "class": "Predictive",
+            "task": "Gene Sets",
+            "db": "Hallmarks",
+            "dataset": "DatasetX",
+            "f01": 0.5,
+        },
+        {
+            "name": "MethodA",
+            "class": "Literature",
+            "task": "TF Markers",
+            "db": "HPA",
+            "dataset": "DatasetX",
+            "f01": 0.6,
+        },
         # MethodB only has Predictive data → NaN for Literature class
-        {"name": "MethodB", "class": "Predictive", "task": "Gene Sets", "db": "Hallmarks", "dataset": "DatasetX", "f01": 0.4},
+        {
+            "name": "MethodB",
+            "class": "Predictive",
+            "task": "Gene Sets",
+            "db": "Hallmarks",
+            "dataset": "DatasetX",
+            "f01": 0.4,
+        },
     ]
     return pd.DataFrame(rows)
 
@@ -77,37 +151,6 @@ def sample_ranking_df_with_excluded(sample_ranking_df):
     extra = sample_ranking_df.copy()
     extra["dts"] = "Synthetic Pituitary"
     return pd.concat([sample_ranking_df, extra])
-
-
-class TestComputeAggregations:
-    """Tests for _compute_aggregations function."""
-
-    def test_returns_tuple_of_two(self, sample_ranking_df):
-        """Test that function returns a tuple of two elements."""
-        result = _compute_aggregations(sample_ranking_df)
-        assert len(result) == 2
-
-    def test_overall_mean_is_series(self, sample_ranking_df):
-        """Test that overall_mean is a pandas Series."""
-        overall_mean, _ = _compute_aggregations(sample_ranking_df)
-        assert isinstance(overall_mean, pd.Series)
-
-    def test_class_mean_is_dataframe(self, sample_ranking_df):
-        """Test that class_mean is a pandas DataFrame."""
-        _, class_mean = _compute_aggregations(sample_ranking_df)
-        assert isinstance(class_mean, pd.DataFrame)
-
-    def test_overall_mean_values_in_range(self, sample_ranking_df):
-        """Test that overall_mean values are in [0, 1]."""
-        overall_mean, _ = _compute_aggregations(sample_ranking_df)
-        assert (overall_mean >= 0).all()
-        assert (overall_mean <= 1).all()
-
-    def test_method_names_in_index(self, sample_ranking_df):
-        """Test that all method names appear in overall_mean index."""
-        overall_mean, _ = _compute_aggregations(sample_ranking_df)
-        for method in ["MethodA", "MethodB", "MethodC"]:
-            assert method in overall_mean.index
 
 
 class TestComputeDbAggregation:
@@ -245,7 +288,7 @@ class TestRankingClass:
 
     def test_returns_figure(self, sample_ranking_df):
         """Test that _ranking_class returns a Figure."""
-        overall_mean, class_mean = _compute_aggregations(sample_ranking_df)
+        overall_mean, class_mean = _agg(sample_ranking_df)
         method_order = overall_mean.sort_values(ascending=False).index.tolist()
         overall_mean = overall_mean.loc[method_order]
 
@@ -263,7 +306,7 @@ class TestRankingClass:
 
     def test_custom_figsize(self, sample_ranking_df):
         """Test that custom figsize is applied."""
-        overall_mean, class_mean = _compute_aggregations(sample_ranking_df)
+        overall_mean, class_mean = _agg(sample_ranking_df)
         method_order = overall_mean.sort_values(ascending=False).index.tolist()
         overall_mean = overall_mean.loc[method_order]
 
@@ -285,7 +328,7 @@ class TestRankingTask:
 
     def test_returns_figure(self, sample_ranking_df):
         """Test that _ranking_task returns a Figure."""
-        overall_mean, _ = _compute_aggregations(sample_ranking_df)
+        overall_mean, _ = _agg(sample_ranking_df)
         method_order = overall_mean.sort_values(ascending=False).index.tolist()
 
         fig = _ranking_task(
@@ -299,7 +342,7 @@ class TestRankingTask:
 
     def test_custom_figsize(self, sample_ranking_df):
         """Test that custom figsize is applied."""
-        overall_mean, _ = _compute_aggregations(sample_ranking_df)
+        overall_mean, _ = _agg(sample_ranking_df)
         method_order = overall_mean.sort_values(ascending=False).index.tolist()
 
         fig = _ranking_task(
