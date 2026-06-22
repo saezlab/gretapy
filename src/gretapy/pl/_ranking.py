@@ -7,7 +7,7 @@ from decoupler._Plotter import Plotter
 from matplotlib.gridspec import GridSpec
 from scipy.stats import rankdata
 
-from gretapy.tl._ranking import CLASS_ORDER, _class_mean
+from gretapy.tl._ranking import CLASS_ORDER, _dataset_class_mean
 from gretapy.tl._ranking import ranking as _tl_ranking
 
 # Default color palette
@@ -409,7 +409,7 @@ def ranking(
     plt.close(bp.fig)
 
     if level == "class":
-        class_mean = _class_mean(df).loc[method_order]
+        class_mean = _dataset_class_mean(df).groupby("name").mean().loc[method_order]
         fig = _ranking_class(overall_mean, class_mean, method_order, n_methods, palette, user_figsize)
     elif level == "task":
         fig = _ranking_task(df, method_order, n_methods, user_figsize)

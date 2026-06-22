@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from gretapy.tl._ranking import _check_weights, _class_mean, _dataset_class_mean, ranking
+from gretapy.tl._ranking import _check_weights, _dataset_class_mean, ranking
 
 
 @pytest.fixture
@@ -94,24 +94,6 @@ def sample_ranking_df_with_nan():
     return pd.DataFrame(rows)
 
 
-class TestClassMean:
-    """Tests for the _class_mean helper."""
-
-    def test_returns_dataframe(self, sample_ranking_df):
-        cm = _class_mean(sample_ranking_df)
-        assert isinstance(cm, pd.DataFrame)
-
-    def test_methods_in_index(self, sample_ranking_df):
-        cm = _class_mean(sample_ranking_df)
-        for method in ["MethodA", "MethodB", "MethodC"]:
-            assert method in cm.index
-
-    def test_classes_in_columns(self, sample_ranking_df):
-        cm = _class_mean(sample_ranking_df)
-        for cls in ["Predictive", "Genomic", "Literature", "Mechanistic"]:
-            assert cls in cm.columns
-
-
 class TestDatasetClassMean:
     """Tests for the _dataset_class_mean helper."""
 
@@ -179,13 +161,13 @@ class TestRanking:
     def test_default_equals_plain_class_mean(self, sample_ranking_df):
         """Equal default weights reproduce the plain mean across classes."""
         out = ranking(sample_ranking_df)
-        plain = _class_mean(sample_ranking_df).mean(axis=1)
+        plain = _dataset_class_mean(sample_ranking_df).groupby("name").mean().mean(axis=1)
         assert np.allclose(out["mean_f01"].values, plain.loc[out.index].values)
 
     def test_single_class_weight(self, sample_ranking_df):
         """A single weight key reduces the score to that class only."""
         out = ranking(sample_ranking_df, {"predictive": 2})
-        cm = _class_mean(sample_ranking_df)
+        cm = _dataset_class_mean(sample_ranking_df).groupby("name").mean()
         assert np.allclose(out["mean_f01"].loc[cm.index].values, cm["Predictive"].loc[cm.index].values)
 
     def test_zero_weight_excludes_class(self, sample_ranking_df):

@@ -4,14 +4,6 @@ import pandas as pd
 CLASS_ORDER = ["Predictive", "Genomic", "Literature", "Mechanistic"]
 
 
-def _class_mean(df):
-    """Compute hierarchical mean F0.1 collapsed to a (name x class) matrix."""
-    s = df.groupby(["name", "class", "task", "db", "dataset"])["f01"].mean()
-    s = s.groupby(["name", "class", "task", "db"]).mean()
-    s = s.groupby(["name", "class", "task"]).mean()
-    return s.groupby(["name", "class"]).mean().unstack()
-
-
 def _dataset_class_mean(df):
     """Mean F0.1 collapsed to a (name, dataset) x class matrix, averaging over db then task."""
     s = df.groupby(["name", "dataset", "class", "task", "db"])["f01"].mean()

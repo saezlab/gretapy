@@ -19,13 +19,13 @@ from gretapy.pl._ranking import (
     _ranking_task,
     ranking,
 )
-from gretapy.tl._ranking import _class_mean
+from gretapy.tl._ranking import _dataset_class_mean
 from gretapy.tl._ranking import ranking as tl_ranking
 
 
 def _agg(df):
     """Helper mirroring the old _compute_aggregations: (overall_mean, class_mean)."""
-    return tl_ranking(df)["mean_f01"], _class_mean(df)
+    return tl_ranking(df)["mean_f01"], _dataset_class_mean(df).groupby("name").mean()
 
 
 @pytest.fixture
