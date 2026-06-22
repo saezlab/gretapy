@@ -293,7 +293,6 @@ class TestRankingClass:
         overall_mean = overall_mean.loc[method_order]
 
         fig = _ranking_class(
-            df=sample_ranking_df,
             overall_mean=overall_mean,
             class_mean=class_mean,
             method_order=method_order,
@@ -311,7 +310,6 @@ class TestRankingClass:
         overall_mean = overall_mean.loc[method_order]
 
         fig = _ranking_class(
-            df=sample_ranking_df,
             overall_mean=overall_mean,
             class_mean=class_mean,
             method_order=method_order,
@@ -367,6 +365,12 @@ class TestRanking:
     def test_task_level_returns_figure(self, sample_ranking_df):
         """Test level='task' returns a Figure."""
         fig = ranking(sample_ranking_df, level="task", return_fig=True)
+        assert isinstance(fig, plt.Figure)
+        plt.close(fig)
+
+    def test_dataset_level_returns_figure(self, sample_ranking_df):
+        """Test level='dataset' returns a Figure."""
+        fig = ranking(sample_ranking_df, level="dataset", return_fig=True)
         assert isinstance(fig, plt.Figure)
         plt.close(fig)
 

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from gretapy.tl._ranking import _check_weights, _class_mean, ranking
+from gretapy.tl._ranking import _check_weights, _class_mean, _dataset_class_mean, ranking
 
 
 @pytest.fixture
@@ -112,6 +112,19 @@ class TestClassMean:
             assert cls in cm.columns
 
 
+class TestDatasetClassMean:
+    """Tests for the _dataset_class_mean helper."""
+
+    def test_index_has_name_and_dataset(self, sample_ranking_df):
+        dcm = _dataset_class_mean(sample_ranking_df)
+        assert list(dcm.index.names) == ["name", "dataset"]
+
+    def test_classes_in_columns(self, sample_ranking_df):
+        dcm = _dataset_class_mean(sample_ranking_df)
+        for cls in ["Predictive", "Genomic", "Literature", "Mechanistic"]:
+            assert cls in dcm.columns
+
+
 class TestCheckWeights:
     """Tests for the _check_weights validation helper."""
 
@@ -140,9 +153,18 @@ class TestRanking:
         out = ranking(sample_ranking_df)
         assert isinstance(out, pd.DataFrame)
 
-    def test_single_mean_f01_column(self, sample_ranking_df):
+    def test_mean_f01_is_first_column(self, sample_ranking_df):
         out = ranking(sample_ranking_df)
-        assert list(out.columns) == ["mean_f01"]
+        assert out.columns[0] == "mean_f01"
+
+    def test_per_dataset_columns_present(self, sample_ranking_df):
+        out = ranking(sample_ranking_df)
+        assert list(out.columns) == ["mean_f01", "DatasetX"]
+
+    def test_mean_f01_is_mean_of_dataset_columns(self, sample_ranking_df):
+        out = ranking(sample_ranking_df)
+        dataset_cols = out.columns.drop("mean_f01")
+        assert np.allclose(out["mean_f01"].values, out[dataset_cols].mean(axis=1).values)
 
     def test_index_named_name(self, sample_ranking_df):
         out = ranking(sample_ranking_df)
@@ -193,3 +215,47 @@ class TestRanking:
     def test_negative_weight_raises(self, sample_ranking_df):
         with pytest.raises(AssertionError, match="non-negative"):
             ranking(sample_ranking_df, {"predictive": -1})
+
+    def test_weighting_is_per_dataset_then_mean_across_datasets(self):
+        """Weighting happens per dataset, then averaged across datasets.
+
+        MethodM has Predictive in two datasets but Mechanistic in only one.
+        Per-dataset weighted means (equal weights): D1 = (0.8 + 0.4) / 2 = 0.6,
+        D2 = 0.2 / 1 = 0.2. Final = mean(0.6, 0.2) = 0.4. This differs from
+        weighting the class means first ((mean(0.8, 0.2) + 0.4) / 2 = 0.45).
+        """
+        df = pd.DataFrame(
+            [
+                {
+                    "name": "MethodM",
+                    "class": "Predictive",
+                    "task": "Gene Sets",
+                    "db": "Hallmarks",
+                    "dataset": "D1",
+                    "f01": 0.8,
+                },
+                {
+                    "name": "MethodM",
+                    "class": "Mechanistic",
+                    "task": "TF Scoring",
+                    "db": "KnockTF",
+                    "dataset": "D1",
+                    "f01": 0.4,
+                },
+                {
+                    "name": "MethodM",
+                    "class": "Predictive",
+                    "task": "Gene Sets",
+                    "db": "Hallmarks",
+                    "dataset": "D2",
+                    "f01": 0.2,
+                },
+            ]
+        )
+        out = ranking(df)
+        assert np.isclose(out["mean_f01"].loc["MethodM"], 0.4)
+        # Per-dataset columns hold each dataset's weighted mean.
+        assert np.isclose(out["D1"].loc["MethodM"], 0.6)
+        assert np.isclose(out["D2"].loc["MethodM"], 0.2)
+        # Confirm it diverges from the old class-mean-then-weight ordering (0.45).
+        assert not np.isclose(out["mean_f01"].loc["MethodM"], 0.45)
