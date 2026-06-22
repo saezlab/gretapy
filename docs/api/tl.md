@@ -13,6 +13,7 @@ Tools for benchmarking and analyzing gene regulatory networks.
 
     benchmark
     eval_grn_dataset
+    ranking
 ```
 
 ## Statistics
