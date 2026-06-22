@@ -67,7 +67,15 @@ def ranking(df, metric_weights=None):
         weighted mean F0.1. Rows are sorted by ``mean_f01`` in descending order.
     """
     metric_weights = _check_weights(metric_weights)
-    per_dataset = _weighted_per_dataset(_dataset_class_mean(df), metric_weights)
+    return _ranking_table(_dataset_class_mean(df), metric_weights)
+
+
+def _ranking_table(dataset_class_mean, metric_weights):
+    """Build the ranking table from a precomputed (name, dataset) x class matrix.
+
+    ``metric_weights`` must already be validated (see :func:`_check_weights`).
+    """
+    per_dataset = _weighted_per_dataset(dataset_class_mean, metric_weights)
     out = per_dataset.unstack("dataset")
     out.insert(0, "mean_f01", out.mean(axis=1))
     out = out.sort_values("mean_f01", ascending=False)

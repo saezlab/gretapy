@@ -7,8 +7,7 @@ from decoupler._Plotter import Plotter
 from matplotlib.gridspec import GridSpec
 from scipy.stats import rankdata
 
-from gretapy.tl._ranking import CLASS_ORDER, _dataset_class_mean
-from gretapy.tl._ranking import ranking as _tl_ranking
+from gretapy.tl._ranking import CLASS_ORDER, _check_weights, _dataset_class_mean, _ranking_table
 
 # Default color palette
 PALETTE = {
@@ -393,8 +392,11 @@ def ranking(
     if palette is None:
         palette = PALETTE
 
-    # Weighted ranking table (validates metric_weights, sorted by mean_f01) drives ordering
-    rank_df = _tl_ranking(df, metric_weights)
+    # Weighted ranking table (sorted by mean_f01) drives ordering; share the per-dataset
+    # class matrix with the class-level heatmap so it is only computed once.
+    metric_weights = _check_weights(metric_weights)
+    dataset_class_mean = _dataset_class_mean(df)
+    rank_df = _ranking_table(dataset_class_mean, metric_weights)
     overall_mean = rank_df["mean_f01"]
     method_order = rank_df.index.tolist()
     n_methods = len(method_order)
@@ -409,7 +411,7 @@ def ranking(
     plt.close(bp.fig)
 
     if level == "class":
-        class_mean = _dataset_class_mean(df).groupby("name").mean().loc[method_order]
+        class_mean = dataset_class_mean.groupby("name").mean().loc[method_order]
         fig = _ranking_class(overall_mean, class_mean, method_order, n_methods, palette, user_figsize)
     elif level == "task":
         fig = _ranking_task(df, method_order, n_methods, user_figsize)
