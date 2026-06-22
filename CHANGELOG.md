@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning][].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## 0.0.3
+
+### Added
+
+- `tl.ranking`: returns the weighted mean F0.1 per method used for the ranking, with `mean_f01` plus one column per dataset, sorted descending.
+
+### Changed
+
+- `pl.ranking`: added a `metric_weights` parameter to weight each metric class, a `level='dataset'` heatmap, and now weights classes per dataset before averaging across datasets, delegating the ranking math to `tl.ranking`.
+
 ## 0.0.2
 
 ### Added

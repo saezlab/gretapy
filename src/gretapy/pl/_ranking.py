@@ -7,6 +7,9 @@ from decoupler._Plotter import Plotter
 from matplotlib.gridspec import GridSpec
 from scipy.stats import rankdata
 
+from gretapy.tl._ranking import CLASS_ORDER, _class_mean
+from gretapy.tl._ranking import ranking as _tl_ranking
+
 # Default color palette
 PALETTE = {
     "CellOracle": "#1e76b4",
@@ -30,18 +33,6 @@ PALETTE = {
     "scGPT": "#7e7e7e",
     "Random": "black",
 }
-
-CLASS_ORDER = ["Predictive", "Genomic", "Literature", "Mechanistic"]
-
-
-def _compute_aggregations(df):
-    """Compute hierarchical mean F0.1 at class and overall level."""
-    s = df.groupby(["name", "class", "task", "db", "dataset"])["f01"].mean()
-    s = s.groupby(["name", "class", "task", "db"]).mean()
-    s = s.groupby(["name", "class", "task"]).mean()
-    class_mean = s.groupby(["name", "class"]).mean().unstack()
-    overall_mean = class_mean.mean(axis=1)
-    return overall_mean, class_mean
 
 
 def _compute_db_aggregation(df):
@@ -121,38 +112,50 @@ def _draw_method_names(ax, method_order, n_methods):
         ax.text(1, i, m, ha="right", va="center", fontsize=10, fontweight="bold")
 
 
-def _ranking_class(df, overall_mean, class_mean, method_order, n_methods, palette, figsize):
-    """Create the class-level ranking figure."""
-    class_cols = [c for c in CLASS_ORDER if c in class_mean.columns]
-    class_mean = class_mean.loc[method_order, class_cols]
-    class_ranks = _compute_ranks(class_mean)
+def _ranking_heatmap(overall_mean, value_mean, method_order, n_methods, palette, figsize, show_barplot=True):
+    """Create a ranking figure: method names, an optional overall barplot, and a value heatmap with ranks.
+
+    ``value_mean`` is a (method x column) matrix already ordered as desired; its
+    columns become the heatmap column labels and ranks are computed per column.
+    When ``show_barplot`` is False the overall mean F0.1 barplot is omitted.
+    """
+    cols = list(value_mean.columns)
+    value_mean = value_mean.loc[method_order]
+    value_ranks = _compute_ranks(value_mean)
 
     if figsize is None:
         figsize = (6, max(4, n_methods * 0.35))
 
     fig = plt.figure(figsize=figsize, constrained_layout=True)
+    if show_barplot:
+        width_ratios = [2, 2, 0.05, len(cols)]
+        hmap_col = 3
+    else:
+        width_ratios = [2, 0.05, len(cols)]
+        hmap_col = 2
     gs = GridSpec(
         2,
-        4,
+        len(width_ratios),
         figure=fig,
-        width_ratios=[2, 2, 0.05, len(class_cols)],
+        width_ratios=width_ratios,
         height_ratios=[20, 0.4],
         wspace=0.02,
         hspace=0.02,
     )
 
     _draw_method_names(fig.add_subplot(gs[0, 0]), method_order, n_methods)
-    _draw_barplot(fig.add_subplot(gs[0, 1]), method_order, overall_mean, palette, n_methods)
+    if show_barplot:
+        _draw_barplot(fig.add_subplot(gs[0, 1]), method_order, overall_mean, palette, n_methods)
 
     # Heatmap
-    ax_hmap = fig.add_subplot(gs[0, 3])
-    data = class_mean.values
-    ranks = class_ranks.values
+    ax_hmap = fig.add_subplot(gs[0, hmap_col])
+    data = value_mean.values
+    ranks = value_ranks.values
     vmin, vmax = 0, np.nanmax(data)
     threshold = vmax / 2
     ax_hmap.imshow(data, aspect="auto", cmap="viridis", vmin=vmin, vmax=vmax)
     for i in range(n_methods):
-        for j in range(len(class_cols)):
+        for j in range(len(cols)):
             rv, cv = ranks[i, j], data[i, j]
             if pd.isna(rv) or pd.isna(cv):
                 txt, color = "-", "gray"
@@ -160,18 +163,31 @@ def _ranking_class(df, overall_mean, class_mean, method_order, n_methods, palett
                 color = "white" if cv < threshold else "black"
                 txt = _rank_text(rv)
             ax_hmap.text(j, i, txt, ha="center", va="center", fontsize=10, color=color)
-    ax_hmap.set_xticks(range(len(class_cols)))
-    ax_hmap.set_xticklabels(class_cols, fontsize=10, rotation=90)
+    ax_hmap.set_xticks(range(len(cols)))
+    ax_hmap.set_xticklabels(cols, fontsize=10, rotation=90)
     ax_hmap.xaxis.set_ticks_position("top")
     ax_hmap.set_yticks([])
 
     # Colorbar
     sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=vmin, vmax=vmax))
-    cbar = plt.colorbar(sm, cax=fig.add_subplot(gs[1, 3]), orientation="horizontal")
+    cbar = plt.colorbar(sm, cax=fig.add_subplot(gs[1, hmap_col]), orientation="horizontal")
     cbar.set_label(r"Mean F$\mathrm{_{0.1}}$", fontsize=9)
     cbar.ax.tick_params(labelsize=8)
 
     return fig
+
+
+def _ranking_class(overall_mean, class_mean, method_order, n_methods, palette, figsize):
+    """Create the class-level ranking figure (classes as heatmap columns)."""
+    class_cols = [c for c in CLASS_ORDER if c in class_mean.columns]
+    return _ranking_heatmap(overall_mean, class_mean[class_cols], method_order, n_methods, palette, figsize)
+
+
+def _ranking_dataset(overall_mean, dataset_mean, method_order, n_methods, palette, figsize):
+    """Create the dataset-level ranking figure (datasets as heatmap columns, no barplot)."""
+    if figsize is None:
+        figsize = (max(6, 2 + len(dataset_mean.columns) * 0.5), max(4, n_methods * 0.35))
+    return _ranking_heatmap(overall_mean, dataset_mean, method_order, n_methods, palette, figsize, show_barplot=False)
 
 
 def _ranking_task(df, method_order, n_methods, figsize):
@@ -336,6 +352,7 @@ def ranking(
     df,
     level="class",
     palette=None,
+    metric_weights=None,
     **kwargs,
 ):
     """
@@ -347,9 +364,23 @@ def ranking(
         Metrics dataframe with columns: class, task, db, dataset, name, f01.
     level : str
         ``'class'`` for summary heatmap at class level (Predictive, Genomic, etc.),
-        ``'task'`` for the fine-grained (db, task) heatmap with hierarchical headers.
+        ``'task'`` for the fine-grained (db, task) heatmap with hierarchical headers,
+        ``'dataset'`` for a heatmap with one column per dataset (cells colored by the
+        per-dataset mean F0.1, ranks printed inside, no overall barplot). In all cases
+        rows are ordered by the final ``mean_f01``.
     palette : dict or None
         Method name -> color mapping. Uses default palette if None.
+    metric_weights : dict or None
+        Weight for each metric class when computing the final mean F0.1 that
+        determines the row ordering. Keys are class names (``predictive``,
+        ``genomic``, ``literature``, ``mechanistic``); all must be non-negative.
+        Any metric class missing from the dictionary is treated as having a
+        weight of 0 (i.e. excluded from the ranking).
+        Defaults to ``dict(predictive=1, genomic=1, literature=1, mechanistic=1)``.
+        The weighted mean across classes is computed per dataset (the sum of
+        ``weight * value`` divided by the total of the weights of the classes
+        present in that dataset) and then averaged across datasets. See
+        :func:`gretapy.tl.ranking`.
     **kwargs
         Additional arguments passed to ``decoupler.Plotter`` (e.g. ``figsize``,
         ``dpi``, ``return_fig``, ``save``). ``figsize`` defaults to auto-computed
@@ -362,10 +393,10 @@ def ranking(
     if palette is None:
         palette = PALETTE
 
-    # Compute overall mean and class-level aggregation (needed for method ordering)
-    overall_mean, class_mean = _compute_aggregations(df)
-    method_order = overall_mean.sort_values(ascending=False).index.tolist()
-    overall_mean = overall_mean.loc[method_order]
+    # Weighted ranking table (validates metric_weights, sorted by mean_f01) drives ordering
+    rank_df = _tl_ranking(df, metric_weights)
+    overall_mean = rank_df["mean_f01"]
+    method_order = rank_df.index.tolist()
     n_methods = len(method_order)
 
     # Extract user-provided figsize before Plotter (sub-functions auto-calc when None)
@@ -378,11 +409,15 @@ def ranking(
     plt.close(bp.fig)
 
     if level == "class":
-        fig = _ranking_class(df, overall_mean, class_mean, method_order, n_methods, palette, user_figsize)
+        class_mean = _class_mean(df).loc[method_order]
+        fig = _ranking_class(overall_mean, class_mean, method_order, n_methods, palette, user_figsize)
     elif level == "task":
         fig = _ranking_task(df, method_order, n_methods, user_figsize)
+    elif level == "dataset":
+        dataset_mean = rank_df.drop(columns="mean_f01")
+        fig = _ranking_dataset(overall_mean, dataset_mean, method_order, n_methods, palette, user_figsize)
     else:
-        raise ValueError(f"level must be 'class' or 'task', got '{level}'")
+        raise ValueError(f"level must be 'class', 'task' or 'dataset', got '{level}'")
 
     bp.fig = fig
     if user_figsize is not None:

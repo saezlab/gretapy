@@ -105,7 +105,7 @@ def _omics(
 ):
     # Split by train test
     train_obs_names, test_obs_names = train_test_split(
-        data.obs_names,
+        list(data.obs_names),
         test_size=test_size,
         random_state=seed,
         stratify=data.obs["celltype"],

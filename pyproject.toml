@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "gretapy"
-version = "0.0.2"
+version = "0.0.3"
 description = "Package to evaluate gene regulatory networks (GRNs)."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -25,16 +25,16 @@ classifiers = [
 dependencies = [
   "anndata",
   "decoupler>=2.1.4",
-  "pyyaml",
   "llvmlite>=0.39",
   "mudata",
   "numba>=0.57",
   "pyboolnet",
   "pyranges",
+  "pyyaml",
   "scanpy",
-  "xgboost",
   # for debug logging (referenced from the issue template)
   "session-info2",
+  "xgboost",
 ]
 # https://docs.pypi.org/project_metadata/#project-urls
 urls.Documentation = "https://gretapy.readthedocs.io/"
